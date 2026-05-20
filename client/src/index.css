@@ -1,0 +1,160 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================
+   Base Styles
+   =========================== */
+@layer base {
+  * {
+    @apply border-surface-200 dark:border-surface-700;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply bg-surface-50 text-surface-900 dark:bg-surface-950 dark:text-surface-100;
+    @apply font-sans antialiased;
+    @apply transition-colors duration-200;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-300 dark:bg-surface-700 rounded-full;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-400 dark:bg-surface-600;
+  }
+}
+
+/* ===========================
+   Component Styles
+   =========================== */
+@layer components {
+  /* Glass card effect */
+  .glass-card {
+    @apply bg-white/70 dark:bg-surface-900/70;
+    @apply backdrop-blur-xl;
+    @apply border border-white/20 dark:border-surface-700/50;
+    @apply rounded-2xl;
+    @apply shadow-card;
+    @apply transition-all duration-300;
+  }
+
+  .glass-card:hover {
+    @apply shadow-card-hover;
+  }
+
+  /* Gradient backgrounds */
+  .gradient-primary {
+    @apply bg-gradient-to-br from-primary-500 to-primary-700;
+  }
+
+  .gradient-hero {
+    @apply bg-gradient-to-br from-primary-50 via-white to-primary-100/50;
+    @apply dark:from-surface-950 dark:via-surface-900 dark:to-primary-950/30;
+  }
+
+  /* Status badge */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  /* Sidebar link */
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-xl;
+    @apply text-surface-600 dark:text-surface-400;
+    @apply hover:bg-primary-50 hover:text-primary-700;
+    @apply dark:hover:bg-primary-950/50 dark:hover:text-primary-400;
+    @apply transition-all duration-200;
+    @apply text-sm font-medium;
+  }
+
+  .sidebar-link.active {
+    @apply bg-primary-50 text-primary-700;
+    @apply dark:bg-primary-950/50 dark:text-primary-400;
+    @apply shadow-sm;
+  }
+
+  /* Stat card */
+  .stat-card {
+    @apply glass-card p-6;
+    @apply flex flex-col gap-2;
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-5 py-2.5 rounded-xl;
+    @apply bg-primary-600 text-white;
+    @apply hover:bg-primary-700;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+    @apply dark:focus:ring-offset-surface-900;
+    @apply transition-all duration-200;
+    @apply text-sm font-semibold;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-5 py-2.5 rounded-xl;
+    @apply bg-surface-100 text-surface-700;
+    @apply hover:bg-surface-200;
+    @apply dark:bg-surface-800 dark:text-surface-300 dark:hover:bg-surface-700;
+    @apply focus:outline-none focus:ring-2 focus:ring-surface-400 focus:ring-offset-2;
+    @apply dark:focus:ring-offset-surface-900;
+    @apply transition-all duration-200;
+    @apply text-sm font-semibold;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-5 py-2.5 rounded-xl;
+    @apply text-surface-600 dark:text-surface-400;
+    @apply hover:bg-surface-100 dark:hover:bg-surface-800;
+    @apply transition-all duration-200;
+    @apply text-sm font-medium;
+  }
+
+  /* Input styles */
+  .input-field {
+    @apply w-full px-4 py-2.5 rounded-xl;
+    @apply bg-white dark:bg-surface-800;
+    @apply border border-surface-300 dark:border-surface-600;
+    @apply text-surface-900 dark:text-surface-100;
+    @apply placeholder-surface-400 dark:placeholder-surface-500;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply transition-all duration-200;
+    @apply text-sm;
+  }
+}
+
+/* ===========================
+   Utility Styles
+   =========================== */
+@layer utilities {
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-primary-500 to-primary-700;
+  }
+
+  .text-gradient-accent {
+    @apply bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-accent-500 to-accent-600;
+  }
+}

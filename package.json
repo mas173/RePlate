@@ -1,0 +1,28 @@
+{
+  "name": "replate",
+  "version": "1.0.0",
+  "description": "RePlate - AI-powered food waste reduction platform connecting donors with NGOs",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:client\" \"npm run dev:server\"",
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && npm run dev",
+    "install:all": "npm install && cd client && npm install && cd ../server && npm install",
+    "build": "cd client && npm run build",
+    "start": "cd server && npm start",
+    "lint": "cd client && npm run lint && cd ../server && npm run lint"
+  },
+  "keywords": [
+    "food-waste",
+    "sustainability",
+    "ai",
+    "redistribution",
+    "social-impact",
+    "replate"
+  ],
+  "author": "RePlate Team",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^9.0.0"
+  }
+}
