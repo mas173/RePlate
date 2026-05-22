@@ -1,5 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { SignIn, SignUp } from '@clerk/clerk-react';
+import { Routes, Route } from 'react-router-dom';
 
 // Layout & Auth guards
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -8,6 +7,8 @@ import RoleGuard from './components/auth/RoleGuard';
 
 // Pages
 import LandingPage from './pages/LandingPage';
+import SignInPage from './pages/SignInPage';
+import SignUpPage from './pages/SignUpPage';
 import DonorDashboard from './pages/DonorDashboard';
 import NGODashboard from './pages/NGODashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -34,34 +35,15 @@ function DashboardRoute({ element, roles }) {
   );
 }
 
-/**
- * Auth page wrapper — centered card on a subtle gradient background.
- */
-function AuthPage({ children }) {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F9FAFB] dark:bg-[#0F172A] relative overflow-hidden">
-      {/* Background orbs */}
-      <div className="absolute w-96 h-96 bg-primary-400 rounded-full blur-3xl opacity-10 -top-20 -right-20 pointer-events-none" />
-      <div className="absolute w-96 h-96 bg-teal-400 rounded-full blur-3xl opacity-10 -bottom-20 -left-20 pointer-events-none" />
-      <div className="relative z-10">
-        {children}
-      </div>
-    </div>
-  );
-}
+
 
 export default function App() {
   return (
     <Routes>
       {/* ── Public ───────────────────────────────────── */}
-      <Route path="/"        element={<LandingPage />} />
-
-      <Route path="/sign-in/*" element={
-        <AuthPage><SignIn routing="path" path="/sign-in" afterSignInUrl="/dashboard" /></AuthPage>
-      } />
-      <Route path="/sign-up/*" element={
-        <AuthPage><SignUp routing="path" path="/sign-up" afterSignUpUrl="/dashboard" /></AuthPage>
-      } />
+      <Route path="/"          element={<LandingPage />} />
+      <Route path="/sign-in/*" element={<SignInPage />} />
+      <Route path="/sign-up/*" element={<SignUpPage />} />
 
       {/* ── Donor routes ─────────────────────────────── */}
       <Route path="/dashboard"     element={<DashboardRoute element={<DonorDashboard />} />} />

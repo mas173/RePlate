@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import {
-  Leaf, ArrowRight, Sparkles, TrendingUp, Users, CheckCircle,
+  ArrowRight, Sparkles, Users, CheckCircle,
   Zap, Shield, Clock, BarChart3, ChevronRight, Menu, X
 } from 'lucide-react';
+import mainLogo from '@/assets/images/mainLogo.png';
+import nameLogo from '@/assets/images/name.png';
+import mottoImg from '@/assets/images/motto.png';
 
 // ─── Animated counter ───────────────────────────────────────
 function Counter({ end, suffix = '', duration = 2000 }) {
@@ -38,11 +41,9 @@ function Navbar() {
     }`}>
       <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 font-bold text-xl text-slate-900 dark:text-white">
-          <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center shadow-glow-green">
-            <Leaf className="w-4.5 h-4.5 text-white" strokeWidth={2.5} />
-          </div>
-          Re<span className="text-primary-500">Plate</span>
+        <Link to="/" className="flex items-center gap-2.5">
+          <img src={mainLogo} alt="RePlate" className="w-9 h-9 object-contain" />
+          <img src={nameLogo} alt="RePlate" className="h-7 object-contain hidden sm:block" />
         </Link>
 
         {/* Desktop nav */}
@@ -427,13 +428,12 @@ function Footer() {
     <footer className="border-t border-slate-200 dark:border-slate-800 py-12">
       <div className="section">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-lg bg-primary-500 flex items-center justify-center">
-              <Leaf className="w-4 h-4 text-white" strokeWidth={2.5} />
+          <div className="flex flex-col items-center md:items-start gap-1">
+            <div className="flex items-center gap-2">
+              <img src={mainLogo} alt="RePlate" className="w-8 h-8 object-contain" />
+              <img src={nameLogo} alt="RePlate" className="h-6 object-contain" />
             </div>
-            <span className="font-bold text-slate-900 dark:text-white">
-              Re<span className="text-primary-500">Plate</span>
-            </span>
+            <img src={mottoImg} alt="Reduce Waste. Feed More." className="h-3.5 object-contain opacity-60" />
           </div>
 
           <div className="flex items-center gap-6">
