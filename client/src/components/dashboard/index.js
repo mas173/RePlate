@@ -10,7 +10,7 @@
  * - ActivityFeed (recent activity timeline)
  */
 
-// Export components as they are created
-// export { default as StatsOverview } from './StatsOverview';
-// export { default as RecentDonations } from './RecentDonations';
-// export { default as ImpactMetrics } from './ImpactMetrics';
+export { default as StatsOverview } from './StatsOverview';
+export { default as RecentDonations } from './RecentDonations';
+export { default as QuickActions } from './QuickActions';
+export { default as ActivityFeed } from './ActivityFeed';
