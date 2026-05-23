@@ -1,4 +1,5 @@
 import { Webhook } from 'svix';
+import { clerkClient } from '@clerk/express';
 import { supabaseAdmin } from '../config/supabase.js';
 
 /**
@@ -117,3 +118,45 @@ export async function syncUser(req, res) {
     return res.status(500).json({ error: 'Failed to sync profile' });
   }
 }
+
+/**
+ * POST /api/auth/role
+ *
+ * Updates both Clerk publicMetadata and the Supabase profiles table
+ * with the user selected role ('donor' or 'ngo').
+ */
+export async function updateUserRole(req, res) {
+  try {
+    const { role } = req.body;
+    const { userId } = req.auth;
+
+    if (!role || !['donor', 'ngo'].includes(role)) {
+      return res.status(400).json({ error: 'Invalid role. Must be donor or ngo.' });
+    }
+
+    // 1. Update Clerk public metadata
+    await clerkClient.users.updateUserMetadata(userId, {
+      publicMetadata: { role },
+    });
+
+    // 2. Update Supabase profile role
+    const { error: dbError } = await supabaseAdmin
+      .from('profiles')
+      .update({ role })
+      .eq('clerk_id', userId);
+
+    if (dbError) {
+      console.error('❌  Supabase role update error:', dbError.message);
+      // Even if database fails, Clerk is source of truth. We will try to sync later.
+    }
+
+    return res.status(200).json({
+      message: `Role successfully set to ${role}`,
+      role,
+    });
+  } catch (err) {
+    console.error('❌  updateUserRole error:', err.message);
+    return res.status(500).json({ error: 'Failed to update user role' });
+  }
+}
+

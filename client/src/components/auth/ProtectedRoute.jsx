@@ -9,7 +9,7 @@ import { authAPI } from '@/services/api';
  * Also performs an automatic background sync to guarantee a Supabase profile exists.
  */
 export default function ProtectedRoute({ children }) {
-  const { isLoaded, isSignedIn, getAuthToken } = useAppAuth();
+  const { isLoaded, isSignedIn, role, getAuthToken } = useAppAuth();
 
   useEffect(() => {
     if (isSignedIn) {
@@ -36,6 +36,16 @@ export default function ProtectedRoute({ children }) {
 
   if (!isSignedIn) {
     return <Navigate to="/sign-in" replace />;
+  }
+
+  // Redirect users who haven't completed onboarding/role selection to /onboarding
+  if (!role && window.location.pathname !== '/onboarding') {
+    return <Navigate to="/onboarding" replace />;
+  }
+
+  // Redirect users who have already selected a role away from /onboarding
+  if (role && window.location.pathname === '/onboarding') {
+    return <Navigate to="/dashboard" replace />;
   }
 
   return children;

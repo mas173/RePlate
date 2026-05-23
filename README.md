@@ -19,6 +19,9 @@
 
 ---
 
+> [!NOTE]
+> **Development Status:** **Phase 0 (External Service Setup)** and **Phase 1 (Foundation & Auth)** are **100% Completed**! You can track the current project status and future milestones in the [Full Development Roadmap](./development_plan.md).
+
 ## 🚀 Features
 
 | Feature | Description |

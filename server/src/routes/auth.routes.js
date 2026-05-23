@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
-import { syncUser } from '../controllers/webhook.controller.js';
+import { syncUser, updateUserRole } from '../controllers/webhook.controller.js';
 
 const router = Router();
 
@@ -14,4 +14,13 @@ const router = Router();
  */
 router.post('/sync', requireAuth, syncUser);
 
+/**
+ * POST /api/auth/role
+ *
+ * Sets the user's role metadata on onboarding.
+ * Requires: Authorization: Bearer <clerk_session_token>
+ */
+router.post('/role', requireAuth, updateUserRole);
+
 export default router;
+

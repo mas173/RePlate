@@ -168,6 +168,11 @@ export const adminAPI = {
 export const authAPI = {
   syncUser: (token) =>
     apiRequest('/auth/sync', { method: 'POST' }, token),
+  updateRole: (token, role) =>
+    apiRequest('/auth/role', {
+      method: 'POST',
+      body: JSON.stringify({ role }),
+    }, token),
 };
 
 export default {
