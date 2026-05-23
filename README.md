@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🌿 RePlate
+# RePlate
 
 ### AI-Powered Food Waste Reduction Platform
 
@@ -13,32 +13,34 @@
 
 **RePlate** connects restaurants, hotels, grocery stores, hostels, and event organizers with NGOs and shelters to redistribute surplus food before it expires — powered by AI for intelligent food freshness analysis and urgency assessment.
 
-[Features](#-features) • [Tech Stack](#-tech-stack) • [Getting Started](#-getting-started) • [Project Structure](#-project-structure) • [Database Setup](#-database-setup) • [API Reference](#-api-reference) • [Contributing](#-contributing)
+[Features](#features) • [Tech Stack](#tech-stack) • [Getting Started](#getting-started) • [Project Structure](#project-structure) • [Database Setup](#database-setup) • [API Reference](#api-reference) • [Contributing](#contributing)
 
 </div>
 
 ---
 
 > [!NOTE]
-> **Development Status:** **Phase 0 (External Service Setup)** and **Phase 1 (Foundation & Auth)** are **100% Completed**! You can track the current project status and future milestones in the [Full Development Roadmap](./development_plan.md).
-
-## 🚀 Features
-
-| Feature | Description |
-|---------|-------------|
-| 🔐 **Role-Based Auth** | Three roles — Donor, NGO, Admin — with Clerk authentication |
-| 📸 **Food Donation Upload** | Image upload with drag & drop and multi-image support |
-| 🤖 **AI Freshness Analysis** | Gemini AI analyzes food images for freshness score and urgency level |
-| 📊 **Analytics Dashboard** | Interactive charts for donations, impact metrics, and trends |
-| ⏰ **Expiry Alerts** | Automated notifications for expiring donations via email |
-| 🤝 **NGO Claiming System** | NGOs can browse, claim, and track food donations |
-| 📈 **Impact Tracking** | Meals saved, CO₂ reduced, water saved, land preserved |
-| 🌙 **Dark Mode** | Full dark mode support with system preference detection |
-| 📱 **Responsive Design** | Works on desktop, tablet, and mobile |
+> **Development Status:** Phase 0 (External Service Setup) and Phase 1 (Foundation & Auth) are **Done**! You can track the current project status and future milestones in the [Full Development Roadmap](./development_plan.md).
 
 ---
 
-## 🛠 Tech Stack
+## Features
+
+| Feature | Description |
+| :--- | :--- |
+| **Role-Based Auth** | Three roles — Donor, NGO, Admin — with Clerk authentication |
+| **Food Donation Upload** | Image upload with drag & drop and multi-image support |
+| **AI Freshness Analysis** | Gemini AI analyzes food images for freshness score and urgency level |
+| **Analytics Dashboard** | Interactive charts for donations, impact metrics, and trends |
+| **Expiry Alerts** | Automated notifications for expiring donations via email |
+| **NGO Claiming System** | NGOs can browse, claim, and track food donations |
+| **Impact Tracking** | Meals saved, CO2 reduced, water saved, land preserved |
+| **Dark Mode** | Full dark mode support with system preference detection |
+| **Responsive Design** | Works on desktop, tablet, and mobile |
+
+---
+
+## Tech Stack
 
 ### Frontend
 - **React 19** — UI library
@@ -69,7 +71,7 @@
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 replate/
@@ -122,7 +124,7 @@ replate/
 │   │   │   ├── supabase.js          # Supabase admin & public clients
 │   │   │   ├── gemini.js            # Gemini AI model config
 │   │   │   └── resend.js            # Resend email client
-│   │   ├── controllers/             # Route handler logic (to be created)
+│   │   ├── controllers/             # Route handler logic
 │   │   ├── middleware/
 │   │   │   ├── auth.js              # Clerk JWT verification & role check
 │   │   │   ├── errorHandler.js      # Global error handling
@@ -158,7 +160,7 @@ replate/
 
 ---
 
-## 🏁 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -198,7 +200,7 @@ Fill in the values in each `.env` file. See [Environment Variables](#environment
 
 ### 4. Set Up the Database
 
-See the [Database Setup](#-database-setup) section below.
+See the [Database Setup](#database-setup) section below.
 
 ### 5. Run the Development Servers
 
@@ -218,12 +220,12 @@ npm run dev:server     # Backend on http://localhost:5000
 
 ---
 
-## 🔑 Environment Variables
+## Environment Variables
 
 ### Client (`client/.env`)
 
 | Variable | Description | Where to Get |
-|----------|-------------|--------------|
+| :--- | :--- | :--- |
 | `VITE_CLERK_PUBLISHABLE_KEY` | Clerk frontend API key | [Clerk Dashboard](https://dashboard.clerk.com) → API Keys |
 | `VITE_SUPABASE_URL` | Supabase project URL | [Supabase Dashboard](https://supabase.com/dashboard) → Settings → API |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key | Supabase Dashboard → Settings → API |
@@ -232,7 +234,7 @@ npm run dev:server     # Backend on http://localhost:5000
 ### Server (`server/.env`)
 
 | Variable | Description | Where to Get |
-|----------|-------------|--------------|
+| :--- | :--- | :--- |
 | `PORT` | Server port | Default: `5000` |
 | `NODE_ENV` | Environment | `development` / `production` |
 | `CLERK_SECRET_KEY` | Clerk backend secret | Clerk Dashboard → API Keys |
@@ -248,7 +250,7 @@ npm run dev:server     # Backend on http://localhost:5000
 
 ---
 
-## 🗄 Database Setup
+## Database Setup
 
 ### Option A: Supabase SQL Editor (Recommended for quick start)
 
@@ -278,7 +280,7 @@ supabase db push
 
 #### Tables
 | Table | Description |
-|-------|-------------|
+| :--- | :--- |
 | `profiles` | User profiles synced from Clerk (donors, NGOs, admins) |
 | `donations` | Food donation listings with images, AI analysis, and status |
 | `claims` | NGO claims on donations with pickup tracking |
@@ -288,7 +290,7 @@ supabase db push
 
 #### Enums (Custom Types)
 | Type | Values |
-|------|--------|
+| :--- | :--- |
 | `user_role` | `donor`, `ngo`, `admin` |
 | `donation_status` | `available`, `claimed`, `picked_up`, `delivered`, `expired`, `cancelled` |
 | `urgency_level` | `critical`, `high`, `medium`, `low` |
@@ -308,7 +310,7 @@ All tables have RLS enabled with policies for:
 
 #### Database Functions
 | Function | Description |
-|----------|-------------|
+| :--- | :--- |
 | `get_platform_stats()` | Returns platform-wide impact statistics |
 | `get_user_impact(user_id)` | Returns impact stats for a specific user |
 | `expire_old_donations()` | Auto-expires donations past their expiry date |
@@ -337,7 +339,7 @@ Valid roles: `donor`, `ngo`, `admin`
 
 ---
 
-## 📡 API Reference
+## API Reference
 
 ### Base URL
 ```
@@ -354,74 +356,74 @@ Authorization: Bearer <clerk_session_token>
 
 #### Health
 | Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/health` | API health check | ❌ |
+| :--- | :--- | :--- | :--- |
+| GET | `/health` | API health check | No |
 
 #### Auth
 | Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/auth/sync` | Sync Clerk user with Supabase | ✅ |
-| POST | `/auth/webhook` | Clerk webhook handler | ❌ (signed) |
+| :--- | :--- | :--- | :--- |
+| POST | `/auth/sync` | Sync Clerk user with Supabase | Yes |
+| POST | `/auth/webhook` | Clerk webhook handler | Signed |
 
 #### Donations
 | Method | Endpoint | Description | Auth | Role |
-|--------|----------|-------------|------|------|
-| GET | `/donations` | List donations | ✅ | Any |
-| GET | `/donations/:id` | Get donation details | ✅ | Any |
-| POST | `/donations` | Create donation | ✅ | Donor |
-| PUT | `/donations/:id` | Update donation | ✅ | Owner |
-| PATCH | `/donations/:id/status` | Update status | ✅ | Owner/Admin |
-| DELETE | `/donations/:id` | Delete donation | ✅ | Owner/Admin |
+| :--- | :--- | :--- | :--- | :--- |
+| GET | `/donations` | List donations | Yes | Any |
+| GET | `/donations/:id` | Get donation details | Yes | Any |
+| POST | `/donations` | Create donation | Yes | Donor |
+| PUT | `/donations/:id` | Update donation | Yes | Owner |
+| PATCH | `/donations/:id/status` | Update status | Yes | Owner/Admin |
+| DELETE | `/donations/:id` | Delete donation | Yes | Owner/Admin |
 
 #### Claims
 | Method | Endpoint | Description | Auth | Role |
-|--------|----------|-------------|------|------|
-| GET | `/claims` | List claims | ✅ | Any |
-| POST | `/claims` | Claim a donation | ✅ | NGO |
-| PATCH | `/claims/:id/status` | Update claim status | ✅ | Participant |
-| DELETE | `/claims/:id` | Cancel claim | ✅ | NGO |
+| :--- | :--- | :--- | :--- | :--- |
+| GET | `/claims` | List claims | Yes | Any |
+| POST | `/claims` | Claim a donation | Yes | NGO |
+| PATCH | `/claims/:id/status` | Update claim status | Yes | Participant |
+| DELETE | `/claims/:id` | Cancel claim | Yes | NGO |
 
 #### AI
 | Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/ai/analyze-freshness` | AI food freshness analysis | ✅ |
-| POST | `/ai/categorize` | AI food categorization | ✅ |
+| :--- | :--- | :--- | :--- |
+| POST | `/ai/analyze-freshness` | AI food freshness analysis | Yes |
+| POST | `/ai/categorize` | AI food categorization | Yes |
 
 #### Analytics
 | Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/analytics/overview` | Platform stats | ✅ |
-| GET | `/analytics/user` | User-specific stats | ✅ |
-| GET | `/analytics/trends` | Donation trends | ✅ |
-| GET | `/analytics/leaderboard` | Top donors/NGOs | ✅ |
+| :--- | :--- | :--- | :--- |
+| GET | `/analytics/overview` | Platform stats | Yes |
+| GET | `/analytics/user` | User-specific stats | Yes |
+| GET | `/analytics/trends` | Donation trends | Yes |
+| GET | `/analytics/leaderboard` | Top donors/NGOs | Yes |
 
 #### Notifications
 | Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/notifications` | List notifications | ✅ |
-| PATCH | `/notifications/:id/read` | Mark as read | ✅ |
-| PATCH | `/notifications/read-all` | Mark all as read | ✅ |
+| :--- | :--- | :--- | :--- |
+| GET | `/notifications` | List notifications | Yes |
+| PATCH | `/notifications/:id/read` | Mark as read | Yes |
+| PATCH | `/notifications/read-all` | Mark all as read | Yes |
 
 #### Users
 | Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/users/profile` | Get profile | ✅ |
-| PUT | `/users/profile` | Update profile | ✅ |
-| GET | `/users/settings` | Get settings | ✅ |
-| PUT | `/users/settings` | Update settings | ✅ |
+| :--- | :--- | :--- | :--- |
+| GET | `/users/profile` | Get profile | Yes |
+| PUT | `/users/profile` | Update profile | Yes |
+| GET | `/users/settings` | Get settings | Yes |
+| PUT | `/users/settings` | Update settings | Yes |
 
 #### Admin
 | Method | Endpoint | Description | Auth | Role |
-|--------|----------|-------------|------|------|
-| GET | `/admin/users` | List all users | ✅ | Admin |
-| PATCH | `/admin/users/:id/role` | Update user role | ✅ | Admin |
-| GET | `/admin/donations` | All donations | ✅ | Admin |
-| GET | `/admin/analytics` | Platform analytics | ✅ | Admin |
-| DELETE | `/admin/users/:id` | Deactivate user | ✅ | Admin |
+| :--- | :--- | :--- | :--- | :--- |
+| GET | `/admin/users` | List all users | Yes | Admin |
+| PATCH | `/admin/users/:id/role` | Update user role | Yes | Admin |
+| GET | `/admin/donations` | All donations | Yes | Admin |
+| GET | `/admin/analytics` | Platform analytics | Yes | Admin |
+| DELETE | `/admin/users/:id` | Deactivate user | Yes | Admin |
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 ### Branch Naming Convention
 
@@ -471,8 +473,8 @@ chore: update dependencies
 
 ### Code Style Guidelines
 
-- Use **functional components** with hooks
-- Use **named exports** for components, **default exports** for pages
+- Use functional components with hooks
+- Use named exports for components, default exports for pages
 - Follow the component folder structure (ui, layout, dashboard, etc.)
 - Use the `cn()` utility for conditional class merging
 - Keep components focused and single-responsibility
@@ -482,7 +484,7 @@ chore: update dependencies
 ### File Naming
 
 | Type | Convention | Example |
-|------|-----------|---------|
+| :--- | :--- | :--- |
 | Pages | PascalCase | `DonorDashboard.jsx` |
 | Components | PascalCase | `DonationCard.jsx` |
 | Hooks | camelCase with `use` prefix | `useAppAuth.js` |
@@ -493,20 +495,20 @@ chore: update dependencies
 
 ---
 
-## 📊 Environment Impact Formulas
+## Environment Impact Formulas
 
 The platform calculates environmental impact using industry-standard estimates:
 
 | Metric | Formula | Source |
-|--------|---------|--------|
+| :--- | :--- | :--- |
 | Meals Saved | `weight_kg / 0.5` | ~0.5 kg per meal average |
-| CO₂ Reduced | `weight_kg × 2.5` kg | WRAP UK food waste studies |
+| CO2 Reduced | `weight_kg × 2.5` kg | WRAP UK food waste studies |
 | Water Saved | `weight_kg × 1000` liters | Water footprint averages |
 | Land Saved | `weight_kg × 3.5` sq meters | Agricultural land use data |
 
 ---
 
-## 📜 License
+## License
 
 This project is licensed under the MIT License.
 
@@ -514,6 +516,6 @@ This project is licensed under the MIT License.
 
 <div align="center">
 
-**Built with 💚 for a sustainable future**
+**Built for a sustainable future**
 
 </div>
