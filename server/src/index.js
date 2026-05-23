@@ -17,6 +17,7 @@ import aiRoutes from './routes/ai.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
 import userRoutes from './routes/user.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import webhookRoutes from './routes/webhook.routes.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -36,7 +37,7 @@ app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'svix-id', 'svix-timestamp', 'svix-signature'],
 }));
 
 // Rate limiting
@@ -47,7 +48,13 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// Body parsing
+// =====================
+// Webhook Routes (raw body — MUST be before express.json)
+// Svix signature verification requires the raw Buffer body.
+// =====================
+app.use('/api/webhooks', express.raw({ type: 'application/json' }), webhookRoutes);
+
+// Body parsing (all other routes)
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 

@@ -9,6 +9,7 @@ import RoleGuard from './components/auth/RoleGuard';
 import LandingPage from './pages/LandingPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
+import SSOCallback from './pages/SSOCallback';
 import DonorDashboard from './pages/DonorDashboard';
 import NGODashboard from './pages/NGODashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -41,9 +42,10 @@ export default function App() {
   return (
     <Routes>
       {/* ── Public ───────────────────────────────────── */}
-      <Route path="/"          element={<LandingPage />} />
-      <Route path="/sign-in/*" element={<SignInPage />} />
-      <Route path="/sign-up/*" element={<SignUpPage />} />
+      <Route path="/"            element={<LandingPage />} />
+      <Route path="/sign-in/*"   element={<SignInPage />} />
+      <Route path="/sign-up/*"   element={<SignUpPage />} />
+      <Route path="/sso-callback" element={<SSOCallback />} />
 
       {/* ── Donor routes ─────────────────────────────── */}
       <Route path="/dashboard"     element={<DashboardRoute element={<DonorDashboard />} />} />

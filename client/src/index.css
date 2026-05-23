@@ -194,3 +194,65 @@
     @apply absolute rounded-full blur-3xl opacity-20 pointer-events-none;
   }
 }
+
+/* ==========================================================================
+   Clerk UI Custom Overrides (Guarantees hiding default header & styling)
+   ========================================================================== */
+.cl-header,
+.cl-logoBox,
+.cl-logoImage,
+.cl-headerTitle,
+.cl-headerSubtitle,
+.cl-footer {
+  display: none !important;
+}
+
+.cl-card {
+  box-shadow: none !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+}
+
+.cl-rootBox {
+  width: 100% !important;
+}
+
+.cl-socialButtonsBlockButton {
+  border-radius: 0.75rem !important;
+  border: 1px solid #e2e8f0 !important;
+  padding-top: 0.625rem !important;
+  padding-bottom: 0.625rem !important;
+  transition: all 0.2s ease !important;
+}
+
+.cl-socialButtonsBlockButton:hover {
+  background-color: #f8fafc !important;
+}
+
+.cl-formButtonPrimary {
+  background-color: #10b981 !important;
+  border-radius: 0.75rem !important;
+  padding-top: 0.625rem !important;
+  padding-bottom: 0.625rem !important;
+  font-weight: 600 !important;
+  transition: all 0.2s ease !important;
+}
+
+.cl-formButtonPrimary:hover {
+  background-color: #059669 !important;
+}
+
+.cl-formFieldInput {
+  border-radius: 0.75rem !important;
+  border: 1px solid #cbd5e1 !important;
+  padding-top: 0.625rem !important;
+  padding-bottom: 0.625rem !important;
+}
+
+.cl-formFieldInput:focus {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2) !important;
+}
+
