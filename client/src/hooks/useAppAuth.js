@@ -20,7 +20,7 @@ export function useAppAuth() {
   const { isLoaded, isSignedIn, getToken } = clerkAuth;
   const { user } = clerkUser;
 
-  const role = user?.publicMetadata?.role || 'donor';
+  const role = user?.publicMetadata?.role || null;
 
   const getAuthToken = async () => {
     try { return await getToken(); }

@@ -10,6 +10,7 @@ import LandingPage from './pages/LandingPage';
 import SignInPage from './pages/SignInPage';
 import SignUpPage from './pages/SignUpPage';
 import SSOCallback from './pages/SSOCallback';
+import OnboardingPage from './pages/OnboardingPage';
 import DonorDashboard from './pages/DonorDashboard';
 import NGODashboard from './pages/NGODashboard';
 import AdminDashboard from './pages/AdminDashboard';
@@ -46,6 +47,9 @@ export default function App() {
       <Route path="/sign-in/*"   element={<SignInPage />} />
       <Route path="/sign-up/*"   element={<SignUpPage />} />
       <Route path="/sso-callback" element={<SSOCallback />} />
+
+      {/* ── Onboarding (protected but no Sidebar/Navbar layout) ─ */}
+      <Route path="/onboarding"  element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
 
       {/* ── Donor routes ─────────────────────────────── */}
       <Route path="/dashboard"     element={<DashboardRoute element={<DonorDashboard />} />} />
