@@ -48,11 +48,11 @@ Complete donor experience including dashboard, uploading food, and viewing statu
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 2.1 | Build Donor Dashboard page | Pending | Stat cards, recent donations, quick actions |
-| 2.2 | Build Food Upload Form - Step 1 | Pending | Food details (name, category, quantity, expiry, storage) |
-| 2.3 | Build Food Upload Form - Step 2 | Pending | Image upload with drag & drop preview |
-| 2.4 | Build Food Upload Form - Step 3 | Pending | Pickup location & instructions |
-| 2.5 | Build Food Upload Form - Step 4 | Pending | Review & submit |
+| 2.1 | Build Donor Dashboard page | Done | Stat cards, recent donations, quick actions |
+| 2.2 | Build Food Upload Form - Step 1 | Done | Food details (name, category, quantity, expiry, storage) |
+| 2.3 | Build Food Upload Form - Step 2 | Done | Image upload with drag & drop preview |
+| 2.4 | Build Food Upload Form - Step 3 | Done | Pickup location & instructions |
+| 2.5 | Build Food Upload Form - Step 4 | Done | Review & submit |
 | 2.6 | Wire up image upload to Supabase Storage | Pending | File storage for food items |
 | 2.7 | Wire up donation creation to Supabase | Pending | Insert entries into donations table |
 | 2.8 | Build My Donations page | Pending | List with status badges, filter, search |
