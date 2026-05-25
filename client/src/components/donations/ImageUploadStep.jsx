@@ -1,24 +1,83 @@
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X, Image as ImageIcon, Sparkles, Loader2 } from 'lucide-react';
 import { cn } from '@/utils/helpers';
+import { useAppAuth } from '@/hooks/useAppAuth';
+import { aiAPI } from '@/services/api';
+import { toast } from 'react-hot-toast';
+import FreshnessIndicator from './FreshnessIndicator';
 
 export default function ImageUploadStep({ data, onChange }) {
+  const { getAuthToken } = useAppAuth();
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+
+  const runAnalysis = async (imageFile) => {
+    setIsAnalyzing(true);
+    try {
+      const token = await getAuthToken();
+      if (!token) {
+        toast.error('Authentication required for AI analysis');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('image', imageFile);
+      formData.append('name', data.name || '');
+      formData.append('category', data.category || '');
+      formData.append('quantity', data.quantity ? `${data.quantity} ${data.unit || 'meals'}` : '');
+      formData.append('storageCondition', data.storageCondition || '');
+
+      const response = await aiAPI.analyzeFreshness(token, formData);
+      
+      onChange({
+        ai_freshness_score: response.freshnessScore,
+        ai_analysis: response,
+      });
+
+      toast.success('AI freshness analysis completed!');
+    } catch (err) {
+      console.error('AI Analysis client error:', err);
+      toast.error('AI freshness analysis failed to process');
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
   const onDrop = useCallback(
     (acceptedFiles) => {
+      if (acceptedFiles.length === 0) return;
+
       const newImages = acceptedFiles.map((file) =>
         Object.assign(file, { preview: URL.createObjectURL(file) })
       );
-      onChange({ images: [...(data.images || []), ...newImages].slice(0, 4) });
+      
+      // Update local images list
+      const updatedImages = [...(data.images || []), ...newImages].slice(0, 4);
+      onChange({ images: updatedImages });
+
+      // Run AI analysis on the first uploaded image
+      if (updatedImages.length > 0 && !data.ai_analysis) {
+        runAnalysis(updatedImages[0]);
+      }
     },
-    [data.images, onChange]
+    [data.images, data.ai_analysis, onChange]
   );
 
   const removeImage = (index) => {
     const updated = [...data.images];
     URL.revokeObjectURL(updated[index].preview);
     updated.splice(index, 1);
-    onChange({ images: updated });
+    
+    // Clear AI analysis if all images are removed
+    if (updated.length === 0) {
+      onChange({ 
+        images: updated,
+        ai_freshness_score: null,
+        ai_analysis: null
+      });
+    } else {
+      onChange({ images: updated });
+    }
   };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -80,6 +139,36 @@ export default function ImageUploadStep({ data, onChange }) {
           </>
         )}
       </div>
+
+      {/* Loading analysis state */}
+      {isAnalyzing && (
+        <div className="flex flex-col items-center justify-center p-8 border rounded-2xl border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/20 space-y-3">
+          <div className="relative flex items-center justify-center">
+            <Loader2 className="w-8 h-8 text-primary-500 animate-spin" />
+            <Sparkles className="w-4 h-4 text-indigo-500 absolute animate-pulse" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">
+              AI freshness analysis in progress...
+            </p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
+              Gemini is evaluating image quality, freshness, and shelf life
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Render AI Freshness Analysis indicator if present */}
+      {!isAnalyzing && data.ai_analysis && (
+        <FreshnessIndicator
+          score={data.ai_freshness_score}
+          urgency={data.ai_analysis.urgencyLevel}
+          shelfLife={data.ai_analysis.estimatedShelfLife}
+          recommendations={data.ai_analysis.safetyRecommendations}
+          distributionMethod={data.ai_analysis.distributionMethod}
+          analysis={data.ai_analysis.analysis}
+        />
+      )}
 
       {/* Image previews */}
       {data.images && data.images.length > 0 && (
