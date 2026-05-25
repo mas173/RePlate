@@ -178,7 +178,7 @@ export default function MyDonationsPage() {
                                     variants={cardVariants}
                                     layout
                                     onClick={() => navigate(`/donations/${donation.id}`)}
-                                    className="card group hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer relative bg-white dark:bg-slate-850/80 border border-slate-100 dark:border-slate-700/50 flex flex-col justify-between min-h-[220px]"
+                                    className="card group hover:shadow-card-hover hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer relative bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 flex flex-col justify-between min-h-[220px]"
                                 >
                                     <div className="h-28 w-full relative overflow-hidden bg-slate-100 dark:bg-slate-800">
                                         {donation.images && donation.images.length > 0 ? (

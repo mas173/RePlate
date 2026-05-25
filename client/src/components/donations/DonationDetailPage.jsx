@@ -459,7 +459,7 @@ export default function DonationDetailPage() {
 
                     {role === 'ngo' && donation.status === 'available' && (
                         <div className="card bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-5 rounded-3xl space-y-4 shadow-sm">
-                            <h3 className="font-bold text-sm text-slate-850 dark:text-white flex items-center gap-1.5">
+                            <h3 className="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-1.5">
                                 <ClipboardCheck className="w-4.5 h-4.5 text-primary-500" />
                                 Claim Surplus Food
                             </h3>
@@ -481,7 +481,7 @@ export default function DonationDetailPage() {
                         
                         return (
                             <div className="card bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-5 rounded-3xl space-y-3 shadow-sm">
-                                <h3 className="font-bold text-sm text-slate-850 dark:text-white flex items-center gap-1.5">
+                                <h3 className="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-1.5">
                                     <ClipboardCheck className="w-4.5 h-4.5 text-emerald-500" />
                                     Active Claim Status
                                 </h3>
@@ -576,7 +576,7 @@ export default function DonationDetailPage() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="bg-white dark:bg-slate-850 p-6 rounded-3xl w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl relative"
+                            className="bg-white dark:bg-slate-800 p-6 rounded-3xl w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl relative"
                         >
                             <button
                                 onClick={() => setIsClaiming(false)}

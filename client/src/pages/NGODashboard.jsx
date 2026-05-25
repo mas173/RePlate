@@ -176,8 +176,8 @@ export default function NGODashboard() {
         {/* Left Column (Radar Map + Active Pickups list) */}
         <div className="lg:col-span-2 space-y-6">
           {/* Geolocation Radar Map */}
-          <div className="card overflow-hidden bg-white dark:bg-slate-850/80 border border-slate-200 dark:border-slate-700/50 flex flex-col justify-between h-[360px] relative">
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between z-10 bg-white/80 dark:bg-slate-850/80 backdrop-blur-md">
+          <div className="card overflow-hidden bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/50 flex flex-col justify-between h-[360px] relative">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between z-10 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md">
               <div>
                 <h3 className="font-bold text-slate-800 dark:text-white flex items-center gap-1.5 text-sm">
                   <Navigation className="w-4 h-4 text-primary-500 animate-pulse" />
@@ -284,7 +284,7 @@ export default function NGODashboard() {
           </div>
 
           {/* Active Pickups Panel */}
-          <div className="card bg-white dark:bg-slate-850/80 border border-slate-200 dark:border-slate-700/50 p-5 space-y-4">
+          <div className="card bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/50 p-5 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
               <div>
                 <h3 className="font-bold text-slate-800 dark:text-white text-sm">
@@ -375,7 +375,7 @@ export default function NGODashboard() {
             <div className="grid grid-cols-1 gap-2.5">
               <Link 
                 to="/available" 
-                className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 hover:bg-slate-100 dark:bg-slate-800/30 dark:hover:bg-slate-850 transition-colors group"
+                className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 hover:bg-slate-100 dark:bg-slate-800/30 dark:hover:bg-slate-800 transition-colors group"
               >
                 <div className="min-w-0">
                   <span className="font-bold text-xs text-slate-800 dark:text-white block">Browse Available Food</span>
@@ -386,7 +386,7 @@ export default function NGODashboard() {
 
               <Link 
                 to="/claims" 
-                className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 hover:bg-slate-100 dark:bg-slate-800/30 dark:hover:bg-slate-850 transition-colors group"
+                className="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 hover:bg-slate-100 dark:bg-slate-800/30 dark:hover:bg-slate-800 transition-colors group"
               >
                 <div className="min-w-0">
                   <span className="font-bold text-xs text-slate-800 dark:text-white block">My Claims & History</span>

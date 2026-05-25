@@ -204,7 +204,7 @@ export default function MyClaimsPage() {
                   key={claim.id}
                   variants={cardVariants}
                   layout
-                  className="card p-5 bg-white dark:bg-slate-850/80 border border-slate-100 dark:border-slate-700/50 hover:shadow-md transition-shadow flex flex-col md:flex-row justify-between gap-5 relative overflow-hidden"
+                  className="card p-5 bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/50 hover:shadow-md transition-shadow flex flex-col md:flex-row justify-between gap-5 relative overflow-hidden"
                 >
                   {/* Left Side: Info */}
                   <div className="flex-1 space-y-3.5">
@@ -353,7 +353,7 @@ export default function MyClaimsPage() {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
-            className="bg-white dark:bg-slate-850 p-6 rounded-2xl max-w-md w-full border border-slate-100 dark:border-slate-700 shadow-2xl relative"
+            className="bg-white dark:bg-slate-800 p-6 rounded-2xl max-w-md w-full border border-slate-100 dark:border-slate-700 shadow-2xl relative"
           >
             <button
               onClick={() => setShowRatingModal(false)}
