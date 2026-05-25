@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ChevronRight } from 'lucide-react';
+import { toast } from 'react-hot-toast';
+import { useAppAuth } from '@/hooks/useAppAuth';
+import { donationsAPI } from '@/services/api';
 import FoodDetailsStep from './FoodDetailsStep';
 import ImageUploadStep from './ImageUploadStep';
 import PickupLocationStep from './PickupLocationStep';
@@ -47,24 +50,22 @@ function Stepper({ currentStep }) {
             {/* Step circle + label */}
             <div className="flex flex-col items-center gap-2">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${
-                  isCompleted
+                className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${isCompleted
                     ? 'bg-primary-500 text-white shadow-glow-green'
                     : isCurrent
                       ? 'bg-primary-500 text-white shadow-glow-green scale-110'
                       : 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500'
-                }`}
+                  }`}
               >
                 {isCompleted ? <Check className="w-5 h-5" /> : step.id}
               </div>
               <span
-                className={`text-xs font-medium transition-colors duration-300 hidden sm:block ${
-                  isCurrent
+                className={`text-xs font-medium transition-colors duration-300 hidden sm:block ${isCurrent
                     ? 'text-primary-600 dark:text-primary-400'
                     : isCompleted
                       ? 'text-slate-700 dark:text-slate-300'
                       : 'text-slate-400 dark:text-slate-500'
-                }`}
+                  }`}
               >
                 {step.label}
               </span>
@@ -104,6 +105,7 @@ const slideVariants = {
 };
 
 export default function FoodUploadForm() {
+  const { getAuthToken } = useAppAuth();
   const [currentStep, setCurrentStep] = useState(1);
   const [direction, setDirection] = useState(1);
   const [formData, setFormData] = useState(INITIAL_FORM);
@@ -135,10 +137,48 @@ export default function FoodUploadForm() {
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    try {
+      const token = await getAuthToken();
+      if (!token) {
+        toast.error('You must be logged in to donate');
+        setIsSubmitting(false);
+        return;
+      }
+
+      // Build FormData
+      const dataToSend = new FormData();
+      dataToSend.append('name', formData.name);
+      dataToSend.append('category', formData.category);
+      dataToSend.append('quantity', formData.quantity);
+      dataToSend.append('unit', formData.unit);
+      dataToSend.append('expiryDate', formData.expiryDate);
+      dataToSend.append('expiryTime', formData.expiryTime);
+      dataToSend.append('storageCondition', formData.storageCondition);
+      dataToSend.append('address', formData.address);
+      dataToSend.append('city', formData.city);
+      dataToSend.append('state', formData.state);
+      dataToSend.append('pincode', formData.pincode);
+      dataToSend.append('pickupFrom', formData.pickupFrom);
+      dataToSend.append('pickupTo', formData.pickupTo);
+      dataToSend.append('instructions', formData.instructions);
+      dataToSend.append('notes', formData.notes);
+
+      // Append image files
+      if (formData.images && formData.images.length > 0) {
+        formData.images.forEach((imageFile) => {
+          dataToSend.append('images', imageFile);
+        });
+      }
+
+      await donationsAPI.create(token, dataToSend);
+      toast.success('Donation submitted successfully!');
+      setIsSubmitted(true);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.message || 'Failed to submit donation');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleReset = () => {

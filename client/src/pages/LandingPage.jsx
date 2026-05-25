@@ -2,11 +2,12 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import {
   ArrowRight, Sparkles, Users, CheckCircle,
-  Zap, Shield, Clock, BarChart3, ChevronRight, Menu, X
+  Zap, Shield, Clock, BarChart3, ChevronRight, Menu, X, Sun, Moon
 } from 'lucide-react';
 import mainLogo from '@/assets/images/mainLogo.png';
 import nameLogo from '@/assets/images/name.png';
 import mottoImg from '@/assets/images/motto.png';
+import { useDarkMode } from '@/hooks/useDarkMode';
 
 // ─── Animated counter ───────────────────────────────────────
 function Counter({ end, suffix = '', duration = 2000 }) {
@@ -28,6 +29,7 @@ function Counter({ end, suffix = '', duration = 2000 }) {
 function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isDark, toggle } = useDarkMode();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -55,6 +57,10 @@ function Navbar() {
 
         {/* CTA */}
         <div className="hidden md:flex items-center gap-3">
+          <button onClick={toggle}
+            className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+            {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          </button>
           <Link to="/sign-in" className="btn-ghost text-sm">Sign in</Link>
           <Link to="/sign-up" className="btn-primary text-sm py-2 px-4">Get started free</Link>
         </div>
