@@ -13,11 +13,12 @@ import {
     Building2,
     Phone,
     Mail,
+    ClipboardCheck,
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 import { useAppAuth } from '@/hooks/useAppAuth';
-import { donationsAPI } from '@/services/api';
+import { donationsAPI, claimsAPI } from '@/services/api';
 import FreshnessIndicator from './FreshnessIndicator';
 import {
     getUrgencyColor,
@@ -54,6 +55,14 @@ export default function DonationDetailPage() {
 
     const [isDeleting, setIsDeleting] = useState(false);
     const [isCancelling, setIsCancelling] = useState(false);
+
+    const [isClaiming, setIsClaiming] = useState(false);
+    const [pickupScheduledAt, setPickupScheduledAt] = useState(() => {
+        const date = new Date(Date.now() + 2 * 60 * 60 * 1000);
+        return date.toISOString().slice(0, 16);
+    });
+    const [claimNotes, setClaimNotes] = useState('');
+    const [claimingInProgress, setClaimingInProgress] = useState(false);
 
     const fetchDonationDetails = async () => {
         try {
@@ -212,6 +221,35 @@ export default function DonationDetailPage() {
         }
     };
 
+    const handleClaim = async (e) => {
+        e.preventDefault();
+        if (!pickupScheduledAt) {
+            toast.error('Please schedule a pickup time');
+            return;
+        }
+        setClaimingInProgress(true);
+        try {
+            const token = await getAuthToken();
+            if (!token) return;
+
+            await claimsAPI.create(token, {
+                donationId: id,
+                pickupScheduledAt: new Date(pickupScheduledAt).toISOString(),
+                notes: claimNotes.trim() || undefined
+            });
+
+            toast.success('Food donation claimed successfully!');
+            setIsClaiming(false);
+            setClaimNotes('');
+            await fetchDonationDetails();
+        } catch (err) {
+            console.error(err);
+            toast.error(err?.message || 'Failed to claim food donation');
+        } finally {
+            setClaimingInProgress(false);
+        }
+    };
+
     if (loading) {
         return (
             <div className="space-y-6 max-w-4xl mx-auto py-6">
@@ -256,12 +294,12 @@ export default function DonationDetailPage() {
         <div className="space-y-6 max-w-4xl mx-auto pb-12">
             <div className="flex items-center justify-between">
                 <Link
-                    to="/donations"
+                    to={role === 'ngo' ? '/available' : '/donations'}
                     className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-colors"
                 >
                     <ArrowLeft className="w-4 h-4" />
 
-                    <span>Back to My Donations</span>
+                    <span>{role === 'ngo' ? 'Back to Available Food' : 'Back to My Donations'}</span>
                 </Link>
             </div>
 
@@ -390,7 +428,6 @@ export default function DonationDetailPage() {
                         </div>
                     </div>
                 </div>
-
                 <div className="space-y-6">
                     {canModify &&
                         !isCancelled &&
@@ -419,6 +456,66 @@ export default function DonationDetailPage() {
                                 </button>
                             </div>
                         )}
+
+                    {role === 'ngo' && donation.status === 'available' && (
+                        <div className="card bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-5 rounded-3xl space-y-4 shadow-sm">
+                            <h3 className="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-1.5">
+                                <ClipboardCheck className="w-4.5 h-4.5 text-primary-500" />
+                                Claim Surplus Food
+                            </h3>
+                            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal">
+                                Schedule a pickup time to claim this donation. It will be reserved for your organization.
+                            </p>
+                            <button
+                                onClick={() => setIsClaiming(true)}
+                                className="btn-primary w-full py-2.5 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold shadow-glow-green border-none"
+                            >
+                                Claim Food
+                            </button>
+                        </div>
+                    )}
+
+                    {claims && claims.length > 0 && (() => {
+                        const activeClaim = claims.find(c => c.status !== 'cancelled');
+                        if (!activeClaim) return null;
+                        
+                        return (
+                            <div className="card bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-5 rounded-3xl space-y-3 shadow-sm">
+                                <h3 className="font-bold text-sm text-slate-800 dark:text-white flex items-center gap-1.5">
+                                    <ClipboardCheck className="w-4.5 h-4.5 text-emerald-500" />
+                                    Active Claim Status
+                                </h3>
+                                <div className="text-xs space-y-2">
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400">Claim Status:</span>
+                                        <span className="font-semibold text-emerald-500 capitalize">{activeClaim.status.replace('_', ' ')}</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-slate-400">Scheduled:</span>
+                                        <span className="font-medium text-slate-800 dark:text-slate-200">
+                                            {new Date(activeClaim.pickup_scheduled_at).toLocaleString(undefined, {
+                                                month: 'short',
+                                                day: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit'
+                                            })}
+                                        </span>
+                                    </div>
+                                    {activeClaim.notes && (
+                                        <div className="bg-slate-50 dark:bg-slate-900/40 p-2.5 rounded-lg border border-slate-100 dark:border-slate-750 text-[11px] text-slate-550 dark:text-slate-400">
+                                            <span className="font-semibold block mb-0.5">Claim Notes:</span>
+                                            {activeClaim.notes}
+                                        </div>
+                                    )}
+                                </div>
+                                {role === 'ngo' && (
+                                    <Link to="/claims" className="btn-secondary w-full py-2 rounded-xl text-xs font-semibold block text-center mt-2">
+                                        Manage in My Claims
+                                    </Link>
+                                )}
+                            </div>
+                        );
+                    })()}
                 </div>
             </div>
 
@@ -469,6 +566,75 @@ export default function DonationDetailPage() {
                                     Delete
                                 </button>
                             </div>
+                        </motion.div>
+                    </div>
+                )}
+
+                {isClaiming && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white dark:bg-slate-800 p-6 rounded-3xl w-full max-w-md border border-slate-100 dark:border-slate-700 shadow-2xl relative"
+                        >
+                            <button
+                                onClick={() => setIsClaiming(false)}
+                                className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">
+                                Claim Surplus Food
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">
+                                Select your logistics team's scheduled pick up date and time.
+                            </p>
+
+                            <form onSubmit={handleClaim} className="space-y-4">
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                                        Scheduled Pickup Time *
+                                    </label>
+                                    <input
+                                        type="datetime-local"
+                                        className="input w-full"
+                                        required
+                                        value={pickupScheduledAt}
+                                        onChange={(e) => setPickupScheduledAt(e.target.value)}
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">
+                                        Notes for the Donor (Optional)
+                                    </label>
+                                    <textarea
+                                        placeholder="E.g., Our pickup vehicle will arrive around 2 PM. Please let us know if any special gate access is needed."
+                                        className="input w-full h-24 py-2 resize-none text-xs"
+                                        value={claimNotes}
+                                        onChange={(e) => setClaimNotes(e.target.value)}
+                                    />
+                                </div>
+
+                                <div className="flex gap-3.5 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsClaiming(false)}
+                                        className="btn-secondary w-full py-2.5 text-xs"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={claimingInProgress}
+                                        className="btn-primary w-full py-2.5 text-xs bg-primary-600 hover:bg-primary-700 border-none shadow-glow-green animate-none"
+                                    >
+                                        {claimingInProgress ? 'Claiming...' : 'Confirm Claim'}
+                                    </button>
+                                </div>
+                            </form>
                         </motion.div>
                     </div>
                 )}
