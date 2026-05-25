@@ -134,7 +134,13 @@ router.post('/', requireAuth, requireRole('donor', 'admin'), upload.array('image
       notes,
       isVegetarian,
       isVegan,
-      allergens
+      allergens,
+      aiFreshnessScore,
+      ai_freshness_score,
+      aiAnalysis,
+      ai_analysis,
+      aiCategorySuggestion,
+      ai_category_suggestion
     } = req.body;
 
     if (!name || !quantity || !expiryDate) {
@@ -193,6 +199,24 @@ router.post('/', requireAuth, requireRole('donor', 'admin'), upload.array('image
       }
     }
 
+    // Safely parse AI fields
+    const scoreVal = aiFreshnessScore || ai_freshness_score;
+    const ai_freshness_score_num = scoreVal ? parseInt(scoreVal, 10) : null;
+
+    let parsedAiAnalysis = null;
+    const rawAnalysis = aiAnalysis || ai_analysis;
+    if (rawAnalysis) {
+      try {
+        parsedAiAnalysis = typeof rawAnalysis === 'string'
+          ? JSON.parse(rawAnalysis)
+          : rawAnalysis;
+      } catch (err) {
+        parsedAiAnalysis = { raw: rawAnalysis };
+      }
+    }
+
+    const categorySuggestion = aiCategorySuggestion || ai_category_suggestion || null;
+
     const donationData = {
       donor_id: profile.id,
       food_name: name,
@@ -211,7 +235,10 @@ router.post('/', requireAuth, requireRole('donor', 'admin'), upload.array('image
       urgency,
       is_vegetarian: isVegetarian === 'true' || isVegetarian === true,
       is_vegan: isVegan === 'true' || isVegan === true,
-      allergens: parsedAllergens
+      allergens: parsedAllergens,
+      ai_freshness_score: ai_freshness_score_num,
+      ai_analysis: parsedAiAnalysis,
+      ai_category_suggestion: categorySuggestion
     };
 
     const { data: donation, error: insertErr } = await supabaseAdmin
@@ -280,7 +307,13 @@ router.put('/:id', requireAuth, async (req, res, next) => {
       isVegetarian,
       isVegan,
       allergens,
-      status
+      status,
+      aiFreshnessScore,
+      ai_freshness_score,
+      aiAnalysis,
+      ai_analysis,
+      aiCategorySuggestion,
+      ai_category_suggestion
     } = req.body;
 
     const updateData = {};
@@ -293,6 +326,31 @@ router.put('/:id', requireAuth, async (req, res, next) => {
     if (status) updateData.status = status;
     if (isVegetarian !== undefined) updateData.is_vegetarian = isVegetarian === 'true' || isVegetarian === true;
     if (isVegan !== undefined) updateData.is_vegan = isVegan === 'true' || isVegan === true;
+
+    const scoreVal = aiFreshnessScore || ai_freshness_score;
+    if (scoreVal !== undefined) {
+      updateData.ai_freshness_score = scoreVal ? parseInt(scoreVal, 10) : null;
+    }
+
+    const rawAnalysis = aiAnalysis || ai_analysis;
+    if (rawAnalysis !== undefined) {
+      if (!rawAnalysis) {
+        updateData.ai_analysis = null;
+      } else {
+        try {
+          updateData.ai_analysis = typeof rawAnalysis === 'string'
+            ? JSON.parse(rawAnalysis)
+            : rawAnalysis;
+        } catch (err) {
+          updateData.ai_analysis = { raw: rawAnalysis };
+        }
+      }
+    }
+
+    const categorySuggestion = aiCategorySuggestion || ai_category_suggestion;
+    if (categorySuggestion !== undefined) {
+      updateData.ai_category_suggestion = categorySuggestion || null;
+    }
 
     if (allergens) {
       updateData.allergens = Array.isArray(allergens) ? allergens : allergens.split(',').map(s => s.trim());

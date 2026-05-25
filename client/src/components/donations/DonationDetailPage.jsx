@@ -18,6 +18,7 @@ import { toast } from 'react-hot-toast';
 
 import { useAppAuth } from '@/hooks/useAppAuth';
 import { donationsAPI } from '@/services/api';
+import FreshnessIndicator from './FreshnessIndicator';
 import {
     getUrgencyColor,
     getRelativeTime,
@@ -345,6 +346,17 @@ export default function DonationDetailPage() {
                             </div>
                         )}
                     </div>
+
+                    {donation.ai_analysis && (
+                        <FreshnessIndicator
+                            score={donation.ai_freshness_score}
+                            urgency={typeof donation.ai_analysis === 'string' ? JSON.parse(donation.ai_analysis).urgencyLevel : donation.ai_analysis.urgencyLevel}
+                            shelfLife={typeof donation.ai_analysis === 'string' ? JSON.parse(donation.ai_analysis).estimatedShelfLife : donation.ai_analysis.estimatedShelfLife}
+                            recommendations={typeof donation.ai_analysis === 'string' ? JSON.parse(donation.ai_analysis).safetyRecommendations : donation.ai_analysis.safetyRecommendations}
+                            distributionMethod={typeof donation.ai_analysis === 'string' ? JSON.parse(donation.ai_analysis).distributionMethod : donation.ai_analysis.distributionMethod}
+                            analysis={typeof donation.ai_analysis === 'string' ? JSON.parse(donation.ai_analysis).analysis : donation.ai_analysis.analysis}
+                        />
+                    )}
 
                     <div className="card bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-6 rounded-3xl space-y-4">
                         <h3 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">

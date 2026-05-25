@@ -67,12 +67,12 @@ Gemini-powered food freshness analysis.
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 3.1 | Implement freshness analysis service | Pending | Gemini API request and response parsing |
-| 3.2 | Wire AI analysis into the Food Upload Form | Pending | Auto-run analysis when food image is uploaded |
-| 3.3 | Build FreshnessIndicator component | Pending | Score gauge, urgency badge, shelf life |
-| 3.4 | Implement AI auto-categorization | Pending | Automatically suggest category based on food details/image |
-| 3.5 | Save AI analysis results to database | Pending | Update donations.ai_analysis column in Supabase |
-| 3.6 | Verify Gemini API key has quota enabled | Pending | aistudio.google.com -> check billing/quota |
+| 3.1 | Implement freshness analysis service | Done | Gemini API request and response parsing |
+| 3.2 | Wire AI analysis into the Food Upload Form | Done | Auto-run analysis when food image is uploaded |
+| 3.3 | Build FreshnessIndicator component | Done | Score gauge, urgency badge, shelf life |
+| 3.4 | Implement AI auto-categorization | Done | Automatically suggest category based on food details/image |
+| 3.5 | Save AI analysis results to database | Done | Update donations.ai_analysis column in Supabase |
+| 3.6 | Verify Gemini API key has quota enabled | Done | aistudio.google.com -> check billing/quota |
 
 ---
 
