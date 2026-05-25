@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Sparkles, Calendar, Clock, MapPin, Package, Heart, ShieldAlert, Navigation, ArrowRight, CheckCircle, Truck, RefreshCw } from 'lucide-react';
+import { Sparkles, Calendar, Clock, MapPin, Package, Heart, ShieldAlert, Navigation, ArrowRight, CheckCircle, Truck, RefreshCw, ChevronRight } from 'lucide-react';
 import { useAppAuth } from '@/hooks/useAppAuth';
 import { claimsAPI, donationsAPI } from '@/services/api';
 import { getUrgencyColor } from '@/utils/helpers';
