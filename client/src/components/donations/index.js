@@ -12,8 +12,8 @@
  * - UrgencyBadge (urgency level badge)
  */
 
-// Export components as they are created
-// export { default as DonationCard } from './DonationCard';
-// export { default as DonationList } from './DonationList';
-// export { default as ImageUploader } from './ImageUploader';
-// export { default as FreshnessIndicator } from './FreshnessIndicator';
+export { default as FoodUploadForm } from './FoodUploadForm';
+export { default as FoodDetailsStep } from './FoodDetailsStep';
+export { default as ImageUploadStep } from './ImageUploadStep';
+export { default as PickupLocationStep } from './PickupLocationStep';
+export { default as ReviewSubmitStep } from './ReviewSubmitStep';

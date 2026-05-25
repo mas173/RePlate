@@ -1,62 +1,68 @@
 import { Routes, Route } from 'react-router-dom';
-import { SignIn, SignUp } from '@clerk/clerk-react';
-
+// Layout & Auth guards
+import DashboardLayout from './components/layout/DashboardLayout';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import RoleGuard from './components/auth/RoleGuard';
 // Pages
 import LandingPage from './pages/LandingPage';
+import SignInPage from './pages/SignInPage';
+import SignUpPage from './pages/SignUpPage';
+import SSOCallback from './pages/SSOCallback';
+import OnboardingPage from './pages/OnboardingPage';
 import DonorDashboard from './pages/DonorDashboard';
 import NGODashboard from './pages/NGODashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import FoodUploadPage from './pages/FoodUploadPage';
+import MyDonationsPage from './components/donations/MyDonationsPage';
+import DonationDetailPage from './components/donations/DonationDetailPage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
-
-// Layout Components
-// import DashboardLayout from './components/layout/DashboardLayout';
-// import ProtectedRoute from './components/auth/ProtectedRoute';
-
-function App() {
+/**
+ * Wraps a page with ProtectedRoute + DashboardLayout.
+ * Optionally restricts to specific roles via RoleGuard.
+ */
+function DashboardRoute({ element, roles }) {
+  const content = roles
+    ? <RoleGuard roles={roles}>{element}</RoleGuard>
+    : element;
   return (
-    <div className="min-h-screen bg-surface-50 dark:bg-surface-950 transition-colors duration-200">
-      <Routes>
-        {/* Public Routes */}
-        <Route path="/" element={<LandingPage />} />
-        <Route
-          path="/sign-in/*"
-          element={
-            <div className="min-h-screen flex items-center justify-center gradient-hero">
-              <SignIn routing="path" path="/sign-in" />
-            </div>
-          }
-        />
-        <Route
-          path="/sign-up/*"
-          element={
-            <div className="min-h-screen flex items-center justify-center gradient-hero">
-              <SignUp routing="path" path="/sign-up" />
-            </div>
-          }
-        />
-
-        {/* Protected Routes - Donor */}
-        <Route path="/dashboard" element={<DonorDashboard />} />
-        <Route path="/donate" element={<FoodUploadPage />} />
-
-        {/* Protected Routes - NGO */}
-        <Route path="/ngo/dashboard" element={<NGODashboard />} />
-
-        {/* Protected Routes - Admin */}
-        <Route path="/admin" element={<AdminDashboard />} />
-
-        {/* Protected Routes - Shared */}
-        <Route path="/analytics" element={<AnalyticsPage />} />
-        <Route path="/settings" element={<ProfileSettingsPage />} />
-
-        {/* 404 */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </div>
+    <ProtectedRoute>
+      <DashboardLayout>
+        {content}
+      </DashboardLayout>
+    </ProtectedRoute>
   );
 }
-
-export default App;
+export default function App() {
+  return (
+    <Routes>
+      {/* ── Public ───────────────────────────────────── */}
+      <Route path="/" element={<LandingPage />} />
+      <Route path="/sign-in/*" element={<SignInPage />} />
+      <Route path="/sign-up/*" element={<SignUpPage />} />
+      <Route path="/sso-callback" element={<SSOCallback />} />
+      {/* ── Onboarding (protected but no Sidebar/Navbar layout) ─ */}
+      <Route path="/onboarding" element={<ProtectedRoute><OnboardingPage /></ProtectedRoute>} />
+      {/* ── Donor routes ─────────────────────────────── */}
+      <Route path="/dashboard" element={<DashboardRoute element={<DonorDashboard />} />} />
+      <Route path="/donate" element={<DashboardRoute element={<FoodUploadPage />} roles={['donor']} />} />
+      <Route path="/donations" element={<DashboardRoute element={<MyDonationsPage />} roles={['donor']} />} />
+      <Route path="/donations/:id" element={<DashboardRoute element={<DonationDetailPage />} roles={['donor', 'ngo', 'admin']} />} />
+      {/* ── NGO routes ───────────────────────────────── */}
+      <Route path="/available" element={<DashboardRoute element={<NGODashboard />} roles={['ngo']} />} />
+      <Route path="/claims" element={<DashboardRoute element={<NGODashboard />} roles={['ngo']} />} />
+      {/* ── Admin routes ─────────────────────────────── */}
+      <Route path="/admin" element={<DashboardRoute element={<AdminDashboard />} roles={['admin']} />} />
+      <Route path="/admin/users" element={<DashboardRoute element={<AdminDashboard />} roles={['admin']} />} />
+      <Route path="/admin/donations" element={<DashboardRoute element={<AdminDashboard />} roles={['admin']} />} />
+      <Route path="/admin/analytics" element={<DashboardRoute element={<AdminDashboard />} roles={['admin']} />} />
+      {/* ── Shared (any authenticated role) ─────────── */}
+      <Route path="/analytics" element={<DashboardRoute element={<AnalyticsPage />} />} />
+      <Route path="/notifications" element={<DonorDashboard />} />
+      <Route path="/settings" element={<DashboardRoute element={<ProfileSettingsPage />} />} />
+      {/* ── Fallback ─────────────────────────────────── */}
+      <Route path="*" element={<NotFoundPage />} />
+    </Routes>
+  );
+}

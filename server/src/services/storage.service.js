@@ -3,7 +3,7 @@
  */
 
 import { supabaseAdmin } from '../config/supabase.js';
-import { v4 as uuidv4 } from 'crypto';
+import { v4 as uuidv4 } from 'uuid';
 
 const BUCKET_NAME = 'donation-images';
 

@@ -1,41 +1,43 @@
-/**
- * Custom hook to get the current user's role and auth token
- * Wraps Clerk's useAuth and useUser hooks
- */
-
 import { useAuth, useUser } from '@clerk/clerk-react';
 
+/**
+ * Safe wrapper around Clerk hooks.
+ * Returns sensible defaults when Clerk is not configured (no VITE_CLERK_PUBLISHABLE_KEY).
+ */
 export function useAppAuth() {
-  const { getToken, isSignedIn, isLoaded } = useAuth();
-  const { user } = useUser();
+  let clerkAuth = { isLoaded: true, isSignedIn: false, getToken: async () => null };
+  let clerkUser = { user: null };
 
-  const role = user?.publicMetadata?.role || 'donor';
-  const fullName = user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '';
-  const email = user?.primaryEmailAddress?.emailAddress || '';
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    clerkAuth = useAuth();
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    clerkUser = useUser();
+  } catch {
+    // Clerk not configured — use defaults above
+  }
 
-  /**
-   * Get a fresh session token for API calls
-   */
+  const { isLoaded, isSignedIn, getToken } = clerkAuth;
+  const { user } = clerkUser;
+
+  const role = user?.publicMetadata?.role || null;
+
   const getAuthToken = async () => {
-    try {
-      const token = await getToken();
-      return token;
-    } catch (error) {
-      console.error('Failed to get auth token:', error);
-      return null;
-    }
+    try { return await getToken(); }
+    catch { return null; }
   };
 
   return {
     isLoaded,
-    isSignedIn,
+    isSignedIn: isSignedIn ?? false,
     user,
     role,
-    fullName,
-    email,
+    fullName: user ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : '',
+    email: user?.primaryEmailAddress?.emailAddress || '',
+    avatar: user?.imageUrl || '',
     getAuthToken,
     isDonor: role === 'donor',
-    isNGO: role === 'ngo',
+    isNGO:   role === 'ngo',
     isAdmin: role === 'admin',
   };
 }

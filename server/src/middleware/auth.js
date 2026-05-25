@@ -1,4 +1,4 @@
-import { clerkClient } from '@clerk/express';
+import { clerkClient, verifyToken } from '@clerk/express';
 
 /**
  * Middleware to verify Clerk JWT and attach user to request
@@ -17,7 +17,9 @@ export const requireAuth = async (req, res, next) => {
     const token = authHeader.split(' ')[1];
 
     // Verify the session token with Clerk
-    const { sub: userId } = await clerkClient.verifyToken(token);
+    const { sub: userId } = await verifyToken(token, {
+      secretKey: process.env.CLERK_SECRET_KEY,
+    });
 
     if (!userId) {
       return res.status(401).json({
