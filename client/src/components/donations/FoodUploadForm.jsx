@@ -28,6 +28,9 @@ const INITIAL_FORM = {
   // Step 2
   images: [],
   notes: '',
+  ai_freshness_score: null,
+  ai_analysis: null,
+  ai_category_suggestion: null,
   // Step 3
   address: '',
   city: '',
@@ -162,6 +165,17 @@ export default function FoodUploadForm() {
       dataToSend.append('pickupTo', formData.pickupTo);
       dataToSend.append('instructions', formData.instructions);
       dataToSend.append('notes', formData.notes);
+
+      // Append AI fields
+      if (formData.ai_freshness_score !== undefined && formData.ai_freshness_score !== null) {
+        dataToSend.append('ai_freshness_score', formData.ai_freshness_score);
+      }
+      if (formData.ai_analysis) {
+        dataToSend.append('ai_analysis', JSON.stringify(formData.ai_analysis));
+      }
+      if (formData.ai_category_suggestion) {
+        dataToSend.append('ai_category_suggestion', formData.ai_category_suggestion);
+      }
 
       // Append image files
       if (formData.images && formData.images.length > 0) {
