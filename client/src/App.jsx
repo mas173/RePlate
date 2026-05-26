@@ -18,6 +18,7 @@ import DonationDetailPage from './components/donations/DonationDetailPage';
 import AvailableFoodPage from './pages/AvailableFoodPage';
 import MyClaimsPage from './pages/MyClaimsPage';
 import AnalyticsPage from './pages/AnalyticsPage';
+import NotificationsPage from './pages/NotificationsPage';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import { useAppAuth } from './hooks/useAppAuth';
@@ -78,7 +79,7 @@ export default function App() {
       <Route path="/admin/analytics" element={<DashboardRoute element={<AdminDashboard />} roles={['admin']} />} />
       {/* ── Shared (any authenticated role) ─────────── */}
       <Route path="/analytics" element={<DashboardRoute element={<AnalyticsPage />} />} />
-      <Route path="/notifications" element={<DonorDashboard />} />
+      <Route path="/notifications" element={<DashboardRoute element={<NotificationsPage />} />} />
       <Route path="/settings" element={<DashboardRoute element={<ProfileSettingsPage />} />} />
       {/* ── Fallback ─────────────────────────────────── */}
       <Route path="*" element={<NotFoundPage />} />

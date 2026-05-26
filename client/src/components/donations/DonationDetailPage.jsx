@@ -149,27 +149,68 @@ export default function DonationDetailPage() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
+    const [editSaving, setEditSaving] = useState(false);
+
+    const validateEditForm = () => {
+        if (!editForm.name?.trim()) return 'Food name is required';
+        if (!editForm.quantity || parseFloat(editForm.quantity) <= 0) return 'Quantity must be a positive number';
+        if (!editForm.expiryDate) return 'Expiry date is required';
+        const expiryStr = editForm.expiryTime
+            ? `${editForm.expiryDate}T${editForm.expiryTime}:00`
+            : `${editForm.expiryDate}T23:59:59`;
+        if (new Date(expiryStr) <= new Date()) return 'Expiry must be in the future';
+        return null;
+    };
+
     const handleUpdate = async (e) => {
         e.preventDefault();
 
+        const validationError = validateEditForm();
+        if (validationError) {
+            toast.error(validationError);
+            return;
+        }
+
+        setEditSaving(true);
+
+        // Snapshot for rollback
+        const previousDonation = { ...donation };
+
+        // Optimistic UI update
+        setDonation((prev) => ({
+            ...prev,
+            food_name: editForm.name,
+            category: editForm.category,
+            quantity: `${editForm.quantity} ${editForm.unit}`,
+            storage_condition: editForm.storageCondition,
+            pickup_city: editForm.city,
+            pickup_instructions: editForm.instructions,
+            description: editForm.notes,
+            is_vegetarian: editForm.isVegetarian,
+            is_vegan: editForm.isVegan,
+        }));
+
         try {
             const token = await getAuthToken();
+            if (!token) {
+                setDonation(previousDonation);
+                return;
+            }
 
-            if (!token) return;
-
-            await donationsAPI.update(token, id, editForm);
+            await donationsAPI.patch(token, id, editForm);
 
             toast.success('Donation updated successfully');
-
             setIsEditing(false);
-
             await fetchDonationDetails();
         } catch (err) {
             console.error(err);
-
+            // Rollback optimistic update
+            setDonation(previousDonation);
             toast.error(
                 err?.message || 'Failed to update donation'
             );
+        } finally {
+            setEditSaving(false);
         }
     };
 
@@ -272,6 +313,9 @@ export default function DonationDetailPage() {
     const isAdmin = role === 'admin';
 
     const canModify = isOwner || isAdmin;
+
+    // Editing is only allowed when the donation is available
+    const canEdit = canModify && donation.status === 'available';
 
     const statusSteps = [
         { key: 'available', label: 'Listed' },
@@ -433,16 +477,23 @@ export default function DonationDetailPage() {
                         !isCancelled &&
                         !isExpired && (
                             <div className="card bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 p-4 rounded-3xl space-y-2.5">
-                                <button
-                                    onClick={() =>
-                                        setIsEditing(true)
-                                    }
-                                    className="btn-secondary w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2 text-sm font-semibold"
-                                >
-                                    <Edit3 className="w-4 h-4" />
-
-                                    Edit Details
-                                </button>
+                                {canEdit ? (
+                                    <button
+                                        onClick={() =>
+                                            setIsEditing(true)
+                                        }
+                                        className="btn-secondary w-full py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center justify-center gap-2 text-sm font-semibold"
+                                    >
+                                        <Edit3 className="w-4 h-4" />
+                                        Edit Details
+                                    </button>
+                                ) : (
+                                    <div className="text-center py-2 px-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/50">
+                                        <p className="text-xs text-slate-400 dark:text-slate-500">
+                                            Editing disabled — status is "{donation.status.replace('_', ' ')}"
+                                        </p>
+                                    </div>
+                                )}
 
                                 <button
                                     onClick={() =>
@@ -451,7 +502,6 @@ export default function DonationDetailPage() {
                                     className="btn w-full py-2.5 rounded-xl bg-red-50 border border-red-200/55 text-red-650 dark:bg-red-950/20 dark:border-red-900/30 dark:text-red-400 flex items-center justify-center gap-2 text-sm font-semibold"
                                 >
                                     <Trash2 className="w-4 h-4" />
-
                                     Delete Posting
                                 </button>
                             </div>
@@ -520,6 +570,245 @@ export default function DonationDetailPage() {
             </div>
 
             <AnimatePresence>
+                {isEditing && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm overflow-y-auto">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-white dark:bg-slate-800 p-6 rounded-3xl w-full max-w-lg border border-slate-100 dark:border-slate-700 shadow-2xl relative my-8 max-h-[90vh] overflow-y-auto"
+                        >
+                            <button
+                                onClick={() => setIsEditing(false)}
+                                className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+                                <Edit3 className="w-5 h-5 text-primary-500" />
+                                Edit Donation
+                            </h3>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-5">
+                                Update your donation details. Changes will be saved immediately.
+                            </p>
+
+                            <form onSubmit={handleUpdate} className="space-y-4">
+                                {/* Food Name */}
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Food Name *</label>
+                                    <input
+                                        type="text"
+                                        className="input w-full"
+                                        required
+                                        value={editForm.name}
+                                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                        placeholder="e.g. Cooked Rice & Dal"
+                                    />
+                                </div>
+
+                                {/* Category */}
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Category</label>
+                                    <select
+                                        className="input w-full"
+                                        value={editForm.category}
+                                        onChange={(e) => setEditForm({ ...editForm, category: e.target.value })}
+                                    >
+                                        {FOOD_CATEGORIES.map((cat) => (
+                                            <option key={cat.value} value={cat.value}>
+                                                {cat.icon} {cat.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Quantity + Unit */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Quantity *</label>
+                                        <input
+                                            type="number"
+                                            min="0.1"
+                                            step="0.1"
+                                            className="input w-full"
+                                            required
+                                            value={editForm.quantity}
+                                            onChange={(e) => setEditForm({ ...editForm, quantity: e.target.value })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Unit</label>
+                                        <select
+                                            className="input w-full"
+                                            value={editForm.unit}
+                                            onChange={(e) => setEditForm({ ...editForm, unit: e.target.value })}
+                                        >
+                                            <option value="meals">Meals / Servings</option>
+                                            <option value="kg">Kilograms (kg)</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Expiry Date + Time */}
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Expiry Date *</label>
+                                        <input
+                                            type="date"
+                                            className="input w-full"
+                                            required
+                                            value={editForm.expiryDate}
+                                            onChange={(e) => setEditForm({ ...editForm, expiryDate: e.target.value })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Expiry Time</label>
+                                        <input
+                                            type="time"
+                                            className="input w-full"
+                                            value={editForm.expiryTime}
+                                            onChange={(e) => setEditForm({ ...editForm, expiryTime: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Storage Condition */}
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Storage Condition</label>
+                                    <select
+                                        className="input w-full"
+                                        value={editForm.storageCondition}
+                                        onChange={(e) => setEditForm({ ...editForm, storageCondition: e.target.value })}
+                                    >
+                                        {STORAGE_CONDITIONS.map((sc) => (
+                                            <option key={sc.value} value={sc.value}>
+                                                {sc.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {/* Address */}
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Pickup Address</label>
+                                    <input
+                                        type="text"
+                                        className="input w-full"
+                                        value={editForm.address}
+                                        onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                                        placeholder="Street address"
+                                    />
+                                </div>
+
+                                {/* City, State, Pincode */}
+                                <div className="grid grid-cols-3 gap-3">
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">City</label>
+                                        <input
+                                            type="text"
+                                            className="input w-full"
+                                            value={editForm.city}
+                                            onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">State</label>
+                                        <input
+                                            type="text"
+                                            className="input w-full"
+                                            value={editForm.state}
+                                            onChange={(e) => setEditForm({ ...editForm, state: e.target.value })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Pincode</label>
+                                        <input
+                                            type="text"
+                                            className="input w-full"
+                                            value={editForm.pincode}
+                                            onChange={(e) => setEditForm({ ...editForm, pincode: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+
+                                {/* Instructions */}
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Pickup Instructions</label>
+                                    <textarea
+                                        className="input w-full h-20 py-2 resize-none text-xs"
+                                        value={editForm.instructions}
+                                        onChange={(e) => setEditForm({ ...editForm, instructions: e.target.value })}
+                                        placeholder="e.g. Ring the bell at gate 2"
+                                    />
+                                </div>
+
+                                {/* Notes */}
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-1">Description / Notes</label>
+                                    <textarea
+                                        className="input w-full h-20 py-2 resize-none text-xs"
+                                        value={editForm.notes}
+                                        onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })}
+                                        placeholder="Additional notes about the donation"
+                                    />
+                                </div>
+
+                                {/* Dietary flags */}
+                                <div className="flex items-center gap-6">
+                                    <label className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            className="rounded border-slate-300 text-primary-500 focus:ring-primary-500"
+                                            checked={editForm.isVegetarian}
+                                            onChange={(e) => setEditForm({ ...editForm, isVegetarian: e.target.checked })}
+                                        />
+                                        🥬 Vegetarian
+                                    </label>
+                                    <label className="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-300 cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            className="rounded border-slate-300 text-primary-500 focus:ring-primary-500"
+                                            checked={editForm.isVegan}
+                                            onChange={(e) => setEditForm({ ...editForm, isVegan: e.target.checked })}
+                                        />
+                                        🌱 Vegan
+                                    </label>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex gap-3.5 pt-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsEditing(false)}
+                                        disabled={editSaving}
+                                        className="btn-secondary w-full py-2.5 text-xs"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={editSaving}
+                                        className="btn-primary w-full py-2.5 text-xs border-none shadow-glow-green flex items-center justify-center gap-2"
+                                    >
+                                        {editSaving ? (
+                                            <>
+                                                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                                Saving...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Save className="w-4 h-4" />
+                                                Save Changes
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </form>
+                        </motion.div>
+                    </div>
+                )}
+
                 {isDeleting && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
                         <motion.div

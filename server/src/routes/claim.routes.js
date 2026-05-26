@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { supabaseAdmin } from '../config/supabase.js';
+import { sendClaimConfirmation } from '../services/email.service.js';
 
 const router = Router();
 
@@ -200,6 +201,62 @@ router.post('/', requireAuth, requireRole('ngo', 'admin'), async (req, res, next
       .eq('id', donationId);
 
     if (updateDonationErr) throw updateDonationErr;
+
+    // --- Send notifications for the claim (non-blocking) ---
+    try {
+      // Get full donation details for notifications
+      const { data: fullDonation } = await supabaseAdmin
+        .from('donations')
+        .select('*, profiles:donor_id(id, email, first_name, last_name, organization_name)')
+        .eq('id', donationId)
+        .single();
+
+      const { data: ngoProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('email, organization_name')
+        .eq('id', profile.id)
+        .single();
+
+      if (fullDonation) {
+        const donorProfileId = fullDonation.profiles?.id;
+        const donorEmail = fullDonation.profiles?.email;
+        const ngoName = ngoProfile?.organization_name || 'An NGO';
+
+        // In-app notification for the donor
+        if (donorProfileId) {
+          await supabaseAdmin.from('notifications').insert({
+            user_id: donorProfileId,
+            type: 'claim_update',
+            title: 'Donation Claimed!',
+            message: `Your donation "${fullDonation.food_name}" has been claimed by ${ngoName}.`,
+            data: { donation_id: donationId, claim_id: claim.id },
+          });
+        }
+
+        // In-app notification for the NGO
+        await supabaseAdmin.from('notifications').insert({
+          user_id: profile.id,
+          type: 'claim_update',
+          title: 'Claim Confirmed',
+          message: `You have successfully claimed "${fullDonation.food_name}". Please arrange pickup.`,
+          data: { donation_id: donationId, claim_id: claim.id },
+        });
+
+        // Email confirmations
+        if (donorEmail && ngoProfile?.email) {
+          sendClaimConfirmation(donorEmail, ngoProfile.email, {
+            foodName: fullDonation.food_name,
+            expiryDate: new Date(fullDonation.expires_at).toLocaleString(),
+            location: fullDonation.pickup_address,
+            donorContact: donorEmail,
+          }, {
+            ngoName,
+          }).catch((err) => console.error('Claim email failed:', err.message));
+        }
+      }
+    } catch (notifErr) {
+      console.error('Claim notification failed (non-critical):', notifErr.message);
+    }
 
     res.status(201).json({ message: 'Donation claimed successfully', claim });
   } catch (error) {

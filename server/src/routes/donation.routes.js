@@ -3,6 +3,7 @@ import { requireAuth, requireRole } from '../middleware/auth.js';
 import { upload } from '../middleware/upload.js';
 import { supabaseAdmin } from '../config/supabase.js';
 import { uploadImage, deleteImage } from '../services/storage.service.js';
+import { sendDonationAlert } from '../services/email.service.js';
 
 const router = Router();
 
@@ -249,12 +250,181 @@ router.post('/', requireAuth, requireRole('donor', 'admin'), upload.array('image
 
     if (insertErr) throw insertErr;
 
+    // --- Notify nearby NGOs (non-blocking) ---
+    try {
+      // Query NGOs — prefer same city, fall back to all NGOs
+      let ngoQuery = supabaseAdmin
+        .from('profiles')
+        .select('id, email')
+        .eq('role', 'ngo')
+        .eq('is_active', true);
+
+      if (city) {
+        ngoQuery = ngoQuery.ilike('city', `%${city}%`);
+      }
+
+      const { data: ngos } = await ngoQuery;
+
+      if (ngos && ngos.length > 0) {
+        const donationInfo = {
+          id: donation.id,
+          foodName: name,
+          quantity: quantityStr,
+          expiryDate: new Date(expires_at).toLocaleString(),
+          location: donationData.pickup_address,
+          urgencyLevel: urgency,
+        };
+
+        for (const ngo of ngos) {
+          // In-app notification
+          await supabaseAdmin.from('notifications').insert({
+            user_id: ngo.id,
+            type: 'donation_alert',
+            title: 'New Food Available',
+            message: `A new donation "${name}" (${quantityStr}) has been posted near your area.`,
+            data: { donation_id: donation.id },
+          });
+
+          // Email notification
+          if (ngo.email) {
+            sendDonationAlert(ngo.email, donationInfo).catch((err) =>
+              console.error('NGO alert email failed:', err.message)
+            );
+          }
+        }
+      }
+    } catch (alertErr) {
+      // Don't fail the donation creation if alerting fails
+      console.error('NGO alerting failed (non-critical):', alertErr.message);
+    }
+
     res.status(201).json({ message: 'Donation created successfully', donation });
   } catch (error) {
     // Transaction Rollback Fallback Strategy: Evict storage assets if DB layer breaks
     for (const path of uploadedPaths) {
       try { await deleteImage(path); } catch (err) { console.error('Rollback cleanup failed for path:', path, err); }
     }
+    next(error);
+  }
+});
+
+/**
+ * PATCH /api/donations/:id
+ * Edit a donation (only when status is 'available')
+ * Enforces ownership + status-based edit restrictions
+ */
+router.patch('/:id', requireAuth, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const { data: profile, error: profileErr } = await supabaseAdmin
+      .from('profiles')
+      .select('id, role')
+      .eq('clerk_id', req.auth.userId)
+      .single();
+
+    if (profileErr || !profile) {
+      return res.status(404).json({ error: 'Profile not found' });
+    }
+
+    const { data: existingDonation, error: fetchErr } = await supabaseAdmin
+      .from('donations')
+      .select('donor_id, status, quantity, expires_at, pickup_address')
+      .eq('id', id)
+      .single();
+
+    if (fetchErr || !existingDonation) {
+      return res.status(404).json({ error: 'Donation not found' });
+    }
+
+    // Ownership check
+    if (profile.role !== 'admin' && existingDonation.donor_id !== profile.id) {
+      return res.status(403).json({ error: 'Access denied. Only the owner or an admin can edit this donation.' });
+    }
+
+    // Status-based restriction — only editable when 'available'
+    if (existingDonation.status !== 'available') {
+      return res.status(400).json({
+        error: `Cannot edit a donation with status "${existingDonation.status}". Only donations with status "available" can be edited.`,
+      });
+    }
+
+    const {
+      name, category, quantity, unit, expiryDate, expiryTime,
+      storageCondition, address, city, state, pincode,
+      instructions, notes, isVegetarian, isVegan, allergens,
+    } = req.body;
+
+    const updateData = {};
+
+    if (name) updateData.food_name = name;
+    if (category) updateData.category = category;
+    if (storageCondition) updateData.storage_condition = storageCondition;
+    if (city) updateData.pickup_city = city;
+    if (instructions !== undefined) updateData.pickup_instructions = instructions;
+    if (notes !== undefined) updateData.description = notes;
+    if (isVegetarian !== undefined) updateData.is_vegetarian = isVegetarian === 'true' || isVegetarian === true;
+    if (isVegan !== undefined) updateData.is_vegan = isVegan === 'true' || isVegan === true;
+
+    if (allergens) {
+      updateData.allergens = Array.isArray(allergens) ? allergens : allergens.split(',').map((s) => s.trim());
+    }
+
+    if (address || state || pincode) {
+      updateData.pickup_address = `${address || ''}${state ? ', ' + state : ''}${pincode ? ' - ' + pincode : ''}`;
+    }
+
+    if (quantity || unit) {
+      const existingQtyParts = existingDonation.quantity.split(' ');
+      const qty = quantity || existingQtyParts[0];
+      const unt = unit || existingQtyParts[1] || 'meals';
+      const qtyNum = parseFloat(qty);
+      updateData.quantity = `${qtyNum} ${unt}`;
+
+      if (unt === 'kg') {
+        updateData.weight_kg = qtyNum;
+        updateData.servings = Math.round(qtyNum / 0.4);
+      } else {
+        updateData.weight_kg = qtyNum * 0.4;
+        updateData.servings = Math.round(qtyNum);
+      }
+    }
+
+    if (expiryDate || expiryTime) {
+      const existingExpiry = new Date(existingDonation.expires_at);
+      const defaultDate = existingExpiry.toISOString().split('T')[0];
+      const defaultTime = existingExpiry.toISOString().split('T')[1].substring(0, 5);
+
+      const expDate = expiryDate || defaultDate;
+      const expTime = expiryTime || defaultTime;
+      const expiryString = expTime ? `${expDate}T${expTime}:00` : `${expDate}T23:59:59`;
+      const expires_at = new Date(expiryString).toISOString();
+      updateData.expires_at = expires_at;
+
+      const diffHours = (new Date(expires_at) - new Date()) / (1000 * 60 * 60);
+      let urgency = 'medium';
+      if (diffHours < 2) urgency = 'critical';
+      else if (diffHours < 6) urgency = 'high';
+      else if (diffHours < 24) urgency = 'medium';
+      else urgency = 'low';
+      updateData.urgency = urgency;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    const { data: updatedDonation, error: updateErr } = await supabaseAdmin
+      .from('donations')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (updateErr) throw updateErr;
+
+    res.status(200).json({ message: 'Donation updated successfully', donation: updatedDonation });
+  } catch (error) {
     next(error);
   }
 });
