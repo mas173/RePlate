@@ -17,3 +17,4 @@ export { default as FoodDetailsStep } from './FoodDetailsStep';
 export { default as ImageUploadStep } from './ImageUploadStep';
 export { default as PickupLocationStep } from './PickupLocationStep';
 export { default as ReviewSubmitStep } from './ReviewSubmitStep';
+export { default as FreshnessIndicator } from './FreshnessIndicator';

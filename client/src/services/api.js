@@ -76,10 +76,10 @@ export const claimsAPI = {
       method: 'POST',
       body: JSON.stringify(data),
     }, token),
-  updateStatus: (token, id, status) =>
+  updateStatus: (token, id, data) =>
     apiRequest(`/claims/${id}/status`, {
       method: 'PATCH',
-      body: JSON.stringify({ status }),
+      body: JSON.stringify(typeof data === 'string' ? { status: data } : data),
     }, token),
   cancel: (token, id) =>
     apiRequest(`/claims/${id}`, { method: 'DELETE' }, token),
