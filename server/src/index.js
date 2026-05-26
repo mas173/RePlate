@@ -22,6 +22,9 @@ import webhookRoutes from './routes/webhook.routes.js';
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
 
+// Import cron scheduler
+import { startCronJobs } from './services/cron.service.js';
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -108,6 +111,9 @@ app.listen(PORT, () => {
   console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`   Port:        ${PORT}`);
   console.log(`   Health:      http://localhost:${PORT}/api/health\n`);
+
+  // Start background cron jobs
+  startCronJobs();
 });
 
 export default app;
