@@ -98,34 +98,108 @@ router.get('/trends', requireAuth, async (req, res, next) => {
 
 /**
  * GET /api/analytics/leaderboard
- * Get high-impact leadership rankings
+ * Get high-impact leadership rankings dynamically computed from impact_logs
  */
 router.get('/leaderboard', requireAuth, async (req, res, next) => {
   try {
-    // Fetch Top Donors by chronological volume output fallback
-    const { data: topDonors, error: donorErr } = await supabaseAdmin
+    // 1. Fetch active profiles
+    const { data: profiles, error: profileErr } = await supabaseAdmin
       .from('profiles')
-      .select('id, organization_name, first_name, last_name, city')
-      .eq('role', 'donor')
-      .order('created_at', { ascending: false })
-      .limit(5);
+      .select('id, organization_name, first_name, last_name, city, avatar_url, role')
+      .eq('is_active', true);
 
-    if (donorErr) throw donorErr;
+    if (profileErr) throw profileErr;
 
-    // Fetch Top NGOs by activation longevity ranking fallback
-    const { data: topNGOs, error: ngoErr } = await supabaseAdmin
-      .from('profiles')
-      .select('id, organization_name, first_name, last_name, city')
-      .eq('role', 'ngo')
-      .order('created_at', { ascending: false })
-      .limit(5);
+    // 2. Fetch impact logs
+    const { data: logs, error: logsErr } = await supabaseAdmin
+      .from('impact_logs')
+      .select('donor_id, ngo_id, meals_saved, weight_kg');
 
-    if (ngoErr) throw ngoErr;
+    if (logsErr) throw logsErr;
 
-    res.status(200).json({
-      donors: topDonors || [],
-      ngos: topNGOs || []
+    // 3. Aggregate logs per user/org
+    const donorStats = {};
+    const ngoStats = {};
+
+    (logs || []).forEach(log => {
+      if (log.donor_id) {
+        if (!donorStats[log.donor_id]) {
+          donorStats[log.donor_id] = { meals: 0, weight: 0 };
+        }
+        donorStats[log.donor_id].meals += log.meals_saved || 0;
+        donorStats[log.donor_id].weight += parseFloat(log.weight_kg) || 0;
+      }
+      if (log.ngo_id) {
+        if (!ngoStats[log.ngo_id]) {
+          ngoStats[log.ngo_id] = { meals: 0, weight: 0 };
+        }
+        ngoStats[log.ngo_id].meals += log.meals_saved || 0;
+        ngoStats[log.ngo_id].weight += parseFloat(log.weight_kg) || 0;
+      }
     });
+
+    // 4. Map back to profiles, sort and slice top 5
+    const donors = (profiles || [])
+      .filter(p => p.role === 'donor')
+      .map(p => ({
+        id: p.id,
+        organizationName: p.organization_name,
+        firstName: p.first_name,
+        lastName: p.last_name,
+        city: p.city,
+        avatarUrl: p.avatar_url,
+        mealsSaved: donorStats[p.id]?.meals || 0,
+        weightSaved: donorStats[p.id]?.weight || 0
+      }))
+      .sort((a, b) => b.mealsSaved - a.mealsSaved || b.weightSaved - a.weightSaved)
+      .slice(0, 5);
+
+    const ngos = (profiles || [])
+      .filter(p => p.role === 'ngo')
+      .map(p => ({
+        id: p.id,
+        organizationName: p.organization_name,
+        firstName: p.first_name,
+        lastName: p.last_name,
+        city: p.city,
+        avatarUrl: p.avatar_url,
+        mealsSaved: ngoStats[p.id]?.meals || 0,
+        weightSaved: ngoStats[p.id]?.weight || 0
+      }))
+      .sort((a, b) => b.mealsSaved - a.mealsSaved || b.weightSaved - a.weightSaved)
+      .slice(0, 5);
+
+    res.status(200).json({ donors, ngos });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/analytics/categories
+ * Get platform-wide category distribution metrics
+ */
+router.get('/categories', requireAuth, async (req, res, next) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('donations')
+      .select('category, servings, weight_kg');
+
+    if (error) throw error;
+
+    // Aggregate category groups in JS
+    const categoryGroups = (data || []).reduce((acc, current) => {
+      const cat = current.category || 'other';
+      if (!acc[cat]) {
+        acc[cat] = { category: cat, count: 0, servings: 0, weight: 0 };
+      }
+      acc[cat].count += 1;
+      acc[cat].servings += current.servings || 0;
+      acc[cat].weight += parseFloat(current.weight_kg) || 0;
+      return acc;
+    }, {});
+
+    res.status(200).json({ categories: Object.values(categoryGroups) });
   } catch (error) {
     next(error);
   }
