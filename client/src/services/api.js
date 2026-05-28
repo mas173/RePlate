@@ -99,6 +99,7 @@ export const analyticsAPI = {
   getUserAnalytics: (token) => apiRequest('/analytics/user', {}, token),
   getTrends: (token) => apiRequest('/analytics/trends', {}, token),
   getLeaderboard: (token) => apiRequest('/analytics/leaderboard', {}, token),
+  getCategories: (token) => apiRequest('/analytics/categories', {}, token),
 };
 
 // ========================

@@ -98,13 +98,13 @@ Real-time alerts and transactional emails.
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 5.1 | Implement new donation email notification | Pending | Send email to local NGOs when new food is posted |
-| 5.2 | Implement expiry warning email | Pending | Send warning to donor when food is expiring soon |
-| 5.3 | Implement claim confirmation email | Pending | Send email to donor and NGO when donation is claimed |
+| 5.1 | Implement new donation email notification | Done | Send email to local NGOs when new food is posted |
+| 5.2 | Implement expiry warning email | Done | Send warning to donor when food is expiring soon |
+| 5.3 | Implement claim confirmation email | Done | Send email to donor and NGO when donation is claimed |
 | 5.4 | Set up server cron job | Done | Auto-expire donations & send warnings |
 | 5.5 | Build Notifications page | Done | List of in-app notifications |
 | 5.6 | Build Notification Bell in Navbar | Done | Unread notification count indicator |
-| 5.7 | Verify sender domain in Resend | Pending | Resend -> Domains -> Add DNS records |
+| 5.7 | Verify sender domain in Resend | Done | Resend -> Domains -> Add DNS records |
 
 ---
 
@@ -114,12 +114,12 @@ Charts, metrics, and environmental statistics.
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 6.1 | Integrate stats function to backend | Pending | Wire up get_platform_stats() function |
-| 6.2 | Build Analytics page | Pending | Impact metrics (meals saved, CO2, water, land) |
-| 6.3 | Build donation trend line chart | Pending | Monthly donation analytics via Recharts |
-| 6.4 | Build food category pie chart | Pending | Food category breakdown visualizer |
-| 6.5 | Build donor/NGO leaderboard | Pending | Show top active donors and NGOs |
-| 6.6 | Build personal impact dashboard widgets | Pending | Stats visible to individual users |
+| 6.1 | Integrate stats function to backend | Done | Wire up get_platform_stats() function |
+| 6.2 | Build Analytics page | Done | Impact metrics (meals saved, CO2, water, land) |
+| 6.3 | Build donation trend line chart | Done | Monthly donation analytics via Recharts |
+| 6.4 | Build food category pie chart | Done | Food category breakdown visualizer |
+| 6.5 | Build donor/NGO leaderboard | Done | Show top active donors and NGOs |
+| 6.6 | Build personal impact dashboard widgets | Done | Stats visible to individual users |
 
 ---
 
