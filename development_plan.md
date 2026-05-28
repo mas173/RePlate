@@ -67,12 +67,12 @@ Gemini-powered food freshness analysis.
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 3.1 | Implement freshness analysis service | Pending | Gemini API request and response parsing |
-| 3.2 | Wire AI analysis into the Food Upload Form | Pending | Auto-run analysis when food image is uploaded |
-| 3.3 | Build FreshnessIndicator component | Pending | Score gauge, urgency badge, shelf life |
-| 3.4 | Implement AI auto-categorization | Pending | Automatically suggest category based on food details/image |
-| 3.5 | Save AI analysis results to database | Pending | Update donations.ai_analysis column in Supabase |
-| 3.6 | Verify Gemini API key has quota enabled | Pending | aistudio.google.com -> check billing/quota |
+| 3.1 | Implement freshness analysis service | Done | Gemini API request and response parsing |
+| 3.2 | Wire AI analysis into the Food Upload Form | Done | Auto-run analysis when food image is uploaded |
+| 3.3 | Build FreshnessIndicator component | Done | Score gauge, urgency badge, shelf life |
+| 3.4 | Implement AI auto-categorization | Done | Automatically suggest category based on food details/image |
+| 3.5 | Save AI analysis results to database | Done | Update donations.ai_analysis column in Supabase |
+| 3.6 | Verify Gemini API key has quota enabled | Done | aistudio.google.com -> check billing/quota |
 
 ---
 
@@ -82,13 +82,13 @@ Complete NGO experience including claiming food, dashboards, and maps.
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 4.1 | Build NGO Dashboard | Pending | Available donations map/list, active claims, impact stats |
-| 4.2 | Build Available Food Browse page | Pending | Filterable list of available donations |
-| 4.3 | Build DonationCard component | Pending | Image, freshness score, urgency, claim button |
-| 4.4 | Build Claim flow | Pending | Confirm modal -> create claim in Supabase |
-| 4.5 | Build My Claims page | Pending | Claimed donations with status timeline |
-| 4.6 | Build pickup confirmation flow | Pending | Mark as picked up, mark as delivered |
-| 4.7 | Write impact logs on delivery | Pending | Update impact logs table in Supabase |
+| 4.1 | Build NGO Dashboard | Done | Available donations map/list, active claims, impact stats |
+| 4.2 | Build Available Food Browse page | Done | Filterable list of available donations |
+| 4.3 | Build DonationCard component | Done | Image, freshness score, urgency, claim button |
+| 4.4 | Build Claim flow | Done | Confirm modal -> create claim in Supabase |
+| 4.5 | Build My Claims page | Done | Claimed donations with status timeline |
+| 4.6 | Build pickup confirmation flow | Done | Mark as picked up, mark as delivered |
+| 4.7 | Write impact logs on delivery | Done | Update impact logs table in Supabase |
 
 ---
 
@@ -101,9 +101,9 @@ Real-time alerts and transactional emails.
 | 5.1 | Implement new donation email notification | Pending | Send email to local NGOs when new food is posted |
 | 5.2 | Implement expiry warning email | Pending | Send warning to donor when food is expiring soon |
 | 5.3 | Implement claim confirmation email | Pending | Send email to donor and NGO when donation is claimed |
-| 5.4 | Set up server cron job | Pending | Auto-expire donations & send warnings |
-| 5.5 | Build Notifications page | Pending | List of in-app notifications |
-| 5.6 | Build Notification Bell in Navbar | Pending | Unread notification count indicator |
+| 5.4 | Set up server cron job | Done | Auto-expire donations & send warnings |
+| 5.5 | Build Notifications page | Done | List of in-app notifications |
+| 5.6 | Build Notification Bell in Navbar | Done | Unread notification count indicator |
 | 5.7 | Verify sender domain in Resend | Pending | Resend -> Domains -> Add DNS records |
 
 ---

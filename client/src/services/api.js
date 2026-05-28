@@ -56,6 +56,11 @@ export const donationsAPI = {
       method: 'PUT',
       body: JSON.stringify(data),
     }, token),
+  patch: (token, id, data) =>
+    apiRequest(`/donations/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }, token),
   updateStatus: (token, id, status) =>
     apiRequest(`/donations/${id}/status`, {
       method: 'PATCH',
@@ -76,10 +81,10 @@ export const claimsAPI = {
       method: 'POST',
       body: JSON.stringify(data),
     }, token),
-  updateStatus: (token, id, status) =>
+  updateStatus: (token, id, data) =>
     apiRequest(`/claims/${id}/status`, {
       method: 'PATCH',
-      body: JSON.stringify({ status }),
+      body: JSON.stringify(typeof data === 'string' ? { status: data } : data),
     }, token),
   cancel: (token, id) =>
     apiRequest(`/claims/${id}`, { method: 'DELETE' }, token),
@@ -119,6 +124,7 @@ export const aiAPI = {
 
 export const notificationsAPI = {
   getAll: (token) => apiRequest('/notifications', {}, token),
+  getUnreadCount: (token) => apiRequest('/notifications/unread-count', {}, token),
   markRead: (token, id) =>
     apiRequest(`/notifications/${id}/read`, { method: 'PATCH' }, token),
   markAllRead: (token) =>

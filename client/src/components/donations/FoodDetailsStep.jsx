@@ -1,7 +1,59 @@
+import { useState } from 'react';
 import { FOOD_CATEGORIES, STORAGE_CONDITIONS } from '@/utils/constants';
 import { cn } from '@/utils/helpers';
+import { useAppAuth } from '@/hooks/useAppAuth';
+import { aiAPI } from '@/services/api';
+import { toast } from 'react-hot-toast';
+import { Sparkles, Loader2 } from 'lucide-react';
 
 export default function FoodDetailsStep({ data, onChange }) {
+  const { getAuthToken } = useAppAuth();
+  const [isCategorizing, setIsCategorizing] = useState(false);
+
+  const handleAiCategorize = async () => {
+    if (!data.name || data.name.trim().length <= 3) {
+      toast.error('Please enter a valid food name first');
+      return;
+    }
+
+    setIsCategorizing(true);
+    try {
+      const token = await getAuthToken();
+      if (!token) {
+        toast.error('Authentication required for AI features');
+        return;
+      }
+
+      const response = await aiAPI.categorize(token, {
+        description: data.name
+      });
+
+      if (response && response.category) {
+        // Find corresponding category display label
+        const matchedCategory = FOOD_CATEGORIES.find(c => c.value === response.category);
+        const categoryLabel = matchedCategory ? matchedCategory.label : response.category;
+
+        // Auto-select category and fill quantity / servings if empty
+        const updates = { category: response.category };
+        
+        if (!data.quantity && response.estimatedServings) {
+          updates.quantity = response.estimatedServings.toString();
+          updates.unit = 'servings';
+        }
+
+        onChange(updates);
+        toast.success(`AI suggested category: ${categoryLabel}`);
+      } else {
+        toast.error('Could not categorize food');
+      }
+    } catch (err) {
+      console.error('AI Categorization client error:', err);
+      toast.error('AI categorization failed');
+    } finally {
+      setIsCategorizing(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -18,13 +70,30 @@ export default function FoodDetailsStep({ data, onChange }) {
         <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
           Food Name <span className="text-red-500">*</span>
         </label>
-        <input
-          type="text"
-          className="input"
-          placeholder="e.g., Cooked Rice & Curry, Assorted Pastries"
-          value={data.name}
-          onChange={(e) => onChange({ name: e.target.value })}
-        />
+        <div className="relative">
+          <input
+            type="text"
+            className="input pr-36"
+            placeholder="e.g., Cooked Rice & Curry, Assorted Pastries"
+            value={data.name}
+            onChange={(e) => onChange({ name: e.target.value })}
+          />
+          {data.name && data.name.trim().length > 3 && (
+            <button
+              type="button"
+              onClick={handleAiCategorize}
+              disabled={isCategorizing}
+              className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 dark:bg-indigo-950/40 dark:hover:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 border border-indigo-200/60 dark:border-indigo-800/40 transition-all duration-200 disabled:opacity-50"
+            >
+              {isCategorizing ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Sparkles className="w-3.5 h-3.5 text-indigo-500 dark:text-indigo-400 animate-pulse" />
+              )}
+              AI Categorize
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Category grid */}
