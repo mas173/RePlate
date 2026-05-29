@@ -156,16 +156,27 @@ export const userAPI = {
 // ========================
 
 export const adminAPI = {
-  getUsers: (token) => apiRequest('/admin/users', {}, token),
+  getUsers: (token, params = '') => apiRequest(`/admin/users${params}`, {}, token),
   updateUserRole: (token, userId, role) =>
     apiRequest(`/admin/users/${userId}/role`, {
       method: 'PATCH',
       body: JSON.stringify({ role }),
     }, token),
-  getDonations: (token) => apiRequest('/admin/donations', {}, token),
-  getAnalytics: (token) => apiRequest('/admin/analytics', {}, token),
+  toggleUserStatus: (token, userId, isActive) =>
+    apiRequest(`/admin/users/${userId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ is_active: isActive }),
+    }, token),
   deleteUser: (token, userId) =>
     apiRequest(`/admin/users/${userId}`, { method: 'DELETE' }, token),
+  getDonations: (token, params = '') => apiRequest(`/admin/donations${params}`, {}, token),
+  updateDonationStatus: (token, donationId, status) =>
+    apiRequest(`/admin/donations/${donationId}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    }, token),
+  getAnalytics: (token) => apiRequest('/admin/analytics', {}, token),
+  getActivity: (token) => apiRequest('/admin/activity', {}, token),
 };
 
 // ========================
