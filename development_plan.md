@@ -129,12 +129,12 @@ Platform oversight and user management tools.
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 7.1 | Build Admin Dashboard home | Pending | Platform stats, recent activity, system health |
-| 7.2 | Build User Management table | Pending | List all users, filter by role, view profile details |
-| 7.3 | Build role assignment controls | Pending | UI to change user roles between donor, NGO, admin |
-| 7.4 | Build All Donations admin view | Pending | Admin list of all donations with moderation features |
-| 7.5 | Build Admin Analytics view | Pending | Deeper platform-wide chart metrics |
-| 7.6 | Set account role as admin | Pending | Clerk Dashboard -> User -> Public Metadata -> {"role": "admin"} |
+| 7.1 | Build Admin Dashboard home | Done | Platform stats, recent activity, system health |
+| 7.2 | Build User Management table | Done | List all users, filter by role, view profile details |
+| 7.3 | Build role assignment controls | Done | UI to change user roles between donor, NGO, admin |
+| 7.4 | Build All Donations admin view | Done | Admin list of all donations with moderation features |
+| 7.5 | Build Admin Analytics view | Done | Deeper platform-wide chart metrics |
+| 7.6 | Set account role as admin | Done | Clerk Dashboard -> User -> Public Metadata -> {"role": "admin"} |
 
 ---
 
