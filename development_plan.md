@@ -144,9 +144,9 @@ User account settings.
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 8.1 | Build Profile settings page | Pending | Name, organization, contact, location, avatar |
-| 8.2 | Wire profile updates to database | Pending | Sync updates to Supabase profiles table |
-| 8.3 | Build Settings page | Pending | Notification preferences, dark/light mode toggle |
+| 8.1 | Build Profile settings page | done | Name, organization, contact, location, avatar |
+| 8.2 | Wire profile updates to database | done | Sync updates to Supabase profiles table |
+| 8.3 | Build Settings page | done | Notification preferences, dark/light mode toggle |
 
 ---
 
