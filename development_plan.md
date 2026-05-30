@@ -98,13 +98,13 @@ Real-time alerts and transactional emails.
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 5.1 | Implement new donation email notification | Pending | Send email to local NGOs when new food is posted |
-| 5.2 | Implement expiry warning email | Pending | Send warning to donor when food is expiring soon |
-| 5.3 | Implement claim confirmation email | Pending | Send email to donor and NGO when donation is claimed |
+| 5.1 | Implement new donation email notification | Done | Send email to local NGOs when new food is posted |
+| 5.2 | Implement expiry warning email | Done | Send warning to donor when food is expiring soon |
+| 5.3 | Implement claim confirmation email | Done | Send email to donor and NGO when donation is claimed |
 | 5.4 | Set up server cron job | Done | Auto-expire donations & send warnings |
 | 5.5 | Build Notifications page | Done | List of in-app notifications |
 | 5.6 | Build Notification Bell in Navbar | Done | Unread notification count indicator |
-| 5.7 | Verify sender domain in Resend | Pending | Resend -> Domains -> Add DNS records |
+| 5.7 | Verify sender domain in Resend | Done | Resend -> Domains -> Add DNS records |
 
 ---
 
@@ -114,12 +114,12 @@ Charts, metrics, and environmental statistics.
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 6.1 | Integrate stats function to backend | Pending | Wire up get_platform_stats() function |
-| 6.2 | Build Analytics page | Pending | Impact metrics (meals saved, CO2, water, land) |
-| 6.3 | Build donation trend line chart | Pending | Monthly donation analytics via Recharts |
-| 6.4 | Build food category pie chart | Pending | Food category breakdown visualizer |
-| 6.5 | Build donor/NGO leaderboard | Pending | Show top active donors and NGOs |
-| 6.6 | Build personal impact dashboard widgets | Pending | Stats visible to individual users |
+| 6.1 | Integrate stats function to backend | Done | Wire up get_platform_stats() function |
+| 6.2 | Build Analytics page | Done | Impact metrics (meals saved, CO2, water, land) |
+| 6.3 | Build donation trend line chart | Done | Monthly donation analytics via Recharts |
+| 6.4 | Build food category pie chart | Done | Food category breakdown visualizer |
+| 6.5 | Build donor/NGO leaderboard | Done | Show top active donors and NGOs |
+| 6.6 | Build personal impact dashboard widgets | Done | Stats visible to individual users |
 
 ---
 
@@ -129,12 +129,12 @@ Platform oversight and user management tools.
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 7.1 | Build Admin Dashboard home | Pending | Platform stats, recent activity, system health |
-| 7.2 | Build User Management table | Pending | List all users, filter by role, view profile details |
-| 7.3 | Build role assignment controls | Pending | UI to change user roles between donor, NGO, admin |
-| 7.4 | Build All Donations admin view | Pending | Admin list of all donations with moderation features |
-| 7.5 | Build Admin Analytics view | Pending | Deeper platform-wide chart metrics |
-| 7.6 | Set account role as admin | Pending | Clerk Dashboard -> User -> Public Metadata -> {"role": "admin"} |
+| 7.1 | Build Admin Dashboard home | Done | Platform stats, recent activity, system health |
+| 7.2 | Build User Management table | Done | List all users, filter by role, view profile details |
+| 7.3 | Build role assignment controls | Done | UI to change user roles between donor, NGO, admin |
+| 7.4 | Build All Donations admin view | Done | Admin list of all donations with moderation features |
+| 7.5 | Build Admin Analytics view | Done | Deeper platform-wide chart metrics |
+| 7.6 | Set account role as admin | Done | Clerk Dashboard -> User -> Public Metadata -> {"role": "admin"} |
 
 ---
 
@@ -144,9 +144,9 @@ User account settings.
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 8.1 | Build Profile settings page | Pending | Name, organization, contact, location, avatar |
-| 8.2 | Wire profile updates to database | Pending | Sync updates to Supabase profiles table |
-| 8.3 | Build Settings page | Pending | Notification preferences, dark/light mode toggle |
+| 8.1 | Build Profile settings page | done | Name, organization, contact, location, avatar |
+| 8.2 | Wire profile updates to database | done | Sync updates to Supabase profiles table |
+| 8.3 | Build Settings page | done | Notification preferences, dark/light mode toggle |
 
 ---
 

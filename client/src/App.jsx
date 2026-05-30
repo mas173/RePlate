@@ -12,6 +12,9 @@ import OnboardingPage from './pages/OnboardingPage';
 import DonorDashboard from './pages/DonorDashboard';
 import NGODashboard from './pages/NGODashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminUsersPage from './pages/AdminUsersPage';
+import AdminDonationsPage from './pages/AdminDonationsPage';
+import AdminAnalyticsPage from './pages/AdminAnalyticsPage';
 import FoodUploadPage from './pages/FoodUploadPage';
 import MyDonationsPage from './components/donations/MyDonationsPage';
 import DonationDetailPage from './components/donations/DonationDetailPage';
@@ -74,9 +77,9 @@ export default function App() {
       <Route path="/claims" element={<DashboardRoute element={<MyClaimsPage />} roles={['ngo']} />} />
       {/* ── Admin routes ─────────────────────────────── */}
       <Route path="/admin" element={<DashboardRoute element={<AdminDashboard />} roles={['admin']} />} />
-      <Route path="/admin/users" element={<DashboardRoute element={<AdminDashboard />} roles={['admin']} />} />
-      <Route path="/admin/donations" element={<DashboardRoute element={<AdminDashboard />} roles={['admin']} />} />
-      <Route path="/admin/analytics" element={<DashboardRoute element={<AdminDashboard />} roles={['admin']} />} />
+      <Route path="/admin/users" element={<DashboardRoute element={<AdminUsersPage />} roles={['admin']} />} />
+      <Route path="/admin/donations" element={<DashboardRoute element={<AdminDonationsPage />} roles={['admin']} />} />
+      <Route path="/admin/analytics" element={<DashboardRoute element={<AdminAnalyticsPage />} roles={['admin']} />} />
       {/* ── Shared (any authenticated role) ─────────── */}
       <Route path="/analytics" element={<DashboardRoute element={<AnalyticsPage />} />} />
       <Route path="/notifications" element={<DashboardRoute element={<NotificationsPage />} />} />

@@ -8,7 +8,8 @@
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
     "lint": "eslint src/",
-    "backfill": "node scripts/backfill-users.js"
+    "backfill": "node scripts/backfill-users.js",
+    "build": "echo Build completed"
   },
   "keywords": [
     "food-waste",
