@@ -155,6 +155,23 @@ async function callWithRetry(fn, retries = 2) {
 }
 
 /* ────────────────────────────────────────────
+ *  Helpers
+ * ──────────────────────────────────────────── */
+
+/**
+ * Detect MIME type from image buffer magic bytes
+ */
+function detectMimeType(buffer) {
+  if (!buffer || buffer.length < 4) return 'image/jpeg';
+  // PNG: 89 50 4E 47
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return 'image/png';
+  // WebP: 52 49 46 46 ... 57 45 42 50
+  if (buffer[0] === 0x52 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x46 && buffer.length > 11 && buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50) return 'image/webp';
+  // Default to JPEG
+  return 'image/jpeg';
+}
+
+/* ────────────────────────────────────────────
  *  Public API
  * ──────────────────────────────────────────── */
 
@@ -183,10 +200,11 @@ export const analyzeFreshness = async (imageBuffer, metadata) => {
 
     Respond ONLY with valid JSON (no markdown fences) with keys: freshnessScore, urgencyLevel, estimatedShelfLife, safetyRecommendations, distributionMethod, analysis`;
 
+    const mimeType = detectMimeType(imageBuffer);
     const imagePart = {
       inlineData: {
         data: imageBuffer.toString('base64'),
-        mimeType: 'image/jpeg',
+        mimeType,
       },
     };
 
@@ -204,8 +222,11 @@ export const analyzeFreshness = async (imageBuffer, metadata) => {
     console.warn('AI Freshness: could not extract JSON from Gemini response, using text fallback');
     return { analysis: response, freshnessScore: 50, urgencyLevel: 'medium' };
   } catch (error) {
-    console.error('AI Freshness Analysis Error:', error.message);
-    console.warn('Falling back to metadata-based freshness estimation');
+    const status = error?.status || error?.httpStatusCode || 'unknown';
+    console.error(`AI Freshness Analysis Error [status=${status}]:`, error.message);
+    if (status === 429) console.error('↳ Gemini API quota exhausted. Check billing at https://ai.google.dev/gemini-api/docs/rate-limits');
+    if (status === 404) console.error('↳ Model not found. The configured model may be deprecated.');
+    console.warn('↳ Falling back to metadata-based freshness estimation');
     return buildFreshnessFallback(metadata);
   }
 };
@@ -232,10 +253,11 @@ export const categorizeFood = async (description, imageBuffer = null) => {
 
     let result;
     if (imageBuffer) {
+      const mimeType = detectMimeType(imageBuffer);
       const imagePart = {
         inlineData: {
           data: imageBuffer.toString('base64'),
-          mimeType: 'image/jpeg',
+          mimeType,
         },
       };
       result = await callWithRetry(() => visionModel.generateContent([prompt, imagePart]));
@@ -254,8 +276,11 @@ export const categorizeFood = async (description, imageBuffer = null) => {
 
     return { category: 'other', analysis: response };
   } catch (error) {
-    console.error('AI Categorization Error:', error.message);
-    console.warn('Falling back to keyword-based categorisation');
+    const status = error?.status || error?.httpStatusCode || 'unknown';
+    console.error(`AI Categorization Error [status=${status}]:`, error.message);
+    if (status === 429) console.error('↳ Gemini API quota exhausted. Check billing at https://ai.google.dev/gemini-api/docs/rate-limits');
+    if (status === 404) console.error('↳ Model not found. The configured model may be deprecated.');
+    console.warn('↳ Falling back to keyword-based categorisation');
     return buildCategorizationFallback(description);
   }
 };
