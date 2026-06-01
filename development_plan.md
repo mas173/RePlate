@@ -144,38 +144,76 @@ User account settings.
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 8.1 | Build Profile settings page | done | Name, organization, contact, location, avatar |
-| 8.2 | Wire profile updates to database | done | Sync updates to Supabase profiles table |
-| 8.3 | Build Settings page | done | Notification preferences, dark/light mode toggle |
+| 8.1 | Build Profile settings page | Done | Name, organization, contact, location, avatar |
+| 8.2 | Wire profile updates to database | Done | Sync updates to Supabase profiles table |
+| 8.3 | Build Settings page | Done | Notification preferences, dark/light mode toggle |
 
 ---
 
-## Phase 9 - Polish & Performance
+## Phase 9 - Sarvam AI Integration
+
+Enhancing accessibility, multilingual communication, and voice-based interaction using Sarvam AI.
+
+| Task ID | Task Description | Status | Details / Location |
+| :--- | :--- | :--- | :--- |
+| 9.1 | Integrate Sarvam AI SDK/API | Pending | Configure API keys and backend service setup |
+| 9.2 | Implement Speech-to-Text for donation upload | Pending | Allow donors to speak food details instead of typing |
+| 9.3 | Build Voice Input component | Pending | Microphone UI with live transcription |
+| 9.4 | Add multilingual translation support | Pending | Translate dashboard content, alerts, and notifications |
+| 9.5 | Implement Text-to-Speech alerts | Pending | Read notifications and instructions aloud |
+| 9.6 | Add regional language selector | Pending | Allow users to switch preferred language |
+| 9.7 | Build multilingual NGO notifications | Pending | Send alerts in user-selected language |
+| 9.8 | Integrate voice-based NGO assistance | Pending | Voice guidance for claiming and navigating donations |
+| 9.9 | Accessibility optimization with voice support | Pending | Improve usability for low-literacy and visually impaired users |
+| 9.10 | Test multilingual and voice workflows | Pending | Validate speech accuracy and translation flows |
+
+---
+
+## Phase 10 - Maps & Location Intelligence
+
+Integrating live maps and location-based coordination for smarter food redistribution.
+
+| Task ID | Task Description | Status | Details / Location |
+| :--- | :--- | :--- | :--- |
+| 10.1 | Integrate React Leaflet & OpenStreetMap | Pending | Configure free map system for the platform |
+| 10.2 | Add donation location picker | Pending | Allow donors to pin exact pickup location |
+| 10.3 | Implement live donation map on NGO dashboard | Pending | Show nearby donations with map markers |
+| 10.4 | Add urgency-based marker colors | Pending | Highlight urgent donations visually |
+| 10.5 | Build nearby donation filtering | Pending | Sort donations by nearest distance |
+| 10.6 | Implement current location detection | Pending | Auto-detect user location using browser GPS |
+| 10.7 | Add route navigation support | Pending | Open directions for pickup locations |
+| 10.8 | Build live pickup tracking system | Pending | Track donation pickup and delivery progress |
+| 10.9 | Add admin heatmap analytics | Pending | Visualize donation-heavy and high-demand areas |
+| 10.10 | Optimize mobile map responsiveness | Pending | Ensure smooth map usage on mobile devices |
+
+---
+
+## Phase 11 - Polish & Performance
 
 Final testing and optimization pass.
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 9.1 | Add loading skeletons | Pending | UI placeholders during loading states |
-| 9.2 | Add empty states | Pending | Skeletons for empty lists, search, etc. |
-| 9.3 | Implement error boundaries | Pending | Prevent layout crash on API/UI exceptions |
-| 9.4 | Ensure mobile responsiveness | Pending | Validate CSS responsive breakpoints |
-| 9.5 | Add page transition animations | Pending | Framer Motion animations |
-| 9.6 | Accessibility optimizations | Pending | Focus states, keyboard navigation, and ARIA labels |
-| 9.7 | Test all flows end-to-end | Pending | Manual testing in browser |
+| 11.1 | Add loading skeletons | Pending | UI placeholders during loading states |
+| 11.2 | Add empty states | Pending | Skeletons for empty lists, search, etc. |
+| 11.3 | Implement error boundaries | Pending | Prevent layout crash on API/UI exceptions |
+| 11.4 | Ensure mobile responsiveness | Pending | Validate CSS responsive breakpoints |
+| 11.5 | Add page transition animations | Pending | Framer Motion animations |
+| 11.6 | Accessibility optimizations | Pending | Focus states, keyboard navigation, and ARIA labels |
+| 11.7 | Test all flows end-to-end | Pending | Manual testing in browser |
 
 ---
 
-## Phase 10 - Deployment
+## Phase 12 - Deployment
 
 Deploying frontend and backend to production hosting.
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 10.1 | Choose a frontend host | Pending | Vercel is recommended |
-| 10.2 | Choose a backend host | Pending | Railway or Render is recommended |
-| 10.3 | Deploy frontend to host | Pending | Configure Vite build and set env variables |
-| 10.4 | Deploy backend to host | Pending | Deploy Node/Express server and set env variables |
-| 10.5 | Update CORS CLIENT_URL env variable | Pending | Point to production frontend URL |
-| 10.6 | Update Clerk webhooks to production domain | Pending | Clerk Dashboard -> Webhooks -> Point to production URL |
-| 10.7 | Update Supabase Row Level Security | Pending | Secure tables for production environment |
+| 12.1 | Choose a frontend host | Pending | Vercel is recommended |
+| 12.2 | Choose a backend host | Pending | Railway or Render is recommended |
+| 12.3 | Deploy frontend to host | Pending | Configure Vite build and set env variables |
+| 12.4 | Deploy backend to host | Pending | Deploy Node/Express server and set env variables |
+| 12.5 | Update CORS CLIENT_URL env variable | Pending | Point to production frontend URL |
+| 12.6 | Update Clerk webhooks to production domain | Pending | Clerk Dashboard -> Webhooks -> Point to production URL |
+| 12.7 | Update Supabase Row Level Security | Pending | Secure tables for production environment |
