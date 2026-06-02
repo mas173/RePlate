@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { SignUp } from '@clerk/clerk-react';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import mainLogo from '@/assets/images/mainLogo.png';
 import nameLogo from '@/assets/images/name.png';
@@ -32,8 +32,8 @@ function BrandPanel() {
     <div className="relative hidden lg:flex flex-col justify-between h-full p-10 bg-gradient-to-br from-slate-900 via-primary-950 to-teal-950 overflow-hidden border-r border-slate-800">
       {/* Background patterns and glowing ambient lights */}
       <div className="absolute inset-0 opacity-5" style={{ backgroundImage: "url(\"data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='white'%3e%3cpath d='M0 .5H31.5V32'/%3e%3c/svg%3e\")" }} />
-      <motion.div 
-        animate={{ 
+      <motion.div
+        animate={{
           scale: [1, 1.2, 1],
           opacity: [0.15, 0.25, 0.15]
         }}
@@ -42,10 +42,10 @@ function BrandPanel() {
           repeat: Infinity,
           ease: "easeInOut"
         }}
-        className="absolute -top-24 -right-24 w-96 h-96 bg-teal-500 rounded-full blur-3xl" 
+        className="absolute -top-24 -right-24 w-96 h-96 bg-teal-500 rounded-full blur-3xl"
       />
-      <motion.div 
-        animate={{ 
+      <motion.div
+        animate={{
           scale: [1, 1.15, 1],
           opacity: [0.1, 0.2, 0.1]
         }}
@@ -55,11 +55,11 @@ function BrandPanel() {
           ease: "easeInOut",
           delay: 2
         }}
-        className="absolute -bottom-24 -left-24 w-96 h-96 bg-primary-500 rounded-full blur-3xl" 
+        className="absolute -bottom-24 -left-24 w-96 h-96 bg-primary-500 rounded-full blur-3xl"
       />
 
       {/* Top Header Logo */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -73,11 +73,11 @@ function BrandPanel() {
       </motion.div>
 
       {/* Body Content */}
-      <motion.div 
+      <motion.div
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="relative z-10 space-y-8"
+        className="relative z-10 space-y-6"
       >
         <motion.div variants={itemVariants}>
           <h2 className="text-3xl font-extrabold text-white leading-tight mb-3">
@@ -89,7 +89,7 @@ function BrandPanel() {
         </motion.div>
 
         {/* Benefits list */}
-        <motion.ul variants={itemVariants} className="space-y-3.5">
+        <motion.ul variants={itemVariants} className="space-y-2">
           {[
             'Free forever — no credit card needed',
             'Takes less than 2 minutes to set up',
@@ -106,7 +106,7 @@ function BrandPanel() {
         </motion.ul>
 
         {/* Impact stats */}
-        <motion.div variants={itemVariants} className="grid grid-cols-3 gap-3">
+        <motion.div variants={itemVariants} className="grid grid-cols-3 gap-2">
           {[
             { v: 'Free', l: 'Always free' },
             { v: '< 2min', l: 'Quick setup' },
@@ -114,18 +114,18 @@ function BrandPanel() {
           ].map(s => (
             <div key={s.l} className="bg-white/5 rounded-2xl p-3.5 text-center border border-white/10 backdrop-blur-md hover:bg-white/10 transition-all duration-300">
               <p className="font-extrabold text-white text-base tracking-tight">{s.v}</p>
-              <p className="text-slate-400 text-2xs font-semibold uppercase tracking-wider mt-0.5">{s.l}</p>
+              <p className="text-slate-400 text-2xs font-semibold tracking-wider">{s.l}</p>
             </div>
           ))}
         </motion.div>
       </motion.div>
 
       {/* Footer Text */}
-      <motion.p 
+      <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 0.6 }}
         transition={{ delay: 0.8 }}
-        className="relative z-10 text-slate-500 text-xs"
+        className="relative z-10 text-slate-200 text-xs"
       >
         © 2026 RePlate · Built for a sustainable future 🌿
       </motion.p>
@@ -137,8 +137,8 @@ function BrandPanel() {
 const clerkAppearance = {
   elements: {
     rootBox: 'w-full',
-    cardBox: 'shadow-none w-full',
-    card: 'shadow-none !p-0 !bg-transparent !border-0 w-full !gap-4',
+    cardBox: 'shadow-none w-full p-4',
+    card: 'shadow-none !p-0 !bg-transparent !border-0 w-full !gap-2',
     // Hide Clerk's own header — we show our own
     header: 'hidden',
     headerTitle: 'hidden',
@@ -152,14 +152,14 @@ const clerkAppearance = {
     dividerLine: 'bg-slate-200 dark:bg-slate-800',
     dividerText: 'text-slate-400 text-xs',
     // Form fields
+    formFieldRow: '',
     formFieldInput:
-      '!rounded-xl !border-slate-200 dark:!border-slate-700 !bg-white dark:!bg-slate-800 text-slate-900 dark:text-white focus:!ring-2 focus:!ring-primary-500 focus:!border-primary-500 !py-2.5 transition-shadow',
+      '!rounded-xl !border-slate-200 dark:!border-slate-700 !bg-white dark:!bg-slate-800 text-slate-900 dark:text-white focus:!ring-2 focus:!ring-primary-500 focus:!border-primary-500 !py-1.5 transition-shadow',
     formFieldLabel: 'text-slate-700 dark:text-slate-300 text-sm font-semibold',
     formFieldHintText: 'text-slate-400 text-xs',
-    formFieldRow: 'flex gap-3 [&>div]:flex-1',
     // Primary button
     formButtonPrimary:
-      '!bg-primary-500 hover:!bg-primary-600 !rounded-xl font-bold text-sm transition-all !shadow-md hover:!shadow-lg !py-2.5 border-none cursor-pointer',
+      '!bg-primary-500 hover:!bg-primary-600 !rounded-xl font-bold text-sm transition-all !shadow-md hover:!shadow-sm !py-2.5 border-none cursor-pointer',
     // Footer / links
     footerAction: 'hidden',
     footerActionLink: 'hidden',
@@ -199,7 +199,7 @@ export default function SignUpPage() {
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary-500/5 dark:bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/4 left-1/3 w-96 h-96 bg-teal-500/5 dark:bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
@@ -208,6 +208,15 @@ export default function SignUpPage() {
           {/* Inner glows */}
           <div className="absolute -top-12 -left-12 w-24 h-24 bg-primary-500/10 dark:bg-primary-500/20 rounded-full blur-2xl pointer-events-none" />
           <div className="absolute -bottom-12 -right-12 w-24 h-24 bg-teal-500/10 dark:bg-teal-500/20 rounded-full blur-2xl pointer-events-none" />
+
+          {/* Redirection button to home page */}
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-slate-500 hover:text-primary-500 dark:text-slate-400 dark:hover:text-primary-400 transition-colors mb-6 group relative z-10"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+            Back to Home
+          </Link>
 
           {/* Mobile logo */}
           <div className="lg:hidden flex flex-col items-center gap-1 mb-8">
@@ -219,12 +228,12 @@ export default function SignUpPage() {
           </div>
 
           {/* Our custom header */}
-          <div className="mb-6 relative z-10">
+          <div className="mb-2 relative z-10">
             <div className="hidden lg:flex items-center gap-2.5 mb-4">
               <img src={mainLogo} alt="" className="w-8 h-8 object-contain" />
               <img src={nameLogo} alt="RePlate" className="h-6 object-contain dark:brightness-0 dark:invert" />
             </div>
-            <h1 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Create your account</h1>
+            <h1 className="text-2xl font-black text-slate-900 dark:text-white">Create your account</h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1.5 leading-normal">Join RePlate and start making a difference today.</p>
           </div>
 
