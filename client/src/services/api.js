@@ -193,6 +193,17 @@ export const authAPI = {
     }, token),
 };
 
+// ========================
+// Assistant API
+// ========================
+
+export const assistantAPI = {
+  sendVoice: (token, formData) =>
+    apiRequest('/assistant/voice', { method: 'POST', body: formData }, token),
+  sendText: (token, data) =>
+    apiRequest('/assistant/text', { method: 'POST', body: JSON.stringify(data) }, token),
+};
+
 export default {
   donationsAPI,
   claimsAPI,
@@ -202,4 +213,5 @@ export default {
   userAPI,
   adminAPI,
   authAPI,
+  assistantAPI,
 };
