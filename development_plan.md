@@ -156,16 +156,16 @@ Enhancing accessibility, multilingual communication, and voice-based interaction
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 9.1 | Integrate Sarvam AI SDK/API | Pending | Configure API keys and backend service setup |
-| 9.2 | Implement Speech-to-Text for donation upload | Pending | Allow donors to speak food details instead of typing |
-| 9.3 | Build Voice Input component | Pending | Microphone UI with live transcription |
-| 9.4 | Add multilingual translation support | Pending | Translate dashboard content, alerts, and notifications |
-| 9.5 | Implement Text-to-Speech alerts | Pending | Read notifications and instructions aloud |
-| 9.6 | Add regional language selector | Pending | Allow users to switch preferred language |
-| 9.7 | Build multilingual NGO notifications | Pending | Send alerts in user-selected language |
-| 9.8 | Integrate voice-based NGO assistance | Pending | Voice guidance for claiming and navigating donations |
-| 9.9 | Accessibility optimization with voice support | Pending | Improve usability for low-literacy and visually impaired users |
-| 9.10 | Test multilingual and voice workflows | Pending | Validate speech accuracy and translation flows |
+| 9.1 | Integrate Sarvam AI SDK/API | Done | Configure API keys and backend service setup |
+| 9.2 | Implement Speech-to-Text for donation upload | Done | Allow donors to speak food details instead of typing |
+| 9.3 | Build Voice Input component | Done | Microphone UI with live transcription |
+| 9.4 | Add multilingual translation support | Done | Translate dashboard content, alerts, and notifications |
+| 9.5 | Implement Text-to-Speech alerts | Done | Read notifications and instructions aloud |
+| 9.6 | Add regional language selector | Done | Allow users to switch preferred language |
+| 9.7 | Build multilingual NGO notifications | Done | Send alerts in user-selected language |
+| 9.8 | Integrate voice-based NGO assistance | Done | Voice guidance for claiming and navigating donations |
+| 9.9 | Accessibility optimization with voice support | Done | Improve usability for low-literacy and visually impaired users |
+| 9.10 | Test multilingual and voice workflows | Done | Validate speech accuracy and translation flows |
 
 ---
 

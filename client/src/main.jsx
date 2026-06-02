@@ -4,7 +4,9 @@ import { BrowserRouter } from 'react-router-dom';
 import { ClerkProvider } from '@clerk/clerk-react';
 import { Toaster } from 'react-hot-toast';
 import App from './App.jsx';
+import 'leaflet/dist/leaflet.css';
 import './index.css';
+import FloatingAssistant from './components/assistant/FloatingAssistant.jsx';
 
 // Clerk publishable key
 const CLERK_PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
@@ -34,6 +36,7 @@ createRoot(document.getElementById('root')).render(
     <AuthProvider>
       <BrowserRouter>
         <App />
+        <FloatingAssistant />
         <Toaster
           position="top-right"
           toastOptions={{
