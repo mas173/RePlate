@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { ClerkProvider } from '@clerk/clerk-react';
 import { Toaster } from 'react-hot-toast';
 import App from './App.jsx';
+import 'leaflet/dist/leaflet.css';
 import './index.css';
 
 // Clerk publishable key
