@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import {
-  Leaf, LayoutDashboard, Package, ClipboardCheck, BarChart3,
+  LayoutDashboard, Package, ClipboardCheck, BarChart3,
   Bell, Settings, Search, Users, PlusCircle, ChevronLeft, ChevronRight, X
 } from 'lucide-react';
 import { useAppAuth } from '@/hooks/useAppAuth';
 import { cn } from '@/utils/helpers';
+import mainLogo from '@/assets/images/mainLogo.png';
 
 const DONOR_NAV = [
   { label: 'Dashboard',    path: '/dashboard',     icon: LayoutDashboard },
@@ -70,9 +71,7 @@ export default function Sidebar({ mobileOpen, onMobileClose }) {
       {/* Logo */}
       <div className={cn('flex items-center h-16 px-4 border-b border-slate-200 dark:border-slate-700/60 shrink-0', collapsed && 'justify-center px-2')}>
         <Link to="/" className="flex items-center gap-2.5 font-bold text-lg text-slate-900 dark:text-white">
-          <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center shadow-glow-green shrink-0">
-            <Leaf className="w-4 h-4 text-white" strokeWidth={2.5} />
-          </div>
+          <img src={mainLogo} alt="RePlate" className="w-8 h-8 object-contain shrink-0" />
           {!collapsed && <span>Re<span className="text-primary-500">Plate</span></span>}
         </Link>
 
