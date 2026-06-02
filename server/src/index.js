@@ -18,6 +18,7 @@ import notificationRoutes from './routes/notification.routes.js';
 import userRoutes from './routes/user.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import webhookRoutes from './routes/webhook.routes.js';
+import assistantRoutes from './routes/assistant.routes.js';
 
 // Import middleware
 import { errorHandler } from './middleware/errorHandler.js';
@@ -89,6 +90,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/assistant', assistantRoutes);
 
 // =====================
 // Error Handling

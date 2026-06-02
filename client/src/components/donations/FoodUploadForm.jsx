@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ChevronRight } from 'lucide-react';
 import { toast } from 'react-hot-toast';
@@ -114,6 +114,28 @@ export default function FoodUploadForm() {
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  useEffect(() => {
+    // Check if there is data pre-filled by the voice assistant
+    const savedData = sessionStorage.getItem('assistant-donation-data');
+    if (savedData) {
+      try {
+        const parsed = JSON.parse(savedData);
+        if (parsed && Object.keys(parsed).length > 0) {
+          setFormData((prev) => ({
+            ...prev,
+            ...parsed,
+          }));
+          toast.success('Form pre-filled by RePlate AI Assistant. Please review details.');
+          
+          // Clean up the storage so we don't reload it on manual refreshes
+          sessionStorage.removeItem('assistant-donation-data');
+        }
+      } catch (err) {
+        console.warn('Failed to parse assistant-donation-data:', err);
+      }
+    }
+  }, []);
 
   const updateForm = (fields) => {
     setFormData((prev) => ({ ...prev, ...fields }));
