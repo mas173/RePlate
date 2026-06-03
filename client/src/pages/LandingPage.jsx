@@ -8,6 +8,8 @@ import mainLogo from '@/assets/images/mainLogo.png';
 import nameLogo from '@/assets/images/name.png';
 import mottoImg from '@/assets/images/motto.png';
 import { useDarkMode } from '@/hooks/useDarkMode';
+import { useAppAuth } from '@/hooks/useAppAuth';
+import { UserButton } from '@clerk/clerk-react';
 
 // ─── Animated counter ───────────────────────────────────────
 function Counter({ end, suffix = '', duration = 2000 }) {
@@ -30,12 +32,15 @@ function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { isDark, toggle } = useDarkMode();
+  const { isSignedIn, role } = useAppAuth();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  const dashboardPath = role === 'admin' ? '/admin' : '/dashboard';
 
   return (
     <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
@@ -61,8 +66,19 @@ function Navbar() {
             className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
             {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
           </button>
-          <Link to="/sign-in" className="btn-ghost text-sm">Sign in</Link>
-          <Link to="/sign-up" className="btn-primary text-sm py-2 px-4">Get started free</Link>
+          {isSignedIn ? (
+            <>
+              <Link to={dashboardPath} className="btn-primary text-sm py-2 px-4 shadow-glow-green">Go to Dashboard</Link>
+              <div className="ml-1 flex items-center">
+                <UserButton afterSignOutUrl="/" />
+              </div>
+            </>
+          ) : (
+            <>
+              <Link to="/sign-in" className="btn-ghost text-sm">Sign in</Link>
+              <Link to="/sign-up" className="btn-primary text-sm py-2 px-4">Get started free</Link>
+            </>
+          )}
         </div>
 
         {/* Mobile menu toggle */}
@@ -79,8 +95,14 @@ function Navbar() {
           <a href="#impact" className="block text-sm font-medium text-slate-700 dark:text-slate-300 py-1">Impact</a>
           <a href="#features" className="block text-sm font-medium text-slate-700 dark:text-slate-300 py-1">Features</a>
           <div className="pt-2 flex flex-col gap-2">
-            <Link to="/sign-in" className="btn-secondary w-full justify-center">Sign in</Link>
-            <Link to="/sign-up" className="btn-primary w-full justify-center">Get started free</Link>
+            {isSignedIn ? (
+              <Link to={dashboardPath} className="btn-primary w-full justify-center">Go to Dashboard</Link>
+            ) : (
+              <>
+                <Link to="/sign-in" className="btn-secondary w-full justify-center">Sign in</Link>
+                <Link to="/sign-up" className="btn-primary w-full justify-center">Get started free</Link>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -88,8 +110,9 @@ function Navbar() {
   );
 }
 
-// ─── Hero ─────────────────────────────────────────────────────
 function Hero() {
+  const { isSignedIn, role } = useAppAuth();
+
   return (
     <section className="relative min-h-screen flex items-center pt-16 overflow-hidden">
       {/* Background */}
@@ -120,12 +143,25 @@ function Hero() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4">
-              <Link to="/sign-up" className="btn-primary py-3 px-7 text-base shadow-glow-green">
-                Donate Food <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link to="/sign-up" className="btn-outline py-3 px-7 text-base">
-                Join as NGO
-              </Link>
+              {isSignedIn ? (
+                <>
+                  <Link to={role === 'ngo' ? '/available' : role === 'admin' ? '/admin' : '/donate'} className="btn-primary py-3 px-7 text-base shadow-glow-green">
+                    {role === 'ngo' ? 'Find Food' : role === 'admin' ? 'Admin Panel' : 'Donate Food'} <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link to={role === 'admin' ? '/admin' : '/dashboard'} className="btn-outline py-3 px-7 text-base">
+                    Go to Dashboard
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link to="/sign-up" className="btn-primary py-3 px-7 text-base shadow-glow-green">
+                    Donate Food <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link to="/sign-up" className="btn-outline py-3 px-7 text-base">
+                    Join as NGO
+                  </Link>
+                </>
+              )}
             </div>
 
             {/* Social proof */}
@@ -382,8 +418,9 @@ function Features() {
   );
 }
 
-// ─── Impact section ────────────────────────────────────────────
 function Impact() {
+  const { isSignedIn, role } = useAppAuth();
+
   return (
     <section id="impact" className="py-24">
       <div className="section">
@@ -414,12 +451,25 @@ function Impact() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/sign-up" className="btn bg-white text-primary-700 hover:bg-primary-50 px-8 py-3 text-base font-bold shadow-elevated">
-                Start donating today <ArrowRight className="w-4 h-4" />
-              </Link>
-              <Link to="/sign-up" className="btn border-2 border-white/50 text-white hover:bg-white/10 px-8 py-3 text-base font-semibold">
-                Register your NGO
-              </Link>
+              {isSignedIn ? (
+                <>
+                  <Link to={role === 'ngo' ? '/available' : role === 'admin' ? '/admin' : '/donate'} className="btn bg-white text-primary-700 hover:bg-primary-50 px-8 py-3 text-base font-bold shadow-elevated">
+                    {role === 'ngo' ? 'Find Food' : role === 'admin' ? 'Admin Panel' : 'Start donating today'} <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link to={role === 'admin' ? '/admin' : '/dashboard'} className="btn border-2 border-white/50 text-white hover:bg-white/10 px-8 py-3 text-base font-semibold">
+                    Go to Dashboard
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link to="/sign-up" className="btn bg-white text-primary-700 hover:bg-primary-50 px-8 py-3 text-base font-bold shadow-elevated">
+                    Start donating today <ArrowRight className="w-4 h-4" />
+                  </Link>
+                  <Link to="/sign-up" className="btn border-2 border-white/50 text-white hover:bg-white/10 px-8 py-3 text-base font-semibold">
+                    Register your NGO
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -20,6 +20,7 @@ import { toast } from 'react-hot-toast';
 import { useAppAuth } from '@/hooks/useAppAuth';
 import { donationsAPI, claimsAPI } from '@/services/api';
 import FreshnessIndicator from './FreshnessIndicator';
+import DonationLocationMap from './DonationLocationMap';
 import {
     getUrgencyColor,
     getRelativeTime,
@@ -470,6 +471,19 @@ export default function DonationDetailPage() {
                                 </span>
                             </div>
                         </div>
+
+                        {/* Map — visible to NGOs, admins, and donation owner */}
+                        {(role === 'ngo' || role === 'admin' || isOwner) && (
+                            <div className="mt-4">
+                                <DonationLocationMap
+                                    latitude={donation.latitude}
+                                    longitude={donation.longitude}
+                                    address={donation.pickup_address}
+                                    foodName={donation.food_name}
+                                    showRoute={role === 'ngo'}
+                                />
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="space-y-6">

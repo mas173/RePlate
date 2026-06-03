@@ -4,6 +4,7 @@ import { upload } from '../middleware/upload.js';
 import { supabaseAdmin } from '../config/supabase.js';
 import { uploadImage, deleteImage } from '../services/storage.service.js';
 import { sendDonationAlert } from '../services/email.service.js';
+import { geocodeAddress } from '../services/geocoding.service.js';
 
 const router = Router();
 
@@ -218,6 +219,22 @@ router.post('/', requireAuth, requireRole('donor', 'admin'), upload.array('image
 
     const categorySuggestion = aiCategorySuggestion || ai_category_suggestion || null;
 
+    // Auto-geocode address to coordinates
+    let latitude = null;
+    let longitude = null;
+    const geocodeQuery = [address, city, state, pincode].filter(Boolean).join(', ');
+    if (geocodeQuery.trim()) {
+      try {
+        const coords = await geocodeAddress(geocodeQuery);
+        if (coords) {
+          latitude = coords.latitude;
+          longitude = coords.longitude;
+        }
+      } catch (geoErr) {
+        console.error('Geocoding failed (non-critical):', geoErr.message);
+      }
+    }
+
     const donationData = {
       donor_id: profile.id,
       food_name: name,
@@ -231,6 +248,8 @@ router.post('/', requireAuth, requireRole('donor', 'admin'), upload.array('image
       pickup_address: pickupAddressStr,
       pickup_city: city || '',
       pickup_instructions: instructions || '',
+      latitude,
+      longitude,
       images: imageUrls,
       status: 'available',
       urgency,
@@ -372,6 +391,20 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
 
     if (address || state || pincode) {
       updateData.pickup_address = `${address || ''}${state ? ', ' + state : ''}${pincode ? ' - ' + pincode : ''}`;
+
+      // Re-geocode when address changes
+      const geocodeQuery = [address, city, state, pincode].filter(Boolean).join(', ');
+      if (geocodeQuery.trim()) {
+        try {
+          const coords = await geocodeAddress(geocodeQuery);
+          if (coords) {
+            updateData.latitude = coords.latitude;
+            updateData.longitude = coords.longitude;
+          }
+        } catch (geoErr) {
+          console.error('Geocoding failed during patch (non-critical):', geoErr.message);
+        }
+      }
     }
 
     if (quantity || unit) {
@@ -528,6 +561,20 @@ router.put('/:id', requireAuth, async (req, res, next) => {
 
     if (address || state || pincode) {
       updateData.pickup_address = `${address || ''}${state ? ', ' + state : ''}${pincode ? ' - ' + pincode : ''}`;
+
+      // Re-geocode when address changes
+      const geocodeQuery = [address, city, state, pincode].filter(Boolean).join(', ');
+      if (geocodeQuery.trim()) {
+        try {
+          const coords = await geocodeAddress(geocodeQuery);
+          if (coords) {
+            updateData.latitude = coords.latitude;
+            updateData.longitude = coords.longitude;
+          }
+        } catch (geoErr) {
+          console.error('Geocoding failed during put (non-critical):', geoErr.message);
+        }
+      }
     }
 
     if (quantity || unit) {

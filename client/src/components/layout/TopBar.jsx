@@ -2,11 +2,12 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useClerk, SignedIn, SignedOut } from '@clerk/clerk-react';
 import {
-  Leaf, Bell, Search, Sun, Moon, ChevronDown,
+  Bell, Search, Sun, Moon, ChevronDown,
   LogOut, Settings, User, Menu
 } from 'lucide-react';
 import { useAppAuth } from '@/hooks/useAppAuth';
 import { useDarkMode } from '@/hooks/useDarkMode';
+import mainLogo from '@/assets/images/mainLogo.png';
 
 function NotificationBell() {
   const { getAuthToken, isSignedIn } = useAppAuth();
@@ -122,9 +123,7 @@ export default function TopBar({ onSidebarToggle }) {
 
       {/* Logo (mobile only) */}
       <Link to="/" className="lg:hidden flex items-center gap-2 font-bold text-lg text-slate-900 dark:text-white">
-        <div className="w-7 h-7 rounded-lg bg-primary-500 flex items-center justify-center">
-          <Leaf className="w-4 h-4 text-white" strokeWidth={2.5} />
-        </div>
+        <img src={mainLogo} alt="RePlate" className="w-7 h-7 object-contain" />
         Re<span className="text-primary-500">Plate</span>
       </Link>
 
