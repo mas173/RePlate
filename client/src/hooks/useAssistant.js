@@ -28,11 +28,19 @@ export function useAssistant() {
   const silenceStartRef = useRef(null);
   const analyserRef = useRef(null);
 
-  // Stop any playing audio when modal closes
+  // Only stop audio on manual close (user clicking X), not on programmatic close
+  // We track whether we're doing a "deferred close" so audio keeps playing
+  const isDeferredCloseRef = useRef(false);
+
   useEffect(() => {
-    if (!isOpen && currentAudioRef.current) {
+    if (!isOpen && currentAudioRef.current && !isDeferredCloseRef.current) {
+      // User manually closed the modal — stop audio immediately
       currentAudioRef.current.pause();
       currentAudioRef.current = null;
+    }
+    // Reset deferred flag after close completes
+    if (!isOpen) {
+      isDeferredCloseRef.current = false;
     }
   }, [isOpen]);
 
@@ -50,20 +58,40 @@ export function useAssistant() {
 
   const toggleOpen = () => setIsOpen((prev) => !prev);
 
-  // Play base64 audio response from server
+  /**
+   * Play base64 audio response from server.
+   * Returns a Promise that resolves when audio finishes playing,
+   * so callers can chain actions (navigate, close modal) after speech ends.
+   */
   const playAudioResponse = (base64Audio) => {
-    try {
-      if (currentAudioRef.current) {
-        currentAudioRef.current.pause();
-      }
+    return new Promise((resolve) => {
+      try {
+        if (currentAudioRef.current) {
+          currentAudioRef.current.pause();
+        }
 
-      const audioUrl = `data:audio/wav;base64,${base64Audio}`;
-      const audio = new Audio(audioUrl);
-      currentAudioRef.current = audio;
-      audio.play().catch((err) => console.warn('[useAssistant] Audio autoplay failed:', err));
-    } catch (err) {
-      console.error('[useAssistant] Audio playback error:', err);
-    }
+        const audioUrl = `data:audio/wav;base64,${base64Audio}`;
+        const audio = new Audio(audioUrl);
+        currentAudioRef.current = audio;
+
+        audio.onended = () => {
+          currentAudioRef.current = null;
+          resolve();
+        };
+        audio.onerror = () => {
+          currentAudioRef.current = null;
+          resolve(); // resolve even on error so downstream actions still fire
+        };
+
+        audio.play().catch((err) => {
+          console.warn('[useAssistant] Audio autoplay failed:', err);
+          resolve();
+        });
+      } catch (err) {
+        console.error('[useAssistant] Audio playback error:', err);
+        resolve();
+      }
+    });
   };
 
   // Start microphone recording with Silence Auto-Cut (VAD)
@@ -261,8 +289,12 @@ export function useAssistant() {
     }
   };
 
-  // Handle Response Actions (navigation, autofill, data mapping)
-  const handleAssistantResponse = (data) => {
+  /**
+   * Handle Response Actions (navigation, autofill, data mapping).
+   * Key behavior: if there is audio, wait for it to finish before navigating/closing.
+   * The chat box stays open the entire time the AI is speaking.
+   */
+  const handleAssistantResponse = async (data) => {
     const extracted = data.extractedData ? { ...data.extractedData } : null;
     if (extracted && extracted.foodName && !extracted.name) {
       extracted.name = extracted.foodName;
@@ -289,29 +321,38 @@ export function useAssistant() {
 
     setMessages((prev) => [...prev, newMsg]);
 
-    // Autoplay response speech if voice response exists
+    // Play audio response and wait for it to finish before doing any action
+    let audioFinished = Promise.resolve();
     if (data.audioResponse) {
-      playAudioResponse(data.audioResponse);
+      audioFinished = playAudioResponse(data.audioResponse);
     }
 
-    // Trigger auto-routing or form auto-filling if applicable
-    if (data.navigationPath) {
-      setTimeout(() => {
+    // Determine the post-response action (navigate, auto-fill, or nothing)
+    const hasNavigation = !!data.navigationPath;
+    const hasDonation = data.intent === 'create_donation' && extracted;
+
+    if (hasNavigation || hasDonation) {
+      // Wait for speech to finish, then perform action
+      await audioFinished;
+
+      // Small grace period so user can see the message text too
+      await new Promise((r) => setTimeout(r, 800));
+
+      if (hasNavigation) {
+        isDeferredCloseRef.current = true;
         navigate(data.navigationPath);
         setIsOpen(false);
         toast.success(`Opening ${data.navigationPath.split('/').pop() || 'page'}...`);
-      }, 2000);
-    } else if (data.intent === 'create_donation' && extracted) {
-      // Store in session storage so the food upload form picks it up
-      const currentStored = JSON.parse(sessionStorage.getItem('assistant-donation-data') || '{}');
-      const merged = { ...currentStored, ...extracted };
-      sessionStorage.setItem('assistant-donation-data', JSON.stringify(merged));
-      
-      setTimeout(() => {
+      } else if (hasDonation) {
+        const currentStored = JSON.parse(sessionStorage.getItem('assistant-donation-data') || '{}');
+        const merged = { ...currentStored, ...extracted };
+        sessionStorage.setItem('assistant-donation-data', JSON.stringify(merged));
+
+        isDeferredCloseRef.current = true;
         navigate('/donate');
         setIsOpen(false);
         toast.success('Opening donation form with pre-filled details...');
-      }, 2000);
+      }
     }
   };
 
