@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import {
   ArrowRight, Sparkles, Users, CheckCircle,
-  Zap, Shield, Clock, BarChart3, ChevronRight, Menu, X, Sun, Moon,
+  Clock, BarChart3, ChevronRight, Menu, X, Sun, Moon,
   Utensils,
   Earth,
   Frown,
@@ -12,7 +12,6 @@ import {
   Handshake,
   BrainCircuit,
   ChartNoAxesCombined,
-  ShieldCheck,
   BellRing,
   IdCardLanyard,
   FileChartPie,
