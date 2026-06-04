@@ -226,7 +226,7 @@ function DashboardPreview() {
           { name: 'Fresh Vegetables', qty: '8 kg', urgency: 'Low', color: 'text-primary-600 bg-primary-50 dark:bg-primary-950/40', score: 96, time: '12h left' },
         ].map((item) => (
           <div key={item.name} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60">
-            <div className="w-10 h-10 rounded-lg text-slate-500 bg-gradient-to-br from-primary-100 to-teal-100 dark:from-primary-900/40 dark:to-teal-900/40 flex items-center justify-center text-lg shrink-0">
+            <div className="w-10 h-10 rounded-lg text-slate-800 dark:text-slate-200 bg-gradient-to-br from-primary-100 to-teal-100 dark:from-primary-900/40 dark:to-teal-900/40 flex items-center justify-center text-lg shrink-0">
               <Utensils size={16}/>
             </div>
             <div className="flex-1 min-w-0">
@@ -343,7 +343,7 @@ function HowItWorks() {
           {steps.map((s, i) => (
             <div key={s.step} className="card-hover p-6 relative group">
               {/* Step number */}
-              <span className="absolute top-5 right-5 text-5xl font-black text-slate-100 dark:text-slate-800 leading-none select-none">{s.step}</span>
+              <span className="absolute top-5 right-5 text-5xl font-black text-slate-200 dark:text-slate-700 leading-none select-none">{s.step}</span>
 
               <div className={`w-12 h-12 rounded-2xl text-white bg-gradient-to-br ${s.color} flex items-center justify-center text-2xl mb-5 shadow-md`}>
                 {s.icon}
@@ -354,7 +354,7 @@ function HowItWorks() {
 
               {/* Connector arrow (hide on last) */}
               {i < steps.length - 1 && (
-                <div className="hidden lg:flex absolute -right-3 top-1/2 -translate-y-1/2 z-10">
+                <div className="hidden lg:flex absolute -right-6 top-1/2 -translate-y-1/2 z-10">
                   <ChevronRight className="w-6 h-6 text-slate-300 dark:text-slate-600" />
                 </div>
               )}
