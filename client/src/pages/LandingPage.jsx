@@ -2,7 +2,23 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import {
   ArrowRight, Sparkles, Users, CheckCircle,
-  Zap, Shield, Clock, BarChart3, ChevronRight, Menu, X, Sun, Moon
+  Zap, Shield, Clock, BarChart3, ChevronRight, Menu, X, Sun, Moon,
+  Utensils,
+  Earth,
+  Frown,
+  ThermometerSun,
+  Package,
+  ImageUp,
+  Handshake,
+  BrainCircuit,
+  ChartNoAxesCombined,
+  ShieldCheck,
+  BellRing,
+  IdCardLanyard,
+  FileChartPie,
+  Sprout,
+  Building2,
+  HeartHandshake
 } from 'lucide-react';
 import mainLogo from '@/assets/images/mainLogo.png';
 import nameLogo from '@/assets/images/name.png';
@@ -210,8 +226,8 @@ function DashboardPreview() {
           { name: 'Fresh Vegetables', qty: '8 kg', urgency: 'Low', color: 'text-primary-600 bg-primary-50 dark:bg-primary-950/40', score: 96, time: '12h left' },
         ].map((item) => (
           <div key={item.name} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-primary-100 to-teal-100 dark:from-primary-900/40 dark:to-teal-900/40 flex items-center justify-center text-lg shrink-0">
-              🍽️
+            <div className="w-10 h-10 rounded-lg text-slate-500 bg-gradient-to-br from-primary-100 to-teal-100 dark:from-primary-900/40 dark:to-teal-900/40 flex items-center justify-center text-lg shrink-0">
+              <Utensils size={16}/>
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{item.name}</p>
@@ -236,7 +252,7 @@ function DashboardPreview() {
         <div className="grid grid-cols-3 gap-2 pt-1">
           {[
             { label: 'Meals Saved', value: '2,412' },
-            { label: 'CO₂ Reduced', value: '1.2t' },
+            { label: 'CO₂ Reduced', value: '1.2T' },
             { label: 'Active NGOs', value: '34' },
           ].map((m) => (
             <div key={m.label} className="text-center p-2 rounded-lg bg-slate-50 dark:bg-slate-800/40">
@@ -253,10 +269,10 @@ function DashboardPreview() {
 // ─── Stats Bar ─────────────────────────────────────────────────
 function StatsBar() {
   const stats = [
-    { value: 1.3, suffix: 'B tons', label: 'food wasted globally each year', icon: '🌍' },
-    { value: 828, suffix: 'M+', label: 'people go hungry worldwide', icon: '😔' },
-    { value: 10, suffix: '%', label: 'of global CO₂ from food waste', icon: '🌡️' },
-    { value: 3, suffix: 'x', label: 'more food produced than needed', icon: '📦' },
+    { value: 1.3, suffix: 'B tons', label: 'food wasted globally each year', icon: <Earth size={32}/> },
+    { value: 828, suffix: 'M+', label: 'people go hungry worldwide', icon: <Frown size={32} /> },
+    { value: 10, suffix: '%', label: 'of global CO₂ from food waste', icon: <ThermometerSun size={32} /> },
+    { value: 3, suffix: 'x', label: 'more food produced than needed', icon: <Package size={32} /> },
   ];
 
   return (
@@ -266,7 +282,7 @@ function StatsBar() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
           {stats.map((s) => (
             <div key={s.label} className="text-center">
-              <p className="text-3xl mb-1">{s.icon}</p>
+              <div className="flex justify-center text-white mb-1">{s.icon}</div>
               <p className="text-3xl font-bold text-white mb-1">
                 <Counter end={s.value} suffix={s.suffix} />
               </p>
@@ -284,28 +300,28 @@ function HowItWorks() {
   const steps = [
     {
       step: '01',
-      icon: '📸',
+      icon: <ImageUp />,
       title: 'Donor uploads surplus food',
       desc: 'Restaurants, hotels, and grocery stores post surplus food with photos, quantity, and expiry details in under 2 minutes.',
       color: 'from-primary-500 to-primary-600',
     },
     {
       step: '02',
-      icon: '🤖',
+      icon: <BrainCircuit />,
       title: 'AI analyses freshness',
       desc: 'Gemini AI instantly analyses the food image, assigns a freshness score, urgency level, and estimated safe distribution window.',
       color: 'from-teal-500 to-teal-600',
     },
     {
       step: '03',
-      icon: '🤝',
+      icon: <Handshake />,
       title: 'NGO claims the donation',
       desc: 'Registered NGOs and shelters browse available food, filter by location and urgency, and claim donations with one click.',
       color: 'from-primary-500 to-teal-500',
     },
     {
       step: '04',
-      icon: '📊',
+      icon: <ChartNoAxesCombined />,
       title: 'Impact is tracked',
       desc: 'Every delivery logs meals saved, CO₂ reduced, and water conserved — building a transparent impact record for all stakeholders.',
       color: 'from-teal-500 to-primary-600',
@@ -329,7 +345,7 @@ function HowItWorks() {
               {/* Step number */}
               <span className="absolute top-5 right-5 text-5xl font-black text-slate-100 dark:text-slate-800 leading-none select-none">{s.step}</span>
 
-              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${s.color} flex items-center justify-center text-2xl mb-5 shadow-md`}>
+              <div className={`w-12 h-12 rounded-2xl text-white bg-gradient-to-br ${s.color} flex items-center justify-center text-2xl mb-5 shadow-md`}>
                 {s.icon}
               </div>
 
@@ -366,19 +382,19 @@ function Features() {
       color: 'text-orange-500 bg-orange-50 dark:bg-orange-950/40',
     },
     {
-      icon: Shield,
+      icon: IdCardLanyard,
       title: 'Role-Based Access',
       desc: 'Three secure roles — Donor, NGO, Admin — each with tailored dashboards and access controls via Clerk authentication.',
       color: 'text-primary-600 bg-primary-50 dark:bg-primary-950/40',
     },
     {
-      icon: BarChart3,
+      icon: FileChartPie,
       title: 'Impact Analytics',
       desc: 'Track meals saved, CO₂ reduced, and water conserved in real-time with beautiful, shareable analytics dashboards.',
       color: 'text-teal-500 bg-teal-50 dark:bg-teal-950/40',
     },
     {
-      icon: Zap,
+      icon: BellRing,
       title: 'Instant Notifications',
       desc: 'Email alerts for every key event — new donation nearby, claim confirmed, pickup scheduled — powered by Resend.',
       color: 'text-yellow-500 bg-yellow-50 dark:bg-yellow-950/40',
@@ -405,10 +421,12 @@ function Features() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((f) => (
             <div key={f.title} className="card p-6 hover:shadow-card-hover hover:-translate-y-0.5 transition-all duration-200">
-              <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${f.color}`}>
-                <f.icon className="w-5 h-5" />
+              <div className='flex items-center gap-3'>
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center mb-4 ${f.color}`}>
+                  <f.icon className="w-7 h-7" />
+                </div>
+                <h3 className="font-semibold text-slate-900 dark:text-white mb-2">{f.title}</h3>
               </div>
-              <h3 className="font-semibold text-slate-900 dark:text-white mb-2">{f.title}</h3>
               <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{f.desc}</p>
             </div>
           ))}
@@ -435,13 +453,13 @@ function Impact() {
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
               {[
-                { value: 2412, suffix: '', label: 'Meals Saved', icon: '🍽️' },
-                { value: 1200, suffix: ' kg', label: 'CO₂ Reduced', icon: '🌱' },
-                { value: 180, suffix: '+', label: 'Donor Partners', icon: '🏪' },
-                { value: 34, suffix: '', label: 'NGO Partners', icon: '🤝' },
+                { value: 2412, suffix: '', label: 'Meals Saved', icon: <Utensils size={34} /> },
+                { value: 1200, suffix: ' kg', label: 'CO₂ Reduced', icon: <Sprout size={34} /> },
+                { value: 180, suffix: '+', label: 'Donor Partners', icon: <Building2 size={34} /> },
+                { value: 34, suffix: '', label: 'NGO Partners', icon: <HeartHandshake size={34} /> },
               ].map((s) => (
                 <div key={s.label}>
-                  <p className="text-3xl mb-1">{s.icon}</p>
+                  <div className="flex justify-center text-white mb-1">{s.icon}</div>
                   <p className="text-3xl font-bold text-white">
                     <Counter end={s.value} suffix={s.suffix} />
                   </p>
@@ -484,7 +502,7 @@ function Footer() {
     <footer className="border-t border-slate-200 dark:border-slate-800 py-12">
       <div className="section">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-col items-center md:items-start gap-1">
+          <div className="flex flex-col items-center md:items-start gap-1 ">
             <div className="flex items-center gap-2">
               <img src={mainLogo} alt="RePlate" className="w-8 h-8 object-contain" />
               <img src={nameLogo} alt="RePlate" className="h-6 object-contain" />
