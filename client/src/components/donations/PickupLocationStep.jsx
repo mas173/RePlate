@@ -1,4 +1,5 @@
 import { MapPin, Clock } from 'lucide-react';
+import LocationPickerMap from './LocationPickerMap';
 
 export default function PickupLocationStep({ data, onChange }) {
   return (
@@ -30,7 +31,7 @@ export default function PickupLocationStep({ data, onChange }) {
             type="text"
             className="input"
             placeholder="e.g., 123 MG Road, Ground Floor"
-            value={data.address}
+            value={data.address || ''}
             onChange={(e) => onChange({ address: e.target.value })}
           />
         </div>
@@ -45,7 +46,7 @@ export default function PickupLocationStep({ data, onChange }) {
               type="text"
               className="input"
               placeholder="e.g., Mumbai"
-              value={data.city}
+              value={data.city || ''}
               onChange={(e) => onChange({ city: e.target.value })}
             />
           </div>
@@ -57,7 +58,7 @@ export default function PickupLocationStep({ data, onChange }) {
               type="text"
               className="input"
               placeholder="e.g., Maharashtra"
-              value={data.state}
+              value={data.state || ''}
               onChange={(e) => onChange({ state: e.target.value })}
             />
           </div>
@@ -69,10 +70,29 @@ export default function PickupLocationStep({ data, onChange }) {
               type="text"
               className="input"
               placeholder="e.g., 400001"
-              value={data.pincode}
+              value={data.pincode || ''}
               onChange={(e) => onChange({ pincode: e.target.value })}
             />
           </div>
+        </div>
+
+        {/* Interactive Map Picker */}
+        <div className="pt-4 border-t border-slate-100 dark:border-slate-800/40">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-3">
+            Pin Exact Pickup Spot <span className="text-slate-400 text-xs">(optional but recommended)</span>
+          </label>
+          <LocationPickerMap
+            latitude={data.latitude}
+            longitude={data.longitude}
+            onLocationSelect={(lat, lng) => onChange({ latitude: lat, longitude: lng })}
+            addressFields={{
+              address: data.address,
+              city: data.city,
+              state: data.state,
+              pincode: data.pincode
+            }}
+            onAddressAutoFill={(autofill) => onChange(autofill)}
+          />
         </div>
       </div>
 

@@ -175,16 +175,16 @@ Integrating live maps and location-based coordination for smarter food redistrib
 
 | Task ID | Task Description | Status | Details / Location |
 | :--- | :--- | :--- | :--- |
-| 10.1 | Integrate React Leaflet & OpenStreetMap | Pending | Configure free map system for the platform |
-| 10.2 | Add donation location picker | Pending | Allow donors to pin exact pickup location |
-| 10.3 | Implement live donation map on NGO dashboard | Pending | Show nearby donations with map markers |
-| 10.4 | Add urgency-based marker colors | Pending | Highlight urgent donations visually |
-| 10.5 | Build nearby donation filtering | Pending | Sort donations by nearest distance |
-| 10.6 | Implement current location detection | Pending | Auto-detect user location using browser GPS |
-| 10.7 | Add route navigation support | Pending | Open directions for pickup locations |
-| 10.8 | Build live pickup tracking system | Pending | Track donation pickup and delivery progress |
-| 10.9 | Add admin heatmap analytics | Pending | Visualize donation-heavy and high-demand areas |
-| 10.10 | Optimize mobile map responsiveness | Pending | Ensure smooth map usage on mobile devices |
+| 10.1 | Integrate React-Leaflet & MapTiler | Done | Configure free map system for the platform |
+| 10.2 | Add donation location picker | Done | Allow donors to pin exact pickup location |
+| 10.3 | Implement live donation map on NGO dashboard | Done | Show nearby donations with map markers |
+| 10.4 | Add urgency-based marker colors | Done | Highlight urgent donations visually |
+| 10.5 | Build nearby donation filtering | Done | Sort donations by nearest distance |
+| 10.6 | Implement current location detection | Done | Auto-detect user location using browser GPS |
+| 10.7 | Add route navigation support | Done | Open directions for pickup locations |
+| 10.8 | Build live pickup tracking system | Done | Track donation pickup and delivery progress |
+| 10.9 | Add admin heatmap analytics | Done | Visualize donation-heavy and high-demand areas |
+| 10.10 | Optimize mobile map responsiveness | Done | Ensure smooth map usage on mobile devices |
 
 ---
 

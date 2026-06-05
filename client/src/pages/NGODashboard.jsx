@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, Calendar, Clock, MapPin, Package, Heart, ShieldAlert, Navigation, ArrowRight, CheckCircle, Truck, RefreshCw, ChevronRight } from 'lucide-react';
 import { useAppAuth } from '@/hooks/useAppAuth';
-import { claimsAPI, donationsAPI } from '@/services/api';
+import { claimsAPI, donationsAPI, userAPI } from '@/services/api';
 import { getUrgencyColor } from '@/utils/helpers';
+import NGODashboardMap from '@/components/dashboard/NGODashboardMap';
 import toast from 'react-hot-toast';
 
 export default function NGODashboard() {
@@ -17,8 +18,10 @@ export default function NGODashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Map state
-  const [hoveredPin, setHoveredPin] = useState(null);
+  // Map & location state
+  const [ngoProfile, setNgoProfile] = useState(null);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locatingUser, setLocatingUser] = useState(false);
 
   const fetchDashboardData = async (showRefreshIndicator = false) => {
     if (showRefreshIndicator) setRefreshing(true);
@@ -34,6 +37,23 @@ export default function NGODashboard() {
         const donationsRes = await donationsAPI.getAll(token);
         const availableOnly = (donationsRes.donations || []).filter(d => d.status === 'available');
         setAvailableFood(availableOnly);
+
+        // Fetch NGO profile to get coordinates
+        try {
+          const profileRes = await userAPI.getProfile(token);
+          if (profileRes && profileRes.profile) {
+            setNgoProfile(profileRes.profile);
+            // Default userLocation to profile coordinates if GPS hasn't completed yet
+            if (profileRes.profile.latitude && profileRes.profile.longitude) {
+              setUserLocation(prev => prev || {
+                latitude: parseFloat(profileRes.profile.latitude),
+                longitude: parseFloat(profileRes.profile.longitude),
+              });
+            }
+          }
+        } catch (profileErr) {
+          console.warn('Failed to load user profile on NGO dashboard:', profileErr);
+        }
       }
     } catch (err) {
       console.error('Failed to load NGO dashboard data:', err);
@@ -45,6 +65,25 @@ export default function NGODashboard() {
 
   useEffect(() => {
     fetchDashboardData();
+
+    // Detect GPS location on load
+    if (navigator.geolocation) {
+      setLocatingUser(true);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLocation({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          });
+          setLocatingUser(false);
+        },
+        (err) => {
+          console.warn('GPS location request failed:', err);
+          setLocatingUser(false);
+        },
+        { timeout: 8000 }
+      );
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -82,23 +121,6 @@ export default function NGODashboard() {
 
   // Active scheduled pickups
   const upcomingPickups = activeClaims.slice(0, 3);
-
-  // Generate simulated pins on map for available food
-  const mapPins = availableFood.map((donation, idx) => {
-    // Generate pseudo-random coordinates within our container bounds
-    const hash = donation.food_name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-    const x = 15 + ((hash * (idx + 1)) % 70); // 15% to 85% width
-    const y = 20 + ((hash * (idx + 2)) % 60); // 20% to 80% height
-    return {
-      id: donation.id,
-      name: donation.food_name,
-      urgency: donation.urgency,
-      quantity: donation.quantity,
-      address: donation.pickup_address,
-      x: `${x}%`,
-      y: `${y}%`
-    };
-  });
 
   return (
     <div className="space-y-6">
@@ -192,87 +214,15 @@ export default function NGODashboard() {
               </span>
             </div>
 
-            {/* Simulated Geographic Grid Area */}
-            <div className="flex-1 bg-slate-950 relative overflow-hidden flex items-center justify-center">
-              {/* Radar circular lines */}
-              <div className="absolute w-[280px] h-[280px] rounded-full border border-dashed border-emerald-500/20 flex items-center justify-center">
-                <div className="w-[180px] h-[180px] rounded-full border border-dashed border-emerald-500/25 flex items-center justify-center">
-                  <div className="w-[80px] h-[80px] rounded-full border border-emerald-500/30" />
-                </div>
-              </div>
-
-              {/* Grid backdrop lines */}
-              <div className="absolute inset-0 grid grid-cols-6 grid-rows-6 opacity-[0.07] pointer-events-none">
-                {[...Array(36)].map((_, i) => (
-                  <div key={i} className="border border-emerald-500" />
-                ))}
-              </div>
-
-              {/* Center point indicator */}
-              <div className="absolute w-5 h-5 rounded-full bg-primary-500/20 border border-primary-400 flex items-center justify-center shadow-lg shadow-primary-500/50 z-10">
-                <div className="w-2.5 h-2.5 rounded-full bg-primary-500" />
-              </div>
-
-              {/* Glowing radar line animation */}
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/0 via-emerald-500/5 to-emerald-500/0 rotate-radar origin-center pointer-events-none" />
-
-              {/* Map Pins */}
-              {mapPins.map((pin) => (
-                <button
-                  key={pin.id}
-                  onClick={() => navigate(`/donations/${pin.id}`)}
-                  onMouseEnter={() => setHoveredPin(pin)}
-                  onMouseLeave={() => setHoveredPin(null)}
-                  style={{ left: pin.x, top: pin.y }}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 group"
-                >
-                  <span className="relative flex h-4 w-4">
-                    <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${
-                      pin.urgency === 'critical' ? 'bg-red-400' :
-                      pin.urgency === 'high' ? 'bg-amber-400' :
-                      'bg-emerald-400'
-                    }`}></span>
-                    <span className={`relative inline-flex rounded-full h-4 w-4 border-2 border-slate-950 shadow-md ${
-                      pin.urgency === 'critical' ? 'bg-red-500' :
-                      pin.urgency === 'high' ? 'bg-amber-500' :
-                      'bg-emerald-500'
-                    }`}></span>
-                  </span>
-                </button>
-              ))}
-
-              {/* Map pin info hover card */}
-              <AnimatePresence>
-                {hoveredPin && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute bottom-4 left-4 right-4 bg-slate-900/95 backdrop-blur-md p-3.5 rounded-xl border border-slate-800 text-white z-20 flex justify-between items-center max-w-sm"
-                  >
-                    <div>
-                      <h4 className="font-bold text-xs leading-snug">{hoveredPin.name}</h4>
-                      <p className="text-[10px] text-slate-400 mt-0.5">{hoveredPin.address}</p>
-                      <div className="flex items-center gap-2 mt-1.5">
-                        <span className={`px-1.5 py-0.5 rounded text-[8px] font-extrabold uppercase ${
-                          hoveredPin.urgency === 'critical' ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
-                          hoveredPin.urgency === 'high' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                          'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                        }`}>
-                          {hoveredPin.urgency}
-                        </span>
-                        <span className="text-[10px] text-slate-300 font-semibold">{hoveredPin.quantity}</span>
-                      </div>
-                    </div>
-                    <span className="text-[10px] font-bold text-primary-400 flex items-center shrink-0 ml-4">
-                      Claim Now <ArrowRight className="w-3.5 h-3.5 ml-1" />
-                    </span>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Map instructions overlay if empty */}
-              {availableFood.length === 0 && (
+            {/* Real React-Leaflet Map */}
+            <div className="flex-1 bg-slate-950 relative overflow-hidden flex items-stretch">
+              {availableFood.length > 0 ? (
+                <NGODashboardMap
+                  donations={availableFood}
+                  userLocation={userLocation}
+                  loadingLocation={locatingUser}
+                />
+              ) : (
                 <div className="absolute inset-0 flex flex-col items-center justify-center p-6 bg-slate-950/80 text-center">
                   <ShieldAlert className="w-8 h-8 text-slate-500 mb-2" />
                   <p className="text-xs text-slate-400 max-w-xs">
