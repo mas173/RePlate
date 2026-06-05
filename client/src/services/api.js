@@ -95,6 +95,7 @@ export const claimsAPI = {
 // ========================
 
 export const analyticsAPI = {
+  getPublicStats: () => apiRequest('/analytics/public-stats'),
   getOverview: (token) => apiRequest('/analytics/overview', {}, token),
   getUserAnalytics: (token) => apiRequest('/analytics/user', {}, token),
   getTrends: (token) => apiRequest('/analytics/trends', {}, token),
