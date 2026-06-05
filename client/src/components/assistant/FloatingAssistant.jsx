@@ -29,7 +29,7 @@ export default function FloatingAssistant() {
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-55 flex flex-col items-end gap-2">
+      <div className="fixed bottom-6 right-6 z-55 bg-slate-800 rounded-full flex flex-col items-end gap-2">
         {/* Floating Sparkle/Mic Button */}
         <button
           onClick={toggleOpen}

@@ -20,6 +20,7 @@ import MetricCard from '@/components/analytics/MetricCard';
 import DonationTrendChart from '@/components/analytics/DonationTrendChart';
 import CategoryPieChart from '@/components/analytics/CategoryPieChart';
 import LeaderboardTable from '@/components/analytics/LeaderboardTable';
+import AdminHeatmap from '@/components/analytics/AdminHeatmap';
 import toast from 'react-hot-toast';
 
 const growthVariants = {
@@ -33,6 +34,8 @@ export default function AdminAnalyticsPage() {
   const [trendData, setTrendData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
   const [leaderboardData, setLeaderboardData] = useState({ donors: [], ngos: [] });
+  const [allDonations, setAllDonations] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -44,11 +47,13 @@ export default function AdminAnalyticsPage() {
       const token = await getAuthToken();
       if (!token) return;
 
-      const [adminRes, trendsRes, categoriesRes, leaderboardRes] = await Promise.allSettled([
+      const [adminRes, trendsRes, categoriesRes, leaderboardRes, donationsRes, usersRes] = await Promise.allSettled([
         adminAPI.getAnalytics(token),
         analyticsAPI.getTrends(token),
         analyticsAPI.getCategories(token),
         analyticsAPI.getLeaderboard(token),
+        adminAPI.getDonations(token),
+        adminAPI.getUsers(token),
       ]);
 
       if (adminRes.status === 'fulfilled') {
@@ -62,6 +67,12 @@ export default function AdminAnalyticsPage() {
       }
       if (leaderboardRes.status === 'fulfilled') {
         setLeaderboardData(leaderboardRes.value);
+      }
+      if (donationsRes.status === 'fulfilled') {
+        setAllDonations(donationsRes.value.donations || []);
+      }
+      if (usersRes.status === 'fulfilled') {
+        setAllUsers(usersRes.value.users || []);
       }
 
       if (isRefresh) {
@@ -245,6 +256,11 @@ export default function AdminAnalyticsPage() {
           </div>
         </div>
       </div>
+
+      {/* Geographic Heatmap Analytics */}
+      {!loading && (
+        <AdminHeatmap donations={allDonations} users={allUsers} />
+      )}
 
       {/* Leaderboard Table */}
       <LeaderboardTable donors={leaderboardData.donors} ngos={leaderboardData.ngos} loading={loading} />

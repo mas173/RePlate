@@ -39,6 +39,8 @@ const INITIAL_FORM = {
   pickupFrom: '',
   pickupTo: '',
   instructions: '',
+  latitude: null,
+  longitude: null,
 };
 
 function Stepper({ currentStep }) {
@@ -187,6 +189,13 @@ export default function FoodUploadForm() {
       dataToSend.append('pickupTo', formData.pickupTo);
       dataToSend.append('instructions', formData.instructions);
       dataToSend.append('notes', formData.notes);
+
+      if (formData.latitude !== null && formData.latitude !== undefined) {
+        dataToSend.append('latitude', formData.latitude);
+      }
+      if (formData.longitude !== null && formData.longitude !== undefined) {
+        dataToSend.append('longitude', formData.longitude);
+      }
 
       // Append AI fields
       if (formData.ai_freshness_score !== undefined && formData.ai_freshness_score !== null) {
