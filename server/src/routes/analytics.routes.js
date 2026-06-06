@@ -5,6 +5,28 @@ import { supabaseAdmin } from '../config/supabase.js';
 const router = Router();
 
 /**
+ * GET /api/analytics/public-stats
+ * Get platform-wide analytics overview publicly (no auth required)
+ */
+router.get('/public-stats', async (req, res, next) => {
+  try {
+    const { data, error } = await supabaseAdmin.rpc('get_platform_stats');
+    if (error) throw error;
+
+    res.status(200).json({
+      totalDonations: data?.total_donations || 0,
+      totalMealsSaved: data?.total_meals_saved || 0,
+      totalWasteReduced: data?.total_weight_saved || 0,
+      totalCO2Reduced: data?.total_co2_reduced || 0,
+      activeDonors: data?.total_donors || 0,
+      activeNGOs: data?.total_ngos || 0,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
  * GET /api/analytics/overview
  * Get platform-wide analytics overview
  */
