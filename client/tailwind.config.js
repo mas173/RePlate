@@ -8,6 +8,25 @@ export default {
   theme: {
     extend: {
       colors: {
+        brand: {
+          forest: '#1F5A3A',
+          green: '#2E7D32',
+          sage: '#DDE8D9',
+          mint: '#F3F7F1',
+          bg: '#FAFAF8',
+          card: '#FFFFFF',
+          border: '#E5E7EB',
+        },
+        neutralText: {
+          main: '#111827',
+          sub: '#4B5563',
+          muted: '#6B7280',
+        },
+        accent: {
+          gold: '#D9A441',
+          yellow: '#F6E8B1',
+          cream: '#FFF8E8',
+        },
         // Primary Emerald Green
         primary: {
           50:  '#ecfdf5',
