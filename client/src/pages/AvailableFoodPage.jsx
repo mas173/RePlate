@@ -1,11 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, MapPin, Sparkles, ChevronRight, RefreshCw, Filter, Calendar } from 'lucide-react';
+import { Search, MapPin, Sparkles, ChevronRight, RefreshCw, Filter, Calendar, Navigation } from 'lucide-react';
 import { useAppAuth } from '@/hooks/useAppAuth';
-import { donationsAPI } from '@/services/api';
+import { donationsAPI, userAPI } from '@/services/api';
 import { getUrgencyColor, getRelativeTime } from '@/utils/helpers';
 import { FOOD_CATEGORIES } from '@/utils/constants';
+
+function haversineDistance(lat1, lon1, lat2, lon2) {
+  if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+  const R = 6371; // Earth radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLon / 2) *
+    Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
 
 function getCategoryIcon(value) {
   const cat = FOOD_CATEGORIES.find((c) => c.value === value);
@@ -39,6 +53,12 @@ export default function AvailableFoodPage() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [cityFilter, setCityFilter] = useState('');
   const [urgencyFilter, setUrgencyFilter] = useState('all');
+  const [distanceFilter, setDistanceFilter] = useState('all'); // 'all', '5', '10', '25', '50'
+
+  // Location state
+  const [userLocation, setUserLocation] = useState(null);
+  const [locatingUser, setLocatingUser] = useState(false);
+  const [ngoProfile, setNgoProfile] = useState(null);
 
   const fetchAvailableDonations = async (showRefreshIndicator = false) => {
     if (showRefreshIndicator) setRefreshing(true);
@@ -46,9 +66,24 @@ export default function AvailableFoodPage() {
     try {
       const token = await getAuthToken();
       if (token) {
-        // GET /api/donations with status=available is filtered on the server side
         const res = await donationsAPI.getAll(token);
         setDonations(res.donations || []);
+
+        // Load NGO Profile for fallback coordinates
+        try {
+          const profileRes = await userAPI.getProfile(token);
+          if (profileRes && profileRes.profile) {
+            setNgoProfile(profileRes.profile);
+            if (profileRes.profile.latitude && profileRes.profile.longitude) {
+              setUserLocation((prev) => prev || {
+                latitude: parseFloat(profileRes.profile.latitude),
+                longitude: parseFloat(profileRes.profile.longitude),
+              });
+            }
+          }
+        } catch (profileErr) {
+          console.warn('Failed to load profile in AvailableFoodPage:', profileErr);
+        }
       }
     } catch (err) {
       console.error('Failed to load available donations:', err);
@@ -60,27 +95,81 @@ export default function AvailableFoodPage() {
 
   useEffect(() => {
     fetchAvailableDonations();
+
+    // Detect GPS location on load
+    if (navigator.geolocation) {
+      setLocatingUser(true);
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setUserLocation({
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          });
+          setLocatingUser(false);
+        },
+        (err) => {
+          console.warn('GPS location request failed:', err);
+          setLocatingUser(false);
+        },
+        { timeout: 8000 }
+      );
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const filteredDonations = donations.filter((donation) => {
-    // Only display available food
-    if (donation.status !== 'available') return false;
+  const donationsWithDistance = useMemo(() => {
+    return donations.map(d => {
+      let distance = null;
+      if (userLocation && d.latitude && d.longitude) {
+        distance = haversineDistance(
+          userLocation.latitude,
+          userLocation.longitude,
+          parseFloat(d.latitude),
+          parseFloat(d.longitude)
+        );
+      }
+      return { ...d, distance };
+    });
+  }, [donations, userLocation]);
 
-    const matchesSearch =
-      donation.food_name.toLowerCase().includes(search.toLowerCase()) ||
-      (donation.description && donation.description.toLowerCase().includes(search.toLowerCase()));
-    
-    const matchesCategory = categoryFilter === 'all' || donation.category === categoryFilter;
-    
-    const matchesCity = !cityFilter || 
-      donation.pickup_city?.toLowerCase().includes(cityFilter.toLowerCase()) ||
-      donation.pickup_address?.toLowerCase().includes(cityFilter.toLowerCase());
+  const filteredDonations = useMemo(() => {
+    let result = donationsWithDistance.filter((donation) => {
+      // Only display available food
+      if (donation.status !== 'available') return false;
 
-    const matchesUrgency = urgencyFilter === 'all' || donation.urgency === urgencyFilter;
+      const matchesSearch =
+        donation.food_name.toLowerCase().includes(search.toLowerCase()) ||
+        (donation.description && donation.description.toLowerCase().includes(search.toLowerCase()));
 
-    return matchesSearch && matchesCategory && matchesCity && matchesUrgency;
-  });
+      const matchesCategory = categoryFilter === 'all' || donation.category === categoryFilter;
+
+      const matchesCity = !cityFilter ||
+        donation.pickup_city?.toLowerCase().includes(cityFilter.toLowerCase()) ||
+        donation.pickup_address?.toLowerCase().includes(cityFilter.toLowerCase());
+
+      const matchesUrgency = urgencyFilter === 'all' || donation.urgency === urgencyFilter;
+
+      // Distance radius filter
+      let matchesDistance = true;
+      if (distanceFilter !== 'all') {
+        if (donation.distance !== null) {
+          const radiusLimit = parseFloat(distanceFilter);
+          matchesDistance = donation.distance <= radiusLimit;
+        } else {
+          matchesDistance = false;
+        }
+      }
+
+      return matchesSearch && matchesCategory && matchesCity && matchesUrgency && matchesDistance;
+    });
+
+    // Sort closest first if distance is available
+    return result.sort((a, b) => {
+      if (a.distance === null) return 1;
+      if (b.distance === null) return -1;
+      return a.distance - b.distance;
+    });
+  }, [donationsWithDistance, search, categoryFilter, cityFilter, urgencyFilter, distanceFilter]);
 
   return (
     <div className="space-y-6">
@@ -110,12 +199,12 @@ export default function AvailableFoodPage() {
       <div className="card p-5 bg-white dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/60 backdrop-blur-md space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3.5">
           {/* Search */}
-          <div className="md:col-span-4 relative">
+          <div className="md:col-span-3 relative">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 dark:text-slate-500" />
             <input
               type="text"
               placeholder="Search food by name..."
-              className="input pl-10 w-full"
+              className="input pl-10 w-full text-xs"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -127,16 +216,16 @@ export default function AvailableFoodPage() {
             <input
               type="text"
               placeholder="Filter by city/address..."
-              className="input pl-10 w-full"
+              className="input pl-10 w-full text-xs"
               value={cityFilter}
               onChange={(e) => setCityFilter(e.target.value)}
             />
           </div>
 
           {/* Category Filter */}
-          <div className="md:col-span-3">
+          <div className="md:col-span-2">
             <select
-              className="input w-full"
+              className="input w-full text-xs"
               value={categoryFilter}
               onChange={(e) => setCategoryFilter(e.target.value)}
             >
@@ -152,7 +241,7 @@ export default function AvailableFoodPage() {
           {/* Urgency Filter */}
           <div className="md:col-span-2">
             <select
-              className="input w-full"
+              className="input w-full text-xs"
               value={urgencyFilter}
               onChange={(e) => setUrgencyFilter(e.target.value)}
             >
@@ -163,17 +252,31 @@ export default function AvailableFoodPage() {
               <option value="low">🟢 Low</option>
             </select>
           </div>
+
+          {/* Distance Filter */}
+          <div className="md:col-span-2">
+            <select
+              className="input w-full text-xs"
+              value={distanceFilter}
+              onChange={(e) => setDistanceFilter(e.target.value)}
+            >
+              <option value="all">Any Distance</option>
+              <option value="5">Within 5 km</option>
+              <option value="10">Within 10 km</option>
+              <option value="25">Within 25 km</option>
+              <option value="50">Within 50 km</option>
+            </select>
+          </div>
         </div>
 
         {/* Quick category pills */}
         <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-thin">
           <button
             onClick={() => setCategoryFilter('all')}
-            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all whitespace-nowrap ${
-              categoryFilter === 'all'
+            className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all whitespace-nowrap ${categoryFilter === 'all'
                 ? 'bg-primary-500 text-white border-primary-500 shadow-sm'
                 : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/60 hover:bg-slate-100 dark:hover:bg-slate-700/50'
-            }`}
+              }`}
           >
             All Food
           </button>
@@ -181,11 +284,10 @@ export default function AvailableFoodPage() {
             <button
               key={cat.value}
               onClick={() => setCategoryFilter(cat.value)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all whitespace-nowrap flex items-center gap-1 ${
-                categoryFilter === cat.value
+              className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-all whitespace-nowrap flex items-center gap-1 ${categoryFilter === cat.value
                   ? 'bg-primary-500 text-white border-primary-500 shadow-sm'
                   : 'bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/60 hover:bg-slate-100 dark:hover:bg-slate-700/50'
-              }`}
+                }`}
             >
               <span>{cat.icon}</span>
               <span>{cat.label}</span>
@@ -240,7 +342,7 @@ export default function AvailableFoodPage() {
                         <span className="text-5xl filter saturate-75">{categoryDetails?.icon || '🍴'}</span>
                       </div>
                     )}
-                    
+
                     {/* Floating badges */}
                     <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
                       <span className="badge bg-black/40 backdrop-blur-md text-white border-0 flex items-center gap-1 text-[10px]">
@@ -258,10 +360,13 @@ export default function AvailableFoodPage() {
                       )}
                     </div>
 
-                    {/* Geolocation Mock Distance */}
-                    <div className="absolute bottom-2.5 left-2.5 bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] text-white flex items-center gap-1">
-                      <MapPin className="w-2.5 h-2.5 text-rose-400" />
-                      <span>{donation.pickup_city || 'Nearby'} · ~1.8 km</span>
+                    {/* Geolocation Distance */}
+                    <div className="absolute bottom-2.5 left-2.5 bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] text-white flex items-center gap-1 max-w-[90%] truncate">
+                      <MapPin className="w-2.5 h-2.5 text-rose-400 shrink-0" />
+                      <span className="truncate">
+                        {donation.pickup_city || 'Nearby'}
+                        {donation.distance !== null ? ` · ${donation.distance < 1 ? `${Math.round(donation.distance * 1000)}m` : `${donation.distance.toFixed(1)}km`}` : ''}
+                      </span>
                     </div>
                   </div>
 

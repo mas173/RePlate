@@ -64,7 +64,7 @@ async function runExpiryWarnings() {
     // Find available donations expiring in the next 4 hours
     const { data: soonExpiring, error: fetchErr } = await supabaseAdmin
       .from('donations')
-      .select('id, donor_id, food_name, quantity, expires_at, location, urgency_level')
+      .select('id, donor_id, food_name, quantity, expires_at, pickup_address, pickup_city, urgency')
       .eq('status', 'available')
       .gt('expires_at', now.toISOString())
       .lt('expires_at', fourHoursLater.toISOString());
@@ -117,8 +117,8 @@ async function runExpiryWarnings() {
           foodName: donation.food_name,
           quantity: donation.quantity,
           expiryDate: new Date(donation.expires_at).toLocaleString(),
-          location: donation.location,
-          urgencyLevel: donation.urgency_level,
+          location: donation.pickup_address || donation.pickup_city || 'N/A',
+          urgencyLevel: donation.urgency,
         });
       }
 

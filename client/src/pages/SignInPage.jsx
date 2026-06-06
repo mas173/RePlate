@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { SignIn } from '@clerk/clerk-react';
 import { CheckCircle, ArrowLeft } from 'lucide-react';
@@ -134,57 +135,79 @@ function BrandPanel() {
 }
 
 /* ── Clerk appearance — hides default chrome ─ */
-const clerkAppearance = {
-  elements: {
-    rootBox: 'w-full',
-    cardBox: 'shadow-none w-full p-4',
-    card: 'shadow-none !p-0 !bg-transparent !border-0 w-full !gap-4',
-    // Hide Clerk's own header — we show our own
-    header: 'hidden',
-    headerTitle: 'hidden',
-    headerSubtitle: 'hidden',
-    // Social buttons
-    socialButtonsBlockButton:
-      'w-full border border-slate-200 dark:border-slate-800 !rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors text-slate-700 dark:text-slate-300 font-medium !py-2.5',
-    socialButtonsBlockButtonText: 'text-sm font-medium',
-    socialButtonsProviderIcon: 'w-5 h-5',
-    // Divider
-    dividerLine: 'bg-slate-200 dark:bg-slate-800',
-    dividerText: 'text-slate-400 text-xs',
-    // Form fields
-    formFieldInput:
-      '!rounded-xl !border-slate-200 dark:!border-slate-700 !bg-white dark:!bg-slate-800 text-slate-900 dark:text-white focus:!ring-2 focus:!ring-primary-500 focus:!border-primary-500 !py-2.5 transition-shadow',
-    formFieldLabel: 'text-slate-700 dark:text-slate-300 text-sm font-semibold',
-    formFieldHintText: 'text-slate-400 text-xs',
-    // Primary button
-    formButtonPrimary:
-      '!bg-primary-500 hover:!bg-primary-600 !rounded-xl font-bold text-sm transition-all !shadow-md hover:!shadow-lg !py-2.5 border-none cursor-pointer',
-    // Footer / links
-    footerAction: 'hidden',
-    footerActionLink: 'hidden',
-    footer: 'hidden',
-    // OTP / verification
-    formResendCodeLink: 'text-primary-600 dark:text-primary-400 font-semibold',
-    otpCodeFieldInput: '!rounded-lg !border-slate-200 dark:!border-slate-700',
-    identityPreview: '!rounded-xl',
-    identityPreviewEditButton: 'text-primary-600 font-semibold',
-    // Alerts
-    alert: '!rounded-xl border border-red-200/50 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 text-red-650 dark:text-red-400',
-    alertText: 'text-sm font-medium',
-  },
-  variables: {
-    colorPrimary: '#10b981',
-    colorBackground: 'transparent',
-    colorText: '#111827',
-    colorTextSecondary: '#6b7280',
-    colorInputBackground: '#ffffff',
-    borderRadius: '0.75rem',
-    fontFamily: 'Outfit, Inter, system-ui, sans-serif',
-  },
-};
+/**
+ * Returns Clerk appearance config that adapts to light/dark mode.
+ */
+function getClerkAppearance(isDark) {
+  return {
+    elements: {
+      rootBox: 'w-full',
+      cardBox: 'shadow-none w-full p-4',
+      card: 'shadow-none !p-0 !bg-transparent !border-0 w-full !gap-4',
+      // Hide Clerk's own header — we show our own
+      header: 'hidden',
+      headerTitle: 'hidden',
+      headerSubtitle: 'hidden',
+      // Social buttons
+      socialButtonsBlockButton:
+        'w-full border border-slate-200 dark:border-slate-800 !rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors text-slate-700 dark:text-slate-300 font-medium !py-2.5',
+      socialButtonsBlockButtonText: 'text-sm font-medium',
+      socialButtonsProviderIcon: 'w-5 h-5',
+      // Divider
+      dividerLine: 'bg-slate-200 dark:bg-slate-800',
+      dividerText: 'text-slate-400 text-xs',
+      // Form fields
+      formFieldInput:
+        '!rounded-xl !border-slate-200 dark:!border-slate-700 !bg-white dark:!bg-slate-800 text-slate-900 dark:text-white focus:!ring-2 focus:!ring-primary-500 focus:!border-primary-500 !py-2.5 transition-shadow',
+      formFieldLabel: 'text-slate-700 dark:text-slate-300 text-sm font-semibold',
+      formFieldHintText: 'text-slate-400 text-xs',
+      // Primary button
+      formButtonPrimary:
+        '!bg-primary-500 hover:!bg-primary-600 !rounded-xl font-bold text-sm transition-all !shadow-md hover:!shadow-lg !py-2.5 border-none cursor-pointer',
+      // Footer / links
+      footerAction: 'hidden',
+      footerActionLink: 'hidden',
+      footer: 'hidden',
+      // OTP / verification
+      formResendCodeLink: 'text-primary-600 dark:text-primary-400 font-semibold',
+      otpCodeFieldInput: '!rounded-lg !border-slate-200 dark:!border-slate-700',
+      identityPreview: '!rounded-xl',
+      identityPreviewEditButton: 'text-primary-600 font-semibold',
+      // Alerts
+      alert: '!rounded-xl border border-red-200/50 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 text-red-650 dark:text-red-400',
+      alertText: 'text-sm font-medium',
+    },
+    variables: {
+      colorPrimary: '#10b981',
+      colorBackground: 'transparent',
+      colorText: isDark ? '#f1f5f9' : '#111827',
+      colorTextSecondary: isDark ? '#94a3b8' : '#6b7280',
+      colorInputBackground: isDark ? '#1e293b' : '#ffffff',
+      colorInputText: isDark ? '#f1f5f9' : '#111827',
+      borderRadius: '0.75rem',
+      fontFamily: 'Outfit, Inter, system-ui, sans-serif',
+    },
+  };
+}
 
 /* ── Sign In Page ────────────────────────── */
 export default function SignInPage() {
+  // Detect dark mode reactively by watching the <html> class
+  const [isDark, setIsDark] = useState(() =>
+    document.documentElement.classList.contains('dark')
+  );
+
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="min-h-screen flex bg-slate-50 dark:bg-slate-950 transition-colors duration-300">
       {/* Left brand panel */}
@@ -243,7 +266,7 @@ export default function SignInPage() {
               path="/sign-in"
               signUpUrl="/sign-up"
               forceRedirectUrl="/dashboard"
-              appearance={clerkAppearance}
+              appearance={getClerkAppearance(isDark)}
             />
           </div>
 
@@ -258,3 +281,4 @@ export default function SignInPage() {
     </div>
   );
 }
+

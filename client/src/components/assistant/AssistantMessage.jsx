@@ -235,13 +235,13 @@ export default function AssistantMessage({ message, onPlayAudio, onFillForm, onN
       <div className={cn('flex flex-col max-w-[82%]', isUser ? 'items-end' : 'items-start')}>
         <div
           className={cn(
-            'p-3.5 rounded-2xl text-sm shadow-sm relative group transition-all duration-200',
+            'p-3.5 rounded-2xl text-sm shadow-lg relative group transition-all duration-200',
             isUser
               ? 'bg-primary-550 dark:bg-primary-600 text-white rounded-tr-none'
-              : 'bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/60 text-slate-800 dark:text-slate-200 rounded-tl-none'
+              : 'bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700/60 text-slate-800 dark:text-slate-200 rounded-tl-none'
           )}
         >
-          <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
+          <p className="leading-relaxed text-slate-800 dark:text-slate-200 whitespace-pre-wrap">{message.content}</p>
 
           {/* Context data renderings */}
           {renderDataCard()}

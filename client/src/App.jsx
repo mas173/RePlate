@@ -25,6 +25,7 @@ import NotificationsPage from './pages/NotificationsPage';
 import ProfileSettingsPage from './pages/ProfileSettingsPage';
 import NotFoundPage from './pages/NotFoundPage';
 import { useAppAuth } from './hooks/useAppAuth';
+import { useDarkMode } from './hooks/useDarkMode';
 
 /**
  * Wraps a page with ProtectedRoute + DashboardLayout.
@@ -58,6 +59,8 @@ function DashboardSelector() {
 }
 
 export default function App() {
+  useDarkMode();
+
   return (
     <Routes>
       {/* ── Public ───────────────────────────────────── */}

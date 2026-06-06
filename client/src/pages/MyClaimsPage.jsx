@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Clock, MapPin, CheckCircle, Truck, Package, MessageSquare, Star, X, RefreshCw, ChevronRight } from 'lucide-react';
+import { Calendar, Clock, MapPin, CheckCircle, Truck, Package, MessageSquare, Star, X, RefreshCw, ChevronRight, Navigation } from 'lucide-react';
 import { useAppAuth } from '@/hooks/useAppAuth';
 import { claimsAPI } from '@/services/api';
+import ClaimTrackingMap from '@/components/donations/ClaimTrackingMap';
 import toast from 'react-hot-toast';
 
 const containerVariants = {
@@ -21,6 +22,7 @@ export default function MyClaimsPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeTab, setActiveTab] = useState('active'); // 'active' or 'history'
+  const [expandedClaimId, setExpandedClaimId] = useState(null);
 
   // Rating Modal state
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -253,22 +255,47 @@ export default function MyClaimsPage() {
 
                     {/* Timeline for active claims */}
                     {(claim.status === 'confirmed' || claim.status === 'picked_up') && (
-                      <div className="pt-4 flex items-center gap-2 max-w-md">
-                        <div className="flex items-center gap-1.5 flex-1">
-                          <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</div>
-                          <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">Claim Booked</span>
+                      <div className="pt-4 flex flex-col gap-4">
+                        <div className="flex items-center gap-2 max-w-md">
+                          <div className="flex items-center gap-1.5 flex-1">
+                            <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] font-bold">✓</div>
+                            <span className="text-[10px] font-bold text-slate-700 dark:text-slate-300">Claim Booked</span>
+                          </div>
+                          <div className={`h-0.5 flex-1 ${claim.status === 'picked_up' ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-800'}`} />
+                          <div className="flex items-center gap-1.5 flex-1">
+                            <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                              claim.status === 'picked_up' ? 'bg-emerald-500 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-400'
+                            }`}>{claim.status === 'picked_up' ? '✓' : '2'}</div>
+                            <span className={`text-[10px] font-bold ${claim.status === 'picked_up' ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400'}`}>Picked Up</span>
+                          </div>
+                          <div className="h-0.5 flex-1 bg-slate-200 dark:bg-slate-800" />
+                          <div className="flex items-center gap-1.5 flex-1">
+                            <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-400 flex items-center justify-center text-[10px] font-bold">3</div>
+                            <span className="text-[10px] font-bold text-slate-400">Delivered</span>
+                          </div>
                         </div>
-                        <div className={`h-0.5 flex-1 ${claim.status === 'picked_up' ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-800'}`} />
-                        <div className="flex items-center gap-1.5 flex-1">
-                          <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
-                            claim.status === 'picked_up' ? 'bg-emerald-500 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-400'
-                          }`}>{claim.status === 'picked_up' ? '✓' : '2'}</div>
-                          <span className={`text-[10px] font-bold ${claim.status === 'picked_up' ? 'text-slate-700 dark:text-slate-300' : 'text-slate-400'}`}>Picked Up</span>
-                        </div>
-                        <div className="h-0.5 flex-1 bg-slate-200 dark:bg-slate-800" />
-                        <div className="flex items-center gap-1.5 flex-1">
-                          <div className="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-400 flex items-center justify-center text-[10px] font-bold">3</div>
-                          <span className="text-[10px] font-bold text-slate-400">Delivered</span>
+
+                        {/* Collapsible live tracking panel */}
+                        <div className="pt-3 border-t border-slate-100 dark:border-slate-800/40">
+                          <button
+                            type="button"
+                            onClick={() => setExpandedClaimId(expandedClaimId === claim.id ? null : claim.id)}
+                            className="flex items-center gap-1.5 text-xs font-bold text-primary-500 hover:text-primary-600 focus:outline-none transition-colors"
+                          >
+                            <Navigation className="w-3.5 h-3.5" />
+                            <span>{expandedClaimId === claim.id ? 'Hide Live Map' : 'Track Pickup / Route'}</span>
+                          </button>
+                          
+                          {expandedClaimId === claim.id && (
+                            <div className="mt-3.5 p-0.5 animate-fadeIn">
+                              <ClaimTrackingMap
+                                donationLat={donation.latitude}
+                                donationLng={donation.longitude}
+                                foodName={donation.food_name}
+                                pickupAddress={donation.pickup_address}
+                              />
+                            </div>
+                          )}
                         </div>
                       </div>
                     )}

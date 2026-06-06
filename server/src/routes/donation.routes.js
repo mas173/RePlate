@@ -219,20 +219,26 @@ router.post('/', requireAuth, requireRole('donor', 'admin'), upload.array('image
 
     const categorySuggestion = aiCategorySuggestion || ai_category_suggestion || null;
 
-    // Auto-geocode address to coordinates
-    let latitude = null;
-    let longitude = null;
-    const geocodeQuery = [address, city, state, pincode].filter(Boolean).join(', ');
-    if (geocodeQuery.trim()) {
-      try {
-        const coords = await geocodeAddress(geocodeQuery);
-        if (coords) {
-          latitude = coords.latitude;
-          longitude = coords.longitude;
+    // Parse client-supplied coordinates, falling back to geocoding if unavailable
+    let latitude = req.body.latitude ? parseFloat(req.body.latitude) : null;
+    let longitude = req.body.longitude ? parseFloat(req.body.longitude) : null;
+
+    if (latitude === null || longitude === null || isNaN(latitude) || isNaN(longitude)) {
+      const geocodeQuery = [address, city, state, pincode].filter(Boolean).join(', ');
+      if (geocodeQuery.trim()) {
+        try {
+          const coords = await geocodeAddress(geocodeQuery);
+          if (coords) {
+            latitude = coords.latitude;
+            longitude = coords.longitude;
+          }
+        } catch (geoErr) {
+          console.error('Geocoding failed (non-critical):', geoErr.message);
         }
-      } catch (geoErr) {
-        console.error('Geocoding failed (non-critical):', geoErr.message);
       }
+    } else {
+      latitude = isNaN(latitude) ? null : latitude;
+      longitude = isNaN(longitude) ? null : longitude;
     }
 
     const donationData = {
@@ -372,6 +378,7 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
       name, category, quantity, unit, expiryDate, expiryTime,
       storageCondition, address, city, state, pincode,
       instructions, notes, isVegetarian, isVegan, allergens,
+      latitude, longitude,
     } = req.body;
 
     const updateData = {};
@@ -385,6 +392,9 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
     if (isVegetarian !== undefined) updateData.is_vegetarian = isVegetarian === 'true' || isVegetarian === true;
     if (isVegan !== undefined) updateData.is_vegan = isVegan === 'true' || isVegan === true;
 
+    if (latitude !== undefined) updateData.latitude = latitude ? parseFloat(latitude) : null;
+    if (longitude !== undefined) updateData.longitude = longitude ? parseFloat(longitude) : null;
+
     if (allergens) {
       updateData.allergens = Array.isArray(allergens) ? allergens : allergens.split(',').map((s) => s.trim());
     }
@@ -392,17 +402,19 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
     if (address || state || pincode) {
       updateData.pickup_address = `${address || ''}${state ? ', ' + state : ''}${pincode ? ' - ' + pincode : ''}`;
 
-      // Re-geocode when address changes
-      const geocodeQuery = [address, city, state, pincode].filter(Boolean).join(', ');
-      if (geocodeQuery.trim()) {
-        try {
-          const coords = await geocodeAddress(geocodeQuery);
-          if (coords) {
-            updateData.latitude = coords.latitude;
-            updateData.longitude = coords.longitude;
+      // Re-geocode when address changes AND coordinates are not explicitly updated in the request
+      if (updateData.latitude === undefined || updateData.longitude === undefined) {
+        const geocodeQuery = [address, city, state, pincode].filter(Boolean).join(', ');
+        if (geocodeQuery.trim()) {
+          try {
+            const coords = await geocodeAddress(geocodeQuery);
+            if (coords) {
+              updateData.latitude = coords.latitude;
+              updateData.longitude = coords.longitude;
+            }
+          } catch (geoErr) {
+            console.error('Geocoding failed during patch (non-critical):', geoErr.message);
           }
-        } catch (geoErr) {
-          console.error('Geocoding failed during patch (non-critical):', geoErr.message);
         }
       }
     }
@@ -516,7 +528,9 @@ router.put('/:id', requireAuth, async (req, res, next) => {
       aiAnalysis,
       ai_analysis,
       aiCategorySuggestion,
-      ai_category_suggestion
+      ai_category_suggestion,
+      latitude,
+      longitude
     } = req.body;
 
     const updateData = {};
@@ -529,6 +543,9 @@ router.put('/:id', requireAuth, async (req, res, next) => {
     if (status) updateData.status = status;
     if (isVegetarian !== undefined) updateData.is_vegetarian = isVegetarian === 'true' || isVegetarian === true;
     if (isVegan !== undefined) updateData.is_vegan = isVegan === 'true' || isVegan === true;
+
+    if (latitude !== undefined) updateData.latitude = latitude ? parseFloat(latitude) : null;
+    if (longitude !== undefined) updateData.longitude = longitude ? parseFloat(longitude) : null;
 
     const scoreVal = aiFreshnessScore || ai_freshness_score;
     if (scoreVal !== undefined) {
@@ -562,17 +579,19 @@ router.put('/:id', requireAuth, async (req, res, next) => {
     if (address || state || pincode) {
       updateData.pickup_address = `${address || ''}${state ? ', ' + state : ''}${pincode ? ' - ' + pincode : ''}`;
 
-      // Re-geocode when address changes
-      const geocodeQuery = [address, city, state, pincode].filter(Boolean).join(', ');
-      if (geocodeQuery.trim()) {
-        try {
-          const coords = await geocodeAddress(geocodeQuery);
-          if (coords) {
-            updateData.latitude = coords.latitude;
-            updateData.longitude = coords.longitude;
+      // Re-geocode when address changes AND coordinates are not explicitly updated in the request
+      if (updateData.latitude === undefined || updateData.longitude === undefined) {
+        const geocodeQuery = [address, city, state, pincode].filter(Boolean).join(', ');
+        if (geocodeQuery.trim()) {
+          try {
+            const coords = await geocodeAddress(geocodeQuery);
+            if (coords) {
+              updateData.latitude = coords.latitude;
+              updateData.longitude = coords.longitude;
+            }
+          } catch (geoErr) {
+            console.error('Geocoding failed during put (non-critical):', geoErr.message);
           }
-        } catch (geoErr) {
-          console.error('Geocoding failed during put (non-critical):', geoErr.message);
         }
       }
     }
