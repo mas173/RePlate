@@ -6,7 +6,21 @@ import {
   Utensils, Globe, Leaf, MapPin, Trash2, Soup, Cloud,
   DollarSign, Camera, ShieldCheck, GitMerge, Truck,
   TrendingUp, Quote, Globe2, Heart, Award, Shield,
-  ExternalLink, Mail
+  ExternalLink, Mail,
+  IndianRupee,
+  Cloudy,
+  Salad,
+  ImageUp,
+  BadgeCheck,
+  PackageCheck,
+  ChartNoAxesCombined,
+  BrainCircuit,
+  HeartHandshake,
+  AlarmClock,
+  Road,
+  Send,
+  AlarmCheck,
+  HandHeart
 } from 'lucide-react';
 import mainLogo from '@/assets/images/mainLogo.png';
 import nameLogo from '@/assets/images/name.png';
@@ -65,9 +79,20 @@ function Navbar() {
   };
 
   return (
-    <nav className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
-      scrolled ? 'bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl shadow-md border-b border-brand-border dark:border-slate-800' : 'bg-transparent'
-    }`}>
+    <nav
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled
+          ? `
+        bg-white/10
+        dark:bg-slate-900/20
+        backdrop-blur-2xl
+        border-b
+        border-white/20
+        dark:border-white/10
+        shadow-[0_8px_32px_rgba(0,0,0,0.12)]
+      `
+          : 'bg-transparent'
+        }`}
+    >
       <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-3 shrink-0">
@@ -269,7 +294,7 @@ function Hero() {
             <div className="flex flex-wrap gap-4 mb-10">
               <Link to={isSignedIn ? (role === 'ngo' ? '/available' : '/donate') : '/sign-up'} 
                 className="inline-flex items-center gap-2 bg-brand-forest hover:bg-brand-forest/90 text-white font-bold rounded-xl px-7 py-4 text-base shadow-lg transition-all transform hover:-translate-y-0.5">
-                <Heart className="w-5 h-5 fill-white" />
+                <HandHeart />
                 Donate Food
               </Link>
               <Link to={isSignedIn ? '/dashboard' : '/sign-up'} 
@@ -378,9 +403,9 @@ function StatsBar({ liveStats }) {
 function Problem() {
   const problems = [
     { value: '1.3 Billion Tons', label: 'of food is wasted every year globally', icon: <Trash2 className="w-6 h-6 text-brand-forest" /> },
-    { value: '783 Million', label: 'people are facing hunger worldwide', icon: <Soup className="w-6 h-6 text-brand-forest" /> },
-    { value: '8-10%', label: 'of greenhouse gas emissions come from food waste', icon: <Cloud className="w-6 h-6 text-brand-forest" /> },
-    { value: '$1 Trillion', label: 'worth of edible food is wasted every year', icon: <DollarSign className="w-6 h-6 text-brand-forest" /> }
+    { value: '783 Million', label: 'people are facing hunger worldwide', icon: <Salad className="w-6 h-6 text-brand-forest" /> },
+    { value: '8-10%', label: 'of greenhouse gas emissions come from food waste', icon: <Cloudy className="w-6 h-6 text-brand-forest" /> },
+    { value: '> 1 Trillion', label: 'worth of edible food is wasted every year', icon: <IndianRupee className="w-6 h-6 text-brand-forest" /> }
   ];
 
   return (
@@ -427,11 +452,11 @@ function Solution() {
   const [activeIdx, setActiveIdx] = useState(0);
 
   const solutions = [
-    { title: 'Easy to share', desc: 'Businesses can list surplus food in minutes.', icon: <Camera className="w-5 h-5" /> },
-    { title: 'AI freshness check', desc: 'We use AI to ensure food quality and safety.', icon: <ShieldCheck className="w-5 h-5" /> },
-    { title: 'Smart matching', desc: 'Donations are matched with the right NGO nearby.', icon: <GitMerge className="w-5 h-5" /> },
-    { title: 'Safe delivery', desc: 'Coordinated pickup ensures timely and safe handover.', icon: <Truck className="w-5 h-5" /> },
-    { title: 'Real impact', desc: 'Track your impact through transparent reports.', icon: <TrendingUp className="w-5 h-5" /> }
+    { title: 'Easy to share', desc: 'Businesses can list surplus food in minutes.', icon: <ImageUp className="w-5 h-5" /> },
+    { title: 'AI freshness check', desc: 'We use AI to ensure food quality and safety.', icon: <BrainCircuit className="w-5 h-5" /> },
+    { title: 'Smart matching', desc: 'Donations are matched with the right NGO nearby.', icon: <CheckCircle className="w-5 h-5" /> },
+    { title: 'Safe delivery', desc: 'Coordinated pickup ensures timely and safe handover.', icon: <PackageCheck className="w-5 h-5" /> },
+    { title: 'Real impact', desc: 'Track your impact through transparent reports.', icon: <ChartNoAxesCombined className="w-5 h-5" /> }
   ];
 
   return (
@@ -466,11 +491,11 @@ function Solution() {
                       <span className="text-2xs text-neutralText-muted">Under 2 minutes</span>
                     </div>
                     <div className="space-y-1.5">
-                      <div className="h-8 bg-brand-mint dark:bg-slate-900 rounded-lg flex items-center px-3 text-xs font-medium text-neutralText-main dark:text-white border border-brand-sage/40">
-                        🥗 Veggie Salads & Bowls (15 meals)
+                      <div className="h-8 bg-brand-mint gap-2 dark:bg-slate-900 rounded-lg flex items-center px-3 text-xs font-medium text-neutralText-main dark:text-white border border-brand-sage/40">
+                        <Salad size="16" /> Veggie Salads & Bowls (15 meals)
                       </div>
-                      <div className="h-8 bg-brand-mint dark:bg-slate-900 rounded-lg flex items-center px-3 text-xs font-medium text-neutralText-main dark:text-white border border-brand-sage/40">
-                        ⏰ Pick up today before 9:00 PM
+                      <div className="h-8 bg-brand-mint gap-2 dark:bg-slate-900 rounded-lg flex items-center px-3 text-xs font-medium text-neutralText-main dark:text-white border border-brand-sage/40">
+                        <AlarmClock size="16" /> Pick up today before 9:00 PM
                       </div>
                     </div>
                     <button className="w-full bg-brand-green text-white font-bold text-xs py-2 rounded-xl shadow-md cursor-default">
@@ -493,7 +518,9 @@ function Solution() {
                 {activeIdx === 2 && (
                   <div className="space-y-3 animate-fade-in">
                     <div className="flex items-center justify-between text-xs border-b border-slate-100 dark:border-slate-800 pb-2">
-                      <span className="font-bold text-brand-forest dark:text-brand-sage">Smart Route Match</span>
+                      <span className="font-bold text-brand-forest dark:text-brand-sage flex items-center gap-1">
+                        <Road size="16" /> Smart Route Match
+                      </span>
                       <span className="text-brand-green font-bold">NGO Notified</span>
                     </div>
                     <div className="flex items-center justify-between bg-brand-mint dark:bg-slate-900 p-3 rounded-xl border border-brand-sage/30">
@@ -508,8 +535,12 @@ function Solution() {
                 {activeIdx === 3 && (
                   <div className="space-y-3 animate-fade-in">
                     <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-neutralText-main dark:text-white">Real-time Delivery</span>
-                      <span className="text-brand-green font-bold">Arriving in 14 mins</span>
+                      <span className="font-bold text-neutralText-main dark:text-white flex items-center gap-1">
+                        <Send size="16" /> Real-time Delivery
+                      </span>
+                      <span className="text-brand-green font-bold flex items-center gap-1">
+                        <AlarmCheck size="16" />Arriving in 14 mins
+                      </span>
                     </div>
                     <div className="relative w-full h-2 bg-slate-100 dark:bg-slate-850 rounded-full overflow-hidden">
                       <div className="absolute top-0 left-0 h-full bg-brand-green rounded-full animate-pulse" style={{ width: '75%' }} />
@@ -658,16 +689,16 @@ function GlobalMovement() {
           <div className="rounded-[32px] bg-accent-cream dark:bg-slate-900 p-8 border border-accent-yellow/45 dark:border-slate-800 flex flex-col justify-between hover:shadow-xl transition-all md:col-span-2 lg:col-span-2 relative overflow-hidden">
             <div className="relative z-10 max-w-[440px]">
               <h3 className="text-2xl font-bold font-display text-neutralText-main dark:text-white tracking-tight mb-2">Small actions. Global impact.</h3>
-              <p className="text-sm text-neutralText-sub dark:text-slate-300 leading-relaxed mb-6">
-                Your contribution can change lives and protect our planet.
+              <p className="text-sm text-neutralText-sub dark:text-slate-300 leading-relaxed mt-6 mb-6">
+                Your contribution can change lives and protect our planet. <br /> Join the movement to end food waste and hunger today.
               </p>
-              <Link to="/sign-up" className="inline-flex items-center bg-neutralText-main hover:bg-neutralText-main/90 text-white font-bold rounded-xl px-5 py-3 text-xs shadow-md transition-all">
-                Be a part of it
+              <Link to="/sign-up" className="inline-flex items-center gap-2 bg-neutralText-main hover:bg-neutralText-main/90 dark:bg-slate-800 dark:hover:bg-slate-800/90 text-white font-bold rounded-xl px-5 py-3 text-sm shadow-md transition-all">
+                Be a part of it<BadgeCheck />
               </Link>
             </div>
             {/* Minimal line/circle decoration or illustration */}
-            <div className="absolute right-0 bottom-0 opacity-20 pointer-events-none transform translate-y-4">
-              <Globe2 className="w-40 h-40 text-brand-forest" />
+            <div className="absolute right-2 bottom-4 opacity-20 pointer-events-none transform translate-y-4">
+              <HeartHandshake className="w-40 h-40 text-brand-forest" />
             </div>
           </div>
 
