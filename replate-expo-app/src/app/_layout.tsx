@@ -4,9 +4,8 @@
 
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
-import { Slot, useRouter, useSegments } from 'expo-router';
+import { Slot, useRouter, useSegments, DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import { ClerkProvider, ClerkLoaded, useAuth } from '@clerk/clerk-expo';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { tokenCache } from '@/services/tokenCache';
