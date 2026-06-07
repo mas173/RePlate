@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "RePlate",
+    "slug": "replate-expo-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/mainLogo.png",
+    "scheme": "replate",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.replate.app",
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.replate.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#1F5A3A",
+        "foregroundImage": "./assets/images/mainLogo.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/mainLogo.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#1F5A3A",
+          "android": {
+            "image": "./assets/images/mainLogo.png",
+            "imageWidth": 100
+          }
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "replate-expo-app"
+      }
+    }
+  }
+}
