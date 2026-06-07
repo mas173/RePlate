@@ -1,521 +1,360 @@
 <div align="center">
 
-# RePlate
+# 🌿 RePlate
 
-### AI-Powered Food Waste Reduction Platform
+### AI-Powered Food Waste Reduction & Redistribution Platform
 
 [![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=white)](https://react.dev)
 [![Express](https://img.shields.io/badge/Express-4-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
 [![Supabase](https://img.shields.io/badge/Supabase-2-3FCF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com)
 [![Clerk](https://img.shields.io/badge/Clerk-Auth-6C47FF?style=flat-square&logo=clerk&logoColor=white)](https://clerk.com)
-[![Gemini AI](https://img.shields.io/badge/Gemini-AI-4285F4?style=flat-square&logo=google&logoColor=white)](https://ai.google.dev)
+[![Google Gemini](https://img.shields.io/badge/Gemini-AI-4285F4?style=flat-square&logo=google&logoColor=white)](https://ai.google.dev)
+[![Sarvam AI](https://img.shields.io/badge/Sarvam_AI-Voice-FF5722?style=flat-square&logo=microphone&logoColor=white)](https://www.sarvam.ai)
+[![Leaflet Map](https://img.shields.io/badge/Leaflet-Map-199900?style=flat-square&logo=leaflet&logoColor=white)](https://leafletjs.com)
 
-**RePlate** connects restaurants, hotels, grocery stores, hostels, and event organizers with NGOs and shelters to redistribute surplus food before it expires — powered by AI for intelligent food freshness analysis and urgency assessment.
+**RePlate** connects restaurants, hotels, grocery stores, and event organizers (Donors) with NGOs and shelters to redistribute surplus food before it expires. Powered by Google Gemini AI for freshness/urgency assessment, MapTiler & React-Leaflet for location intelligence, and Sarvam AI for a voice-activated multilingual interface.
 
-[Features](#features) • [Tech Stack](#tech-stack) • [Getting Started](#getting-started) • [Project Structure](#project-structure) • [Database Setup](#database-setup) • [API Reference](#api-reference) • [Contributing](#contributing)
+[✨ Features](#-key-features) • [🛠️ Tech Stack](#️-tech-stack) • [📁 Structure](#-project-structure) • [🚀 Getting Started](#-getting-started) • [🔑 Environment](#-environment-variables) • [🗄️ Database Setup](#-database-setup) • [🔌 API Reference](#-api-reference) • [🍃 Impact Formulas](#-environmental-impact-formulas)
 
 </div>
 
 ---
 
 > [!NOTE]
-> **Development Status:** Phase 0 (External Service Setup) and Phase 1 (Foundation & Auth) are **Done**! You can track the current project status and future milestones in the [Full Development Roadmap](./development_plan.md).
+> **Project Status:** All milestones including Core Authentication, Donor Flow, Google Gemini Freshness AI, NGO claiming, Resend notification integrations, **Sarvam AI multilingual voice interaction**, and **interactive maps/geolocations** are fully implemented and verified!
 
 ---
 
-## Features
+## 📸 Visual Walkthrough
 
-| Feature | Description |
-| :--- | :--- |
-| **Role-Based Auth** | Three roles — Donor, NGO, Admin — with Clerk authentication |
-| **Food Donation Upload** | Image upload with drag & drop and multi-image support |
-| **AI Freshness Analysis** | Gemini AI analyzes food images for freshness score and urgency level |
-| **Analytics Dashboard** | Interactive charts for donations, impact metrics, and trends |
-| **Expiry Alerts** | Automated notifications for expiring donations via email |
-| **NGO Claiming System** | NGOs can browse, claim, and track food donations |
-| **Impact Tracking** | Meals saved, CO2 reduced, water saved, land preserved |
-| **Dark Mode** | Full dark mode support with system preference detection |
-| **Responsive Design** | Works on desktop, tablet, and mobile |
+
+#### 🖥️ Landing Page 
+<img width="1785" height="908" alt="Screenshot 2026-06-07 141324" src="https://github.com/user-attachments/assets/ec120730-61e8-4e93-9914-00cf29e11d2b" />
+
+
+#### 📊 Donor Dashboard 
+<img width="1917" height="910" alt="Screenshot 2026-06-07 144608" src="https://github.com/user-attachments/assets/d447730d-5513-4277-959b-be1772801ac1" />
+
+
+#### 📈 Analytics & Environmental Handprint
+<img width="1918" height="921" alt="Screenshot 2026-06-07 144731" src="https://github.com/user-attachments/assets/5d842ecf-e111-4cf0-96af-664b072b64b8" />
+
+
+#### 🗺️ Geographic Hotspot Heatmap & Admin Panel 
+<img width="1914" height="904" alt="Screenshot 2026-06-07 141913" src="https://github.com/user-attachments/assets/30218eec-fecd-4d79-99ee-95213982044f" />
+
 
 ---
 
-## Tech Stack
+## ✨ Key Features
+
+| Feature Group | Description | Technologies |
+| :--- | :--- | :--- |
+| **👥 Role-Based Workflows** | Three customized panels (Donor, NGO, Admin) secured via Clerk authentication and database role guards. | Clerk Auth, React Router |
+| **🧠 AI Freshness Analysis** | Evaluates uploaded food images using Google Gemini to estimate a freshness score (0-100%), auto-detect category, and detail potential shelf-life. | Gemini API, Supabase Storage |
+| **🗣️ Multilingual Voice Assistant** | Hands-free floating voice assistant powered by Sarvam AI. Transcribes regional audio (Saaras v3 STT), generates actions (Gemini), queries live database context, and replies in speech (Bulbul v3 TTS). Supports English and 10 Indian regional languages. | Sarvam AI, Google Gemini, Web Audio API |
+| **🗺️ Map & Location Intelligence** | Live interactive maps using MapTiler tile layers. Features address-based geocoding with caching/throttling, exact geo-picking for donors, nearby browse list for NGOs, and supply-vs-demand heatmaps for admins. | React-Leaflet, MapTiler API |
+| **📊 Real-time Analytics** | Rich data charts displaying donation trends, categories, and leaders. Translates weight rescued into gasoline miles offset, phone charges, shower minutes, and agricultural land conserved. | Recharts, Supabase RPC Functions |
+| **🔔 Alerts & Automated Crons** | Background cron checks auto-expire stale listings. Resend broadcasts notification updates to local NGOs when fresh food is uploaded in their city. | Node-cron, Resend Mail API |
+
+---
+
+## 🛠️ Tech Stack
 
 ### Frontend
-- **React 19** — UI library
-- **Vite 8** — Build tool
-- **Tailwind CSS 3.4** — Utility-first CSS
-- **React Router 7** — Client-side routing
-- **Recharts** — Data visualization
-- **Framer Motion** — Animations
-- **Lucide React** — Icon library
-- **React Hot Toast** — Notifications
-- **React Dropzone** — File upload
+- **React 19** & **Vite 8** — Reactive SPA framework and fast development bundler.
+- **Tailwind CSS 3.4** — Utility-first styling with system-aware Dark Mode.
+- **React-Leaflet** & **MapTiler** — Interactive mapping, markers, and path tracking.
+- **Recharts** — Visualization engine for donation trends, categories, and metrics.
+- **Framer Motion** — Smooth card hover, drawer slide, and modal fade transitions.
+- **Lucide React** & **React Hot Toast** — Modern typography icons and toast alerts.
+- **React Dropzone** — Drag-and-drop file upload with multi-image support.
 
 ### Backend
-- **Express.js 4** — API framework
-- **Clerk Express** — Authentication middleware
-- **Multer** — File upload handling
-- **Express Rate Limit** — API rate limiting
-- **Express Validator** — Input validation
-- **Helmet** — Security headers
-- **Morgan** — HTTP logging
-- **Cron** — Scheduled tasks (expiry checks)
+- **Node.js** & **Express.js 4** — Lightweight, asynchronous REST API.
+- **Clerk Express** — Server-side JWT token verification.
+- **Multer** — Middleware for handling multipart/form-data audio/image buffers.
+- **Express Rate Limit** & **Helmet** — Prevents DDoS and configures security headers.
+- **Node-cron** — Runs periodic tasks (checking expiration dates).
 
 ### Services
-- **Clerk** — Authentication & user management
-- **Supabase** — Database (PostgreSQL) & file storage
-- **Google Gemini AI** — Food freshness analysis
-- **Resend** — Transactional emails
+- **Clerk** — Managed sign-in, user profiles, and public role metadata.
+- **Supabase** — PostgreSQL relational database, custom SQL functions, and file storage.
+- **Google Gemini AI** — Food analysis (`gemini-2.5-flash` model for speech intents).
+- **Sarvam AI** — `saaras:v3` (Speech-to-Text) and `bulbul:v3` (Text-to-Speech).
+- **Resend** — Transactional, templated HTML emailing.
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```
 replate/
 ├── client/                          # React Frontend (Vite)
 │   ├── public/
-│   │   └── favicon.svg
+│   │   ├── favicon.svg
+│   │   └── icons.svg
 │   ├── src/
-│   │   ├── assets/                  # Static assets (images, fonts)
+│   │   ├── assets/                  # Static assets (images, logos)
+│   │   │   └── images/
 │   │   ├── components/
-│   │   │   ├── analytics/           # Chart & data viz components
-│   │   │   ├── auth/                # ProtectedRoute, RoleGuard
-│   │   │   ├── dashboard/           # Dashboard widgets & cards
-│   │   │   ├── donations/           # Donation cards, lists, forms
-│   │   │   ├── layout/              # Navbar, Sidebar, Footer, DashboardLayout
-│   │   │   └── ui/                  # Reusable UI (Button, Card, Modal, Badge)
-│   │   ├── hooks/                   # Custom React hooks
-│   │   │   ├── useAppAuth.js        # Auth & role management hook
-│   │   │   └── useDarkMode.js       # Dark mode toggle hook
-│   │   ├── lib/                     # Third-party client configs
-│   │   │   └── supabase.js          # Supabase client initialization
-│   │   ├── pages/                   # Page components (one per route)
-│   │   │   ├── LandingPage.jsx
+│   │   │   ├── analytics/           # Personal & platform impact graphs
+│   │   │   ├── assistant/           # Floating voice assistant, audio message visualization
+│   │   │   ├── auth/                # ProtectedRoute, RoleGuard wrappers
+│   │   │   ├── dashboard/           # Action panels & overview cards
+│   │   │   ├── donations/           # Donation creation, details, list grids
+│   │   │   ├── layout/              # Sidebar (role-based), Topbar, DashboardLayout
+│   │   │   └── ui/                  # Atom widgets (button, modal, badge, inputs)
+│   │   ├── hooks/                   # Custom React hooks (useAppAuth, useDarkMode)
+│   │   ├── lib/                     # Client configs (supabaseClient)
+│   │   ├── pages/                   # Main page components
+│   │   │   ├── LandingPage.jsx      # Home layout with stats & CTAs
+│   │   │   ├── SignInPage.jsx / SignUpPage.jsx
+│   │   │   ├── OnboardingPage.jsx   # Selects role during first registration
 │   │   │   ├── DonorDashboard.jsx
 │   │   │   ├── NGODashboard.jsx
 │   │   │   ├── AdminDashboard.jsx
-│   │   │   ├── FoodUploadPage.jsx
-│   │   │   ├── AnalyticsPage.jsx
-│   │   │   ├── ProfileSettingsPage.jsx
-│   │   │   └── NotFoundPage.jsx
-│   │   ├── services/                # API client functions
-│   │   │   └── api.js               # Centralized API client
-│   │   ├── store/                   # State management (if needed)
-│   │   ├── styles/                  # Additional CSS files
-│   │   ├── utils/
-│   │   │   ├── constants.js         # App-wide constants & enums
-│   │   │   └── helpers.js           # Utility functions
-│   │   ├── App.jsx                  # Root component with routes
-│   │   ├── main.jsx                 # Entry point with providers
-│   │   └── index.css                # Global styles & Tailwind
-│   ├── .env.example
-│   ├── index.html
-│   ├── package.json
-│   ├── postcss.config.js
-│   ├── tailwind.config.js
-│   └── vite.config.js
+│   │   │   ├── AdminUsersPage.jsx   # Admin management of active accounts & roles
+│   │   │   ├── AdminDonationsPage.jsx # Moderates all donations listed
+│   │   │   ├── AdminAnalyticsPage.jsx # Deep chart dashboards for administrators
+│   │   │   ├── AvailableFoodPage.jsx # NGO browsing view for available food
+│   │   │   ├── MyClaimsPage.jsx     # NGO claim history and status timelines
+│   │   │   ├── FoodUploadPage.jsx   # Step-by-step donation form (details, images, location picker)
+│   │   │   ├── AnalyticsPage.jsx    # Environmental handprint & charts
+│   │   │   ├── NotificationsPage.jsx# In-app notifications listing
+│   │   │   └── ProfileSettingsPage.jsx
+│   │   ├── services/                # Axios client configurations
+│   │   └── utils/                   # Unit constants & conversion calculations
+│   └── package.json
 │
 ├── server/                          # Express Backend
 │   ├── src/
-│   │   ├── config/
-│   │   │   ├── supabase.js          # Supabase admin & public clients
-│   │   │   ├── gemini.js            # Gemini AI model config
-│   │   │   └── resend.js            # Resend email client
-│   │   ├── controllers/             # Route handler logic
-│   │   ├── middleware/
-│   │   │   ├── auth.js              # Clerk JWT verification & role check
-│   │   │   ├── errorHandler.js      # Global error handling
-│   │   │   └── upload.js            # Multer image upload config
-│   │   ├── routes/
-│   │   │   ├── auth.routes.js       # /api/auth — user sync, webhooks
-│   │   │   ├── donation.routes.js   # /api/donations — CRUD
-│   │   │   ├── claim.routes.js      # /api/claims — NGO claiming
-│   │   │   ├── analytics.routes.js  # /api/analytics — stats & trends
-│   │   │   ├── ai.routes.js         # /api/ai — freshness analysis
-│   │   │   ├── notification.routes.js # /api/notifications
-│   │   │   ├── user.routes.js       # /api/users — profile & settings
-│   │   │   └── admin.routes.js      # /api/admin — admin operations
-│   │   ├── services/
-│   │   │   ├── ai.service.js        # Gemini API interactions
-│   │   │   ├── email.service.js     # Resend email templates
-│   │   │   └── storage.service.js   # Supabase Storage operations
-│   │   ├── utils/
-│   │   │   └── helpers.js           # Server utility functions
-│   │   └── index.js                 # Express app entry point
-│   ├── .env.example
+│   │   ├── config/                  # Services client initialization (supabaseAdmin, gemini, resend)
+│   │   ├── controllers/             # Complex request handlers
+│   │   │   └── webhook.controller.js# Clerk webhook synchronization listener
+│   │   ├── middleware/              # Auth context injection, error bounds, upload limits
+│   │   ├── routes/                  # Express Router routes
+│   │   │   ├── admin.routes.js      # /api/admin — Moderator access
+│   │   │   ├── ai.routes.js         # /api/ai — Freshness and categorization
+│   │   │   ├── analytics.routes.js  # /api/analytics — Overview counters
+│   │   │   ├── assistant.routes.js  # /api/assistant — Sarvam voice and Gemini parsing
+│   │   │   ├── auth.routes.js       # /api/auth — Synchronization endpoint
+│   │   │   ├── claim.routes.js      # /api/claims — NGO claiming and pickup updates
+│   │   │   ├── donation.routes.js   # /api/donations — CRUD routes for posts
+│   │   │   ├── notification.routes.js# /api/notifications
+│   │   │   ├── user.routes.js       # /api/users — Profiling settings
+│   │   │   └── webhook.routes.js    # Clerk svix listeners
+│   │   ├── services/                # Business logic helper layers
+│   │   │   ├── ai.service.js        # Gemini multi-modal prompts
+│   │   │   ├── assistant.service.js # Voice processing & DB context extraction
+│   │   │   ├── cron.service.js      # Expiry check automation
+│   │   │   ├── email.service.js     # Resend HTML email generation
+│   │   │   ├── geocoding.service.js # MapTiler geocoding with cash & intervals
+│   │   │   └── storage.service.js   # Image uploading & removal
+│   │   └── index.js                 # Express server bootstrapper
 │   └── package.json
 │
-├── supabase/                        # Database schema & migrations
+├── supabase/                        # Database scripts
 │   └── migrations/
-│       └── 001_initial_schema.sql   # Full database schema
-│
-├── .env.example                     # Root env template (all variables)
-├── .gitignore
-├── package.json                     # Root scripts (concurrent dev)
-└── README.md                        # This file
+│       └── 001_initial_schema.sql   # Postgres schemas (tables, enums, RPCs, policies)
 ```
 
 ---
 
-## Getting Started
+## 🚀 Getting Started
 
 ### Prerequisites
-
 - **Node.js** >= 18.x
 - **npm** >= 9.x
-- Accounts on: [Clerk](https://clerk.com), [Supabase](https://supabase.com), [Google AI Studio](https://aistudio.google.com), [Resend](https://resend.com)
+- Service accounts on: **Clerk**, **Supabase**, **Google AI Studio**, **Resend**, and **MapTiler**
 
-### 1. Clone the Repository
-
+### 1. Clone & Install
 ```bash
+# Clone the repository
 git clone https://github.com/your-org/replate.git
 cd replate
-```
 
-### 2. Install Dependencies
-
-```bash
-# Install all dependencies (root + client + server)
+# Install dependencies for root, client, and server simultaneously
 npm run install:all
-
-# Or install individually:
-npm install            # Root (concurrently)
-cd client && npm install
-cd ../server && npm install
 ```
 
-### 3. Configure Environment Variables
-
+### 2. Configure Environment Variables
+Copy and paste the template files into `.env` configurations:
 ```bash
-# Copy the example env files
+# Root env (combines client and server settings for reference)
 cp .env.example .env
+
+# Client env configuration
 cp client/.env.example client/.env
+
+# Server env configuration
 cp server/.env.example server/.env
 ```
+Fill in all keys inside `client/.env` and `server/.env`. (See [Environment Variables](#-environment-variables) for details).
 
-Fill in the values in each `.env` file. See [Environment Variables](#environment-variables) below.
+### 3. Initialize Supabase
+1. Go to your [Supabase Console](https://supabase.com/dashboard).
+2. Open the **SQL Editor** tab of your project.
+3. Paste the contents of `supabase/migrations/001_initial_schema.sql` and click **Run**.
+4. Navigate to **Storage** → Create a public bucket named `donation-images` (set limit to 5MB, allowing standard images).
+5. In storage policies, allow public download, and allow authenticated users (`auth.role() = 'authenticated'`) to insert.
 
-### 4. Set Up the Database
-
-See the [Database Setup](#database-setup) section below.
-
-### 5. Run the Development Servers
-
+### 4. Run Locally
+Execute the concurrent dev script from the root directory:
 ```bash
-# Run both client and server concurrently (from root)
+# Fires up Vite on http://localhost:5173 and Express on http://localhost:5000
 npm run dev
-
-# Or run individually:
-npm run dev:client     # Frontend on http://localhost:5173
-npm run dev:server     # Backend on http://localhost:5000
 ```
-
-### 6. Verify Everything Works
-
-- Frontend: http://localhost:5173
-- Backend Health Check: http://localhost:5000/api/health
 
 ---
 
-## Environment Variables
+## 🔑 Environment Variables
 
-### Client (`client/.env`)
-
-| Variable | Description | Where to Get |
+### Client Config (`client/.env`)
+| Variable | Description | Source |
 | :--- | :--- | :--- |
-| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk frontend API key | [Clerk Dashboard](https://dashboard.clerk.com) → API Keys |
-| `VITE_SUPABASE_URL` | Supabase project URL | [Supabase Dashboard](https://supabase.com/dashboard) → Settings → API |
-| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous key | Supabase Dashboard → Settings → API |
-| `VITE_API_BASE_URL` | Backend API URL | Default: `http://localhost:5000/api` |
+| `VITE_CLERK_PUBLISHABLE_KEY` | Clerk public authentication token | Clerk dashboard → API Keys |
+| `VITE_SUPABASE_URL` | Endpoint URL of the Supabase API | Supabase dashboard → Settings → API |
+| `VITE_SUPABASE_ANON_KEY` | Anonymous public API key | Supabase dashboard → Settings → API |
+| `VITE_API_BASE_URL` | Port mapping for Express routes | Default: `http://localhost:5000/api` |
+| `VITE_MAPTILER_API_KEY` | Public MapTiler maps key | [MapTiler Account API Keys](https://cloud.maptiler.com/) |
 
-### Server (`server/.env`)
-
-| Variable | Description | Where to Get |
+### Server Config (`server/.env`)
+| Variable | Description | Source |
 | :--- | :--- | :--- |
-| `PORT` | Server port | Default: `5000` |
-| `NODE_ENV` | Environment | `development` / `production` |
-| `CLERK_SECRET_KEY` | Clerk backend secret | Clerk Dashboard → API Keys |
-| `CLERK_PUBLISHABLE_KEY` | Clerk publishable key | Clerk Dashboard → API Keys |
-| `CLERK_WEBHOOK_SECRET` | Clerk webhook signing secret | Clerk Dashboard → Webhooks |
-| `SUPABASE_URL` | Supabase project URL | Supabase Dashboard → Settings → API |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (admin) | Supabase Dashboard → Settings → API |
-| `SUPABASE_ANON_KEY` | Supabase anonymous key | Supabase Dashboard → Settings → API |
-| `GEMINI_API_KEY` | Google Gemini API key | [Google AI Studio](https://aistudio.google.com/apikey) |
-| `RESEND_API_KEY` | Resend email API key | [Resend Dashboard](https://resend.com/api-keys) |
-| `RESEND_FROM_EMAIL` | Sender email address | Must be verified in Resend |
-| `CLIENT_URL` | Frontend URL for CORS | Default: `http://localhost:5173` |
+| `PORT` | Local runtime port | Default: `5000` |
+| `NODE_ENV` | Mode of operation | `development` / `production` |
+| `CLERK_SECRET_KEY` | Backend private authentication key | Clerk dashboard → API Keys |
+| `CLERK_PUBLISHABLE_KEY` | Clerk public key counterpart | Clerk dashboard → API Keys |
+| `CLERK_WEBHOOK_SECRET` | Signing secret for sync listeners | Clerk dashboard → Webhooks (Svix) |
+| `SUPABASE_URL` | Root project url | Supabase dashboard → Settings → API |
+| `SUPABASE_SERVICE_ROLE_KEY`| Database administrator service key | Supabase dashboard → Settings → API |
+| `SUPABASE_ANON_KEY` | Anonymous key counterpart | Supabase dashboard → Settings → API |
+| `GEMINI_API_KEY` | Key for core image freshness analysis | [Google AI Studio](https://aistudio.google.com/apikey) |
+| `GEMINI_ASSISTANT_KEY` | (Optional) Separate key for voice intents | Google AI Studio |
+| `SARVAM_API` | Private key for STT & TTS | [Sarvam AI Console](https://dashboard.sarvam.ai/) |
+| `MAPTILER_API_KEY` | Server key for geocode address parsing | MapTiler Cloud Account |
+| `RESEND_API_KEY` | Transactional emails routing key | [Resend Dashboard](https://resend.com/api-keys) |
+| `RESEND_FROM_EMAIL` | Sender address verified in DNS | Default: `notifications@yourdomain.com` |
+| `CLIENT_URL` | Cross-Origin Resource URL mapping | Default: `http://localhost:5173` |
 
 ---
 
-## Database Setup
+## 🗄️ Database Setup
 
-### Option A: Supabase SQL Editor (Recommended for quick start)
+### Migrated Tables
+- `profiles`: Synced with Clerk profiles. Stores geolocation coordinates, active status, role (`donor`, `ngo`, `admin`), contact coordinates, and email settings.
+- `donations`: Food listings referencing the posting donor. Stores quantities, expiry timestamps, urgency labels, images array, geocoded coordinates, and Gemini AI analysis JSON payload.
+- `claims`: Links a claimed donation to the claimer NGO. Manages statuses: `pending`, `confirmed`, `picked_up`, `delivered`, `cancelled`.
+- `notifications`: Keeps track of in-app alert flags.
+- `impact_logs`: Stores weight metrics, meal counts, and carbon reduction estimates upon delivery completion.
+- `audit_logs`: Administrator logging for system oversight.
 
-1. Go to your [Supabase Dashboard](https://supabase.com/dashboard)
-2. Navigate to **SQL Editor**
-3. Open the file `supabase/migrations/001_initial_schema.sql`
-4. Copy the entire contents and paste into the SQL Editor
-5. Click **Run** to execute
+### Custom PostgreSQL RPC Functions
+The database schema exposes functions callable via the Supabase Client:
+- `get_platform_stats()`: Returns platform-wide aggregate counts.
+- `get_user_impact(p_user_id)`: Summarizes environmental savings for a specific user ID.
+- `expire_old_donations()`: Auto-transitions overdue listings from `available` to `expired`.
 
-### Option B: Supabase CLI
-
-```bash
-# Install Supabase CLI
-npm install -g supabase
-
-# Login to Supabase
-supabase login
-
-# Link to your project
-supabase link --project-ref your-project-id
-
-# Push the migration
-supabase db push
-```
-
-### What the Migration Creates
-
-#### Tables
-| Table | Description |
-| :--- | :--- |
-| `profiles` | User profiles synced from Clerk (donors, NGOs, admins) |
-| `donations` | Food donation listings with images, AI analysis, and status |
-| `claims` | NGO claims on donations with pickup tracking |
-| `notifications` | In-app notifications for all users |
-| `impact_logs` | Environmental impact records per completed donation |
-| `audit_logs` | Admin audit trail for all platform actions |
-
-#### Enums (Custom Types)
-| Type | Values |
-| :--- | :--- |
-| `user_role` | `donor`, `ngo`, `admin` |
-| `donation_status` | `available`, `claimed`, `picked_up`, `delivered`, `expired`, `cancelled` |
-| `urgency_level` | `critical`, `high`, `medium`, `low` |
-| `food_category` | `cooked_meals`, `raw_produce`, `bakery`, `dairy`, `beverages`, `packaged`, `fruits`, `grains`, `meat`, `other` |
-| `storage_condition` | `room_temp`, `refrigerated`, `frozen`, `heated` |
-| `claim_status` | `pending`, `confirmed`, `picked_up`, `delivered`, `cancelled` |
-| `notification_type` | `donation_alert`, `claim_update`, `expiry_warning`, `system`, `achievement` |
-
-#### Row Level Security (RLS)
-All tables have RLS enabled with policies for:
-- **Profiles**: Public read, self-update only
-- **Donations**: Public read, donor-only create/update/delete
-- **Claims**: Participant-based access
-- **Notifications**: User-only access to their own notifications
-- **Impact Logs**: Public read
-- **Audit Logs**: Admin-only access
-
-#### Database Functions
-| Function | Description |
-| :--- | :--- |
-| `get_platform_stats()` | Returns platform-wide impact statistics |
-| `get_user_impact(user_id)` | Returns impact stats for a specific user |
-| `expire_old_donations()` | Auto-expires donations past their expiry date |
-
-### Supabase Storage Setup
-
-1. Go to Supabase Dashboard → **Storage**
-2. Create a new **public bucket** called `donation-images`
-3. Set max upload size to **5MB**
-4. Add storage policies:
-   - **SELECT (download)**: Allow public access → Policy: `true`
-   - **INSERT (upload)**: Allow authenticated users → Policy: `auth.role() = 'authenticated'`
-   - **DELETE**: Allow owner/admin
-
-### Setting Up Clerk User Roles
-
-In your Clerk Dashboard:
-1. Go to **Users** → Click a user → **Public Metadata**
-2. Add the role field:
+### Setting Admin Privileges
+To configure accounts as platform administrators, set the role inside the Clerk public metadata:
 ```json
 {
-  "role": "donor"
+  "role": "admin"
 }
 ```
-Valid roles: `donor`, `ngo`, `admin`
 
 ---
 
-## API Reference
+## 🔌 API Reference
 
-### Base URL
-```
-http://localhost:5000/api
-```
-
-### Authentication
-All protected routes require a `Bearer` token in the `Authorization` header:
-```
+### Authentication Header
+Secure API calls by appending the Clerk session authorization JWT:
+```http
 Authorization: Bearer <clerk_session_token>
 ```
 
-### Endpoints
+### Endpoints List
 
-#### Health
-| Method | Endpoint | Description | Auth |
-| :--- | :--- | :--- | :--- |
-| GET | `/health` | API health check | No |
+#### 🏥 System Health
+- `GET /api/health` — Checks database and server connectivity.
 
-#### Auth
-| Method | Endpoint | Description | Auth |
-| :--- | :--- | :--- | :--- |
-| POST | `/auth/sync` | Sync Clerk user with Supabase | Yes |
-| POST | `/auth/webhook` | Clerk webhook handler | Signed |
+#### 🔐 Auth Integration
+- `POST /api/auth/sync` — Forces user synchronization with profiles table.
+- `POST /api/webhook` — Clerk svix webhook listener (processes deletes, updates, signups).
 
-#### Donations
-| Method | Endpoint | Description | Auth | Role |
-| :--- | :--- | :--- | :--- | :--- |
-| GET | `/donations` | List donations | Yes | Any |
-| GET | `/donations/:id` | Get donation details | Yes | Any |
-| POST | `/donations` | Create donation | Yes | Donor |
-| PUT | `/donations/:id` | Update donation | Yes | Owner |
-| PATCH | `/donations/:id/status` | Update status | Yes | Owner/Admin |
-| DELETE | `/donations/:id` | Delete donation | Yes | Owner/Admin |
+#### 🍎 Donations Management
+- `GET /api/donations` — Lists filtered available donations (role-restricted bounds).
+- `POST /api/donations` — Creates a donation (Donor/Admin only, handles file upload).
+- `GET /api/donations/:id` — Retreives details and claim history.
+- `PATCH /api/donations/:id` — Edits details (only if status is `available`).
+- `PATCH /api/donations/:id/status` — Updates status (Donor/Admin only).
+- `DELETE /api/donations/:id` — Removes listing and associated images from bucket.
 
-#### Claims
-| Method | Endpoint | Description | Auth | Role |
-| :--- | :--- | :--- | :--- | :--- |
-| GET | `/claims` | List claims | Yes | Any |
-| POST | `/claims` | Claim a donation | Yes | NGO |
-| PATCH | `/claims/:id/status` | Update claim status | Yes | Participant |
-| DELETE | `/claims/:id` | Cancel claim | Yes | NGO |
+#### 🤝 Claims Handling
+- `GET /api/claims` — Lists claims.
+- `POST /api/claims` — NGO claims a donation (locks status to `claimed`).
+- `PATCH /api/claims/:id/status` — Updates claim progress (`confirmed`, `picked_up`, `delivered`). Writes to `impact_logs` on delivery.
+- `DELETE /api/claims/:id` — Cancels claim, releasing food status to `available` (NGO only).
 
-#### AI
-| Method | Endpoint | Description | Auth |
-| :--- | :--- | :--- | :--- |
-| POST | `/ai/analyze-freshness` | AI food freshness analysis | Yes |
-| POST | `/ai/categorize` | AI food categorization | Yes |
+#### 🗣️ Sarvam AI Assistant
+- `POST /api/assistant/voice` — Handles multipart forms with audio buffers. Transcribes speech, extracts fields, retrieves context, and returns voice/text response.
+- `POST /api/assistant/text` — Fallback text-based conversational router.
 
-#### Analytics
-| Method | Endpoint | Description | Auth |
-| :--- | :--- | :--- | :--- |
-| GET | `/analytics/overview` | Platform stats | Yes |
-| GET | `/analytics/user` | User-specific stats | Yes |
-| GET | `/analytics/trends` | Donation trends | Yes |
-| GET | `/analytics/leaderboard` | Top donors/NGOs | Yes |
+#### 🧠 Gemini AI Services
+- `POST /api/ai/analyze-freshness` — Performs vision analysis of uploaded food images.
+- `POST /api/ai/categorize` — Classifies text/image details into standard food categories.
 
-#### Notifications
-| Method | Endpoint | Description | Auth |
-| :--- | :--- | :--- | :--- |
-| GET | `/notifications` | List notifications | Yes |
-| PATCH | `/notifications/:id/read` | Mark as read | Yes |
-| PATCH | `/notifications/read-all` | Mark all as read | Yes |
+#### 📈 Statistics
+- `GET /api/analytics/overview` — Platform-wide metrics.
+- `GET /api/analytics/user` — Personal user metrics.
+- `GET /api/analytics/trends` — Monthly charting arrays.
+- `GET /api/analytics/leaderboard` — Displays top donors and active NGOs.
 
-#### Users
-| Method | Endpoint | Description | Auth |
-| :--- | :--- | :--- | :--- |
-| GET | `/users/profile` | Get profile | Yes |
-| PUT | `/users/profile` | Update profile | Yes |
-| GET | `/users/settings` | Get settings | Yes |
-| PUT | `/users/settings` | Update settings | Yes |
+#### 🔔 Notifications
+- `GET /api/notifications` — Fetches user notifications.
+- `PATCH /api/notifications/:id/read` — Marks an alert as read.
+- `PATCH /api/notifications/read-all` — Marks all notifications as read.
 
-#### Admin
-| Method | Endpoint | Description | Auth | Role |
-| :--- | :--- | :--- | :--- | :--- |
-| GET | `/admin/users` | List all users | Yes | Admin |
-| PATCH | `/admin/users/:id/role` | Update user role | Yes | Admin |
-| GET | `/admin/donations` | All donations | Yes | Admin |
-| GET | `/admin/analytics` | Platform analytics | Yes | Admin |
-| DELETE | `/admin/users/:id` | Deactivate user | Yes | Admin |
+#### ⚙️ Users & Profiles
+- `GET /api/users/profile` — Retrieves user info.
+- `PUT /api/users/profile` — Modifies user profile and geolocates coordinates.
+- `GET /api/users/settings` — Returns user settings.
+- `PUT /api/users/settings` — Updates notifications or UI preferences.
+
+#### 🛡️ Administration Panel (Admin Role Required)
+- `GET /api/admin/users` — Lists all registered accounts.
+- `PATCH /api/admin/users/:id/role` — Modifies role permissions.
+- `DELETE /api/admin/users/:id` — Deactivates account.
+- `GET /api/admin/donations` — Lists all active/expired donations.
+- `GET /api/admin/analytics` — Detailed administrative graphs.
 
 ---
 
-## Contributing
+## 🍃 Environmental Impact Formulas
 
-### Branch Naming Convention
+RePlate uses values estimated by WRAP UK and similar agricultural audits to estimate ecological handprints:
 
-```
-feature/short-description     # New features
-fix/short-description         # Bug fixes
-refactor/short-description    # Code refactoring
-docs/short-description        # Documentation
-ui/short-description          # UI/styling changes
-```
-
-### Commit Message Format
-
-```
-feat: add donation upload form with drag & drop
-fix: resolve expiry alert not triggering
-refactor: extract API client to service module
-docs: update README with database setup guide
-style: improve dashboard card hover animation
-chore: update dependencies
-```
-
-### Development Workflow
-
-1. **Create a branch** from `main`:
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-2. **Make your changes** following the project structure
-
-3. **Test locally**:
-   ```bash
-   npm run dev
-   ```
-
-4. **Commit with a descriptive message**:
-   ```bash
-   git add .
-   git commit -m "feat: your descriptive message"
-   ```
-
-5. **Push and create a Pull Request**:
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-### Code Style Guidelines
-
-- Use functional components with hooks
-- Use named exports for components, default exports for pages
-- Follow the component folder structure (ui, layout, dashboard, etc.)
-- Use the `cn()` utility for conditional class merging
-- Keep components focused and single-responsibility
-- Add JSDoc comments for all exported functions
-- Use the design tokens from `tailwind.config.js` — don't use arbitrary values
-
-### File Naming
-
-| Type | Convention | Example |
+| Metric | Base Conversion Rate | Real-world Equivalent Handprint Translation |
 | :--- | :--- | :--- |
-| Pages | PascalCase | `DonorDashboard.jsx` |
-| Components | PascalCase | `DonationCard.jsx` |
-| Hooks | camelCase with `use` prefix | `useAppAuth.js` |
-| Utils | camelCase | `helpers.js` |
-| Services | camelCase | `api.js` |
-| Routes (server) | kebab-case with `.routes.js` | `donation.routes.js` |
-| Middleware (server) | camelCase | `auth.js` |
+| **Meals Saved** | `1 meal = 0.5 kg` of food | Sum of total meals distributed to shelter networks. |
+| **CO₂ Reduced** | `1 kg food = 2.5 kg CO₂` offset | **Gasoline Driving Offset**: `1 km driving = 0.244 kg CO₂`<br>🚗 *Formula: `CO2_reduced / 0.244` (km driven)* |
+| **Water Conserved**| `1 kg food = 1,000 Liters` saved | **Domestic Shower Minutes Saved**: `1 min shower = 12 Liters`<br>🚿 *Formula: `water_saved / 12` (minutes of shower)* |
+| **Farmland Saved** | `1 kg food = 3.5 sq. meters` preserved | **Agricultural Area Conserved**: Total agricultural zone protected.<br>🌾 *Formula: `weight_kg * 3.5` (m²)* |
+
+*Example:* A donation of **33 kg** translates to **66 meals**, **82.5 kg of CO₂ offset** (equivalent to ~338 km of gasoline driving, or ~9,900 phone battery charges), **33,000 Liters of water saved** (equivalent to 2,750 minutes of continuous hot showers), and **115.5 m² of farmland protected**.
 
 ---
 
-## Environment Impact Formulas
+## 📄 License
 
-The platform calculates environmental impact using industry-standard estimates:
-
-| Metric | Formula | Source |
-| :--- | :--- | :--- |
-| Meals Saved | `weight_kg / 0.5` | ~0.5 kg per meal average |
-| CO2 Reduced | `weight_kg × 2.5` kg | WRAP UK food waste studies |
-| Water Saved | `weight_kg × 1000` liters | Water footprint averages |
-| Land Saved | `weight_kg × 3.5` sq meters | Agricultural land use data |
-
----
-
-## License
-
-This project is licensed under the MIT License.
+This project is licensed under the MIT License. See `LICENSE` for more information.
 
 ---
 
 <div align="center">
 
-**Built for a sustainable future**
+✨ **Collaborating for a sustainable, zero-waste future.** 💫
 
 </div>
