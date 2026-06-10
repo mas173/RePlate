@@ -21,6 +21,7 @@ import { useAppAuth } from '@/hooks/useAppAuth';
 import { donationsAPI, claimsAPI } from '@/services/api';
 import FreshnessIndicator from './FreshnessIndicator';
 import DonationLocationMap from './DonationLocationMap';
+import LocationPickerMap from './LocationPickerMap';
 import {
     getUrgencyColor,
     getRelativeTime,
@@ -124,6 +125,8 @@ export default function DonationDetailPage() {
                     city: res.donation.pickup_city || '',
                     state,
                     pincode,
+                    latitude: res.donation.latitude,
+                    longitude: res.donation.longitude,
                     instructions:
                         res.donation.pickup_instructions || '',
                     notes: res.donation.description || '',
@@ -744,6 +747,37 @@ export default function DonationDetailPage() {
                                             onChange={(e) => setEditForm({ ...editForm, pincode: e.target.value })}
                                         />
                                     </div>
+                                </div>
+
+                                {/* Map Pin Selection for Donors */}
+                                <div>
+                                    <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 block mb-2">Pin Pickup Location *</label>
+                                    <LocationPickerMap
+                                        latitude={editForm.latitude}
+                                        longitude={editForm.longitude}
+                                        onLocationSelect={(lat, lng) => {
+                                            setEditForm(prev => ({
+                                                ...prev,
+                                                latitude: lat,
+                                                longitude: lng
+                                            }));
+                                        }}
+                                        addressFields={{
+                                            address: editForm.address,
+                                            city: editForm.city,
+                                            state: editForm.state,
+                                            pincode: editForm.pincode
+                                        }}
+                                        onAddressAutoFill={(autofill) => {
+                                            setEditForm(prev => ({
+                                                ...prev,
+                                                address: autofill.address || prev.address,
+                                                city: autofill.city || prev.city,
+                                                state: autofill.state || prev.state,
+                                                pincode: autofill.pincode || prev.pincode
+                                            }));
+                                        }}
+                                    />
                                 </div>
 
                                 {/* Instructions */}
