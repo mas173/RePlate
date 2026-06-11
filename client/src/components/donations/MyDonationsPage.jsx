@@ -200,7 +200,7 @@ export default function MyDonationsPage() {
                                         )}
                                     </div>
                                     <div className="p-5 flex-1 flex flex-col justify-between">
-                                        <div className="flex gap-14">
+                                        <div className="grid grid-cols-2">
                                             <div>
                                                 <h3 className="font-bold text-slate-800 dark:text-white leading-snug group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
                                                     {donation.food_name}
@@ -211,9 +211,9 @@ export default function MyDonationsPage() {
                                                     </p>
                                                 )}
                                             </div>
-                                            <div >
+                                            <div className="justify-end">
                                                 <span className={`badge shadow-sm ${getStatusColor(donation.status)}`}>
-                                                    {donation.status.replace('_', ' ').toUpperCase()}
+                                                    {donation.status.replace('_', ' ')}
                                                 </span>
                                             </div>
                                         </div>
