@@ -192,11 +192,6 @@ export default function MyDonationsPage() {
                                                 <span className="text-4xl filter saturate-75">{categoryDetails?.icon || '🍴'}</span>
                                             </div>
                                         )}
-                                        <div className="absolute top-3 right-3">
-                                            <span className={`badge shadow-sm ${getStatusColor(donation.status)}`}>
-                                                {donation.status.replace('_', ' ').toUpperCase()}
-                                            </span>
-                                        </div>
                                         {donation.images && donation.images.length > 0 && (
                                             <div className="absolute bottom-3 left-3 bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md text-xs font-semibold text-white flex items-center gap-1">
                                                 <span>{categoryDetails?.icon}</span>
@@ -205,15 +200,22 @@ export default function MyDonationsPage() {
                                         )}
                                     </div>
                                     <div className="p-5 flex-1 flex flex-col justify-between">
-                                        <div>
-                                            <h3 className="font-bold text-slate-800 dark:text-white leading-snug group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
-                                                {donation.food_name}
-                                            </h3>
-                                            {donation.description && (
-                                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 line-clamp-2">
-                                                    {donation.description}
-                                                </p>
-                                            )}
+                                        <div className="flex gap-14">
+                                            <div>
+                                                <h3 className="font-bold text-slate-800 dark:text-white leading-snug group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors truncate">
+                                                    {donation.food_name}
+                                                </h3>
+                                                {donation.description && (
+                                                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 line-clamp-2">
+                                                        {donation.description}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <div >
+                                                <span className={`badge shadow-sm ${getStatusColor(donation.status)}`}>
+                                                    {donation.status.replace('_', ' ').toUpperCase()}
+                                                </span>
+                                            </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-100 dark:border-slate-800/60 text-xs text-slate-500 dark:text-slate-400">
                                             <div className="flex items-center gap-1.5 min-w-0">

@@ -244,11 +244,15 @@ router.post('/', requireAuth, requireRole('ngo', 'admin'), async (req, res, next
 
         // Email confirmations
         if (donorEmail && ngoProfile?.email) {
+          const metrics = estimateMetrics(fullDonation.weight_kg, fullDonation.quantity);
           sendClaimConfirmation(donorEmail, ngoProfile.email, {
             foodName: fullDonation.food_name,
             expiryDate: new Date(fullDonation.expires_at).toLocaleString(),
             location: fullDonation.pickup_address,
             donorContact: donorEmail,
+            quantity: fullDonation.quantity,
+            id: fullDonation.id,
+            metrics,
           }, {
             ngoName,
           }).catch((err) => console.error('Claim email failed:', err.message));

@@ -293,11 +293,14 @@ router.post('/', requireAuth, requireRole('donor', 'admin'), upload.array('image
       if (ngos && ngos.length > 0) {
         const donationInfo = {
           id: donation.id,
-          foodName: name,
-          quantity: quantityStr,
-          expiryDate: new Date(expires_at).toLocaleString(),
-          location: donationData.pickup_address,
-          urgencyLevel: urgency,
+          foodName: donation.food_name,
+          quantity: donation.quantity,
+          expiryDate: new Date(donation.expires_at).toLocaleString(),
+          location: donation.pickup_address,
+          urgencyLevel: donation.urgency,
+          category: donation.category,
+          storageCondition: donation.storage_condition,
+          aiFreshnessScore: donation.ai_freshness_score,
         };
 
         for (const ngo of ngos) {
