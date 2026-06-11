@@ -5,6 +5,7 @@ import { supabaseAdmin } from '../config/supabase.js';
 import { uploadImage, deleteImage } from '../services/storage.service.js';
 import { sendDonationAlert } from '../services/email.service.js';
 import { geocodeAddress } from '../services/geocoding.service.js';
+import { cacheMiddleware, invalidateCachePattern } from '../middleware/cache.js';
 
 const router = Router();
 
@@ -12,7 +13,7 @@ const router = Router();
  * GET /api/donations
  * Get all donations (filtered by role with query parameter sanitization)
  */
-router.get('/', requireAuth, async (req, res, next) => {
+router.get('/', requireAuth, cacheMiddleware('donations', 5), async (req, res, next) => {
   try {
     const { data: profile, error: profileErr } = await supabaseAdmin
       .from('profiles')
@@ -77,7 +78,7 @@ router.get('/', requireAuth, async (req, res, next) => {
  * GET /api/donations/:id
  * Get a specific donation by ID
  */
-router.get('/:id', requireAuth, async (req, res, next) => {
+router.get('/:id', requireAuth, cacheMiddleware('donation', 10), async (req, res, next) => {
   try {
     const { id } = req.params;
     const { data: donation, error: donationErr } = await supabaseAdmin
@@ -326,6 +327,10 @@ router.post('/', requireAuth, requireRole('donor', 'admin'), upload.array('image
       console.error('NGO alerting failed (non-critical):', alertErr.message);
     }
 
+    // Invalidate caches
+    invalidateCachePattern('donations:*');
+    invalidateCachePattern('analytics:*');
+
     res.status(201).json({ message: 'Donation created successfully', donation });
   } catch (error) {
     // Transaction Rollback Fallback Strategy: Evict storage assets if DB layer breaks
@@ -470,6 +475,11 @@ router.patch('/:id', requireAuth, async (req, res, next) => {
       .single();
 
     if (updateErr) throw updateErr;
+
+    // Invalidate caches
+    invalidateCachePattern('donations:*');
+    invalidateCachePattern(`donation:*:${id}*`);
+    invalidateCachePattern('analytics:*');
 
     res.status(200).json({ message: 'Donation updated successfully', donation: updatedDonation });
   } catch (error) {
@@ -644,6 +654,11 @@ router.put('/:id', requireAuth, async (req, res, next) => {
 
     if (updateErr) throw updateErr;
 
+    // Invalidate caches
+    invalidateCachePattern('donations:*');
+    invalidateCachePattern(`donation:*:${id}*`);
+    invalidateCachePattern('analytics:*');
+
     res.status(200).json({ message: 'Donation updated successfully', donation: updatedDonation });
   } catch (error) {
     next(error);
@@ -701,6 +716,11 @@ router.patch('/:id/status', requireAuth, async (req, res, next) => {
 
     if (updateErr) throw updateErr;
 
+    // Invalidate caches
+    invalidateCachePattern('donations:*');
+    invalidateCachePattern(`donation:*:${id}*`);
+    invalidateCachePattern('analytics:*');
+
     res.status(200).json({ message: 'Status updated successfully', donation: updatedDonation });
   } catch (error) {
     next(error);
@@ -757,6 +777,11 @@ router.delete('/:id', requireAuth, requireRole('donor', 'admin'), async (req, re
       .eq('id', id);
 
     if (deleteErr) throw deleteErr;
+
+    // Invalidate caches
+    invalidateCachePattern('donations:*');
+    invalidateCachePattern(`donation:*:${id}*`);
+    invalidateCachePattern('analytics:*');
 
     res.status(200).json({ message: 'Donation deleted successfully' });
   } catch (error) {

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { supabaseAdmin } from '../config/supabase.js';
 import { sendClaimConfirmation } from '../services/email.service.js';
+import { invalidateCachePattern } from '../middleware/cache.js';
 
 const router = Router();
 
@@ -262,6 +263,11 @@ router.post('/', requireAuth, requireRole('ngo', 'admin'), async (req, res, next
       console.error('Claim notification failed (non-critical):', notifErr.message);
     }
 
+    // Invalidate caches
+    invalidateCachePattern('donations:*');
+    invalidateCachePattern(`donation:*:${donationId}*`);
+    invalidateCachePattern('analytics:*');
+
     res.status(201).json({ message: 'Donation claimed successfully', claim });
   } catch (error) {
     next(error);
@@ -368,6 +374,11 @@ router.patch('/:id/status', requireAuth, async (req, res, next) => {
       }
     }
 
+    // Invalidate caches
+    invalidateCachePattern('donations:*');
+    invalidateCachePattern(`donation:*:${claim.donation_id}*`);
+    invalidateCachePattern('analytics:*');
+
     res.status(200).json({ message: 'Claim status updated successfully', claim: updatedClaim });
   } catch (error) {
     next(error);
@@ -423,6 +434,11 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
       .eq('id', claim.donation_id);
 
     if (updateDonationErr) throw updateDonationErr;
+
+    // Invalidate caches
+    invalidateCachePattern('donations:*');
+    invalidateCachePattern(`donation:*:${claim.donation_id}*`);
+    invalidateCachePattern('analytics:*');
 
     res.status(200).json({ message: 'Claim cancelled successfully' });
   } catch (error) {

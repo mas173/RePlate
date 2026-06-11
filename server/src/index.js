@@ -26,6 +26,9 @@ import { errorHandler } from './middleware/errorHandler.js';
 // Import cron scheduler
 import { startCronJobs } from './services/cron.service.js';
 
+// Import Redis client
+import redisClient from './config/redis.js';
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -113,6 +116,11 @@ app.listen(PORT, () => {
   console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`   Port:        ${PORT}`);
   console.log(`   Health:      http://localhost:${PORT}/api/health\n`);
+
+  // Connect to Redis (asynchronous, degrades gracefully if offline)
+  redisClient.connect().catch((err) => {
+    console.warn('⚠️ Could not establish initial Redis connection. Caching disabled:', err.message);
+  });
 
   // Start background cron jobs
   startCronJobs();
