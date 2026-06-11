@@ -217,3 +217,16 @@ Deploying frontend and backend to production hosting.
 | 12.5 | Update CORS CLIENT_URL env variable | Pending | Point to production frontend URL |
 | 12.6 | Update Clerk webhooks to production domain | Pending | Clerk Dashboard -> Webhooks -> Point to production URL |
 | 12.7 | Update Supabase Row Level Security | Pending | Secure tables for production environment |
+
+---
+
+## Phase 13 - Caching & API Performance
+
+Integrating Redis caching layer to optimize API response times.
+
+| Task ID | Task Description | Status | Details / Location |
+| :--- | :--- | :--- | :--- |
+| 13.1 | Configure Redis client | In Progress | Add redis dependency, config, and env variables |
+| 13.2 | Create Caching & Invalidation middleware | Pending | Safe caching decorator with db fallback |
+| 13.3 | Implement caching in routes | Pending | Cache GET donations, analytics, and listings with low TTLs |
+| 13.4 | Setup invalidation on mutations | Pending | Invalidate cache on post, patch, put, delete, and claims |
