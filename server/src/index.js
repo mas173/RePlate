@@ -26,6 +26,9 @@ import { errorHandler } from './middleware/errorHandler.js';
 // Import cron scheduler
 import { startCronJobs } from './services/cron.service.js';
 
+// Import Redis client
+import redisClient from './config/redis.js';
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -37,13 +40,14 @@ const PORT = process.env.PORT || 5000;
 app.use(helmet());
 
 // CORS
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'svix-id', 'svix-timestamp', 'svix-signature'],
-}));
+const allowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
 
+app.use(
+  cors({
+    origin: allowedOrigins,
+    credentials: true,
+  })
+);
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -113,6 +117,11 @@ app.listen(PORT, () => {
   console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`   Port:        ${PORT}`);
   console.log(`   Health:      http://localhost:${PORT}/api/health\n`);
+
+  // Connect to Redis (asynchronous, degrades gracefully if offline)
+  redisClient.connect().catch((err) => {
+    console.warn('⚠️ Could not establish initial Redis connection. Caching disabled:', err.message);
+  });
 
   // Start background cron jobs
   startCronJobs();

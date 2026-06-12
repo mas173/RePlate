@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { requireAuth, requireRole } from '../middleware/auth.js';
 import { supabaseAdmin } from '../config/supabase.js';
 import { sendClaimConfirmation } from '../services/email.service.js';
+import { invalidateCachePattern } from '../middleware/cache.js';
 
 const router = Router();
 
@@ -244,11 +245,15 @@ router.post('/', requireAuth, requireRole('ngo', 'admin'), async (req, res, next
 
         // Email confirmations
         if (donorEmail && ngoProfile?.email) {
+          const metrics = estimateMetrics(fullDonation.weight_kg, fullDonation.quantity);
           sendClaimConfirmation(donorEmail, ngoProfile.email, {
             foodName: fullDonation.food_name,
             expiryDate: new Date(fullDonation.expires_at).toLocaleString(),
             location: fullDonation.pickup_address,
             donorContact: donorEmail,
+            quantity: fullDonation.quantity,
+            id: fullDonation.id,
+            metrics,
           }, {
             ngoName,
           }).catch((err) => console.error('Claim email failed:', err.message));
@@ -257,6 +262,11 @@ router.post('/', requireAuth, requireRole('ngo', 'admin'), async (req, res, next
     } catch (notifErr) {
       console.error('Claim notification failed (non-critical):', notifErr.message);
     }
+
+    // Invalidate caches
+    invalidateCachePattern('donations:*');
+    invalidateCachePattern(`donation:*:${donationId}*`);
+    invalidateCachePattern('analytics:*');
 
     res.status(201).json({ message: 'Donation claimed successfully', claim });
   } catch (error) {
@@ -364,6 +374,11 @@ router.patch('/:id/status', requireAuth, async (req, res, next) => {
       }
     }
 
+    // Invalidate caches
+    invalidateCachePattern('donations:*');
+    invalidateCachePattern(`donation:*:${claim.donation_id}*`);
+    invalidateCachePattern('analytics:*');
+
     res.status(200).json({ message: 'Claim status updated successfully', claim: updatedClaim });
   } catch (error) {
     next(error);
@@ -419,6 +434,11 @@ router.delete('/:id', requireAuth, async (req, res, next) => {
       .eq('id', claim.donation_id);
 
     if (updateDonationErr) throw updateDonationErr;
+
+    // Invalidate caches
+    invalidateCachePattern('donations:*');
+    invalidateCachePattern(`donation:*:${claim.donation_id}*`);
+    invalidateCachePattern('analytics:*');
 
     res.status(200).json({ message: 'Claim cancelled successfully' });
   } catch (error) {
