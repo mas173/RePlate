@@ -1,6 +1,7 @@
 import { Webhook } from 'svix';
 import { clerkClient } from '@clerk/express';
 import { supabaseAdmin } from '../config/supabase.js';
+import { sendWelcomeEmail } from '../services/email.service.js';
 
 /**
  * Upsert a user row into Supabase profiles table.
@@ -134,6 +135,40 @@ export async function updateUserRole(req, res) {
       return res.status(400).json({ error: 'Invalid role. Must be donor or ngo.' });
     }
 
+    // Retrieve Clerk user and Supabase profile to handle Welcome Email safely
+    let welcomeEmailSent = false;
+    let userEmail = '';
+    let firstName = '';
+    let lastName = '';
+    let signupCreatedAt = null;
+
+    try {
+      const user = await clerkClient.users.getUser(userId);
+      welcomeEmailSent = user.publicMetadata?.welcomeEmailSent === true;
+      userEmail = user.emailAddresses?.[0]?.emailAddress || '';
+      firstName = user.firstName || '';
+      lastName = user.lastName || '';
+    } catch (clerkErr) {
+      console.error('⚠️  Failed to fetch user from Clerk:', clerkErr.message);
+    }
+
+    try {
+      const { data: profile } = await supabaseAdmin
+        .from('profiles')
+        .select('created_at, email, first_name, last_name')
+        .eq('clerk_id', userId)
+        .single();
+      
+      if (profile) {
+        if (!userEmail) userEmail = profile.email;
+        if (!firstName) firstName = profile.first_name;
+        if (!lastName) lastName = profile.last_name;
+        signupCreatedAt = profile.created_at;
+      }
+    } catch (dbErr) {
+      console.error('⚠️  Failed to fetch profile from Supabase:', dbErr.message);
+    }
+
     // 1. Update Clerk public metadata
     await clerkClient.users.updateUserMetadata(userId, {
       publicMetadata: { role },
@@ -148,6 +183,33 @@ export async function updateUserRole(req, res) {
     if (dbError) {
       console.error('❌  Supabase role update error:', dbError.message);
       // Even if database fails, Clerk is source of truth. We will try to sync later.
+    }
+
+    // Welcome email triggering logic (only for new registered users after implementation cutoff)
+    if (!welcomeEmailSent && userEmail) {
+      const CUTOFF_TIME = new Date('2026-06-11T15:00:00.000Z'); // Feature implementation date
+      const profileDate = signupCreatedAt ? new Date(signupCreatedAt) : new Date();
+      const isNewSignup = profileDate >= CUTOFF_TIME;
+
+      if (isNewSignup) {
+        try {
+          await sendWelcomeEmail(userEmail, {
+            firstName,
+            lastName,
+            role,
+          });
+
+          // Mark welcomeEmailSent as true in Clerk public metadata
+          await clerkClient.users.updateUserMetadata(userId, {
+            publicMetadata: { welcomeEmailSent: true },
+          });
+          console.log(`✉️  Sent Welcome Email to ${userEmail} and marked metadata welcomeEmailSent: true`);
+        } catch (sendErr) {
+          console.error('❌  Failed to send welcome email:', sendErr.message);
+        }
+      } else {
+        console.log(`ℹ️  Welcome email skipped for ${userEmail} (registered before cutoff).`);
+      }
     }
 
     return res.status(200).json({

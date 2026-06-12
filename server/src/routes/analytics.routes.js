@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../middleware/auth.js';
 import { supabaseAdmin } from '../config/supabase.js';
+import { cacheMiddleware } from '../middleware/cache.js';
 
 const router = Router();
 
@@ -8,7 +9,7 @@ const router = Router();
  * GET /api/analytics/public-stats
  * Get platform-wide analytics overview publicly (no auth required)
  */
-router.get('/public-stats', async (req, res, next) => {
+router.get('/public-stats', cacheMiddleware('analytics:public', 30), async (req, res, next) => {
   try {
     const { data, error } = await supabaseAdmin.rpc('get_platform_stats');
     if (error) throw error;
@@ -30,7 +31,7 @@ router.get('/public-stats', async (req, res, next) => {
  * GET /api/analytics/overview
  * Get platform-wide analytics overview
  */
-router.get('/overview', requireAuth, async (req, res, next) => {
+router.get('/overview', requireAuth, cacheMiddleware('analytics:overview', 30), async (req, res, next) => {
   try {
     const { data, error } = await supabaseAdmin.rpc('get_platform_stats');
     if (error) throw error;
@@ -52,7 +53,7 @@ router.get('/overview', requireAuth, async (req, res, next) => {
  * GET /api/analytics/user
  * Get analytics for the current user
  */
-router.get('/user', requireAuth, async (req, res, next) => {
+router.get('/user', requireAuth, cacheMiddleware('analytics:user', 30), async (req, res, next) => {
   try {
     const { data: profile, error: profileErr } = await supabaseAdmin
       .from('profiles')
@@ -87,7 +88,7 @@ router.get('/user', requireAuth, async (req, res, next) => {
  * GET /api/analytics/trends
  * Get real chronological donation trends for charts (Last 30 Days)
  */
-router.get('/trends', requireAuth, async (req, res, next) => {
+router.get('/trends', requireAuth, cacheMiddleware('analytics:trends', 30), async (req, res, next) => {
   try {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -122,7 +123,7 @@ router.get('/trends', requireAuth, async (req, res, next) => {
  * GET /api/analytics/leaderboard
  * Get high-impact leadership rankings dynamically computed from impact_logs
  */
-router.get('/leaderboard', requireAuth, async (req, res, next) => {
+router.get('/leaderboard', requireAuth, cacheMiddleware('analytics:leaderboard', 30), async (req, res, next) => {
   try {
     // 1. Fetch active profiles
     const { data: profiles, error: profileErr } = await supabaseAdmin
@@ -201,7 +202,7 @@ router.get('/leaderboard', requireAuth, async (req, res, next) => {
  * GET /api/analytics/categories
  * Get platform-wide category distribution metrics
  */
-router.get('/categories', requireAuth, async (req, res, next) => {
+router.get('/categories', requireAuth, cacheMiddleware('analytics:categories', 30), async (req, res, next) => {
   try {
     const { data, error } = await supabaseAdmin
       .from('donations')
