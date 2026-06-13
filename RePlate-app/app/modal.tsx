@@ -17,6 +17,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { apiClient } from '../services/api';
 import { Colors } from '../constants/theme';
 import { useAppAuth } from '../hooks/useAppAuth';
+import ClaimTrackingMap from '../components/ClaimTrackingMap';
 
 const { width } = Dimensions.get('window');
 
@@ -26,6 +27,8 @@ interface Profile {
   organization_name?: string;
   email?: string;
   phone?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 interface Claim {
@@ -67,6 +70,7 @@ export default function DonationDetailModal() {
 
   const [donation, setDonation] = useState<Donation | null>(null);
   const [claims, setClaims] = useState<Claim[]>([]);
+  const activeClaim = claims.find((c) => c.status !== 'cancelled');
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -102,7 +106,7 @@ export default function DonationDetailModal() {
     if (!id) return;
     try {
       setLoading(true);
-      const response = await apiClient.get(`/donations/${id}`);
+      const response = await apiClient.get(`/donations/${id}?t=${Date.now()}`);
       const data = response.data;
       setDonation(data.donation);
       setClaims(data.claims || []);
@@ -153,6 +157,25 @@ export default function DonationDetailModal() {
   useEffect(() => {
     fetchDetails();
   }, [fetchDetails]);
+
+  // Poll donation/claims updates quietly for live route tracking
+  useEffect(() => {
+    let interval: any;
+    if (id && activeClaim && (activeClaim.status === 'confirmed' || activeClaim.status === 'picked_up')) {
+      interval = setInterval(() => {
+        apiClient.get(`/donations/${id}?t=${Date.now()}`)
+          .then(res => {
+            if (res.data && res.data.claims) {
+              setClaims(res.data.claims);
+            }
+          })
+          .catch(err => console.warn('Failed to poll location updates:', err));
+      }, 8000);
+    }
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [id, activeClaim?.status]);
 
   const handleUpdate = async () => {
     if (!editName || !editQuantity || !editExpiryDate) {
@@ -384,11 +407,18 @@ export default function DonationDetailModal() {
     }
   };
 
-  const parsedAiAnalysis = typeof donation.ai_analysis === 'string'
-    ? JSON.parse(donation.ai_analysis)
-    : donation.ai_analysis;
-
-  const activeClaim = claims.find((c) => c.status !== 'cancelled');
+  let parsedAiAnalysis = null;
+  if (donation.ai_analysis) {
+    if (typeof donation.ai_analysis === 'string') {
+      try {
+        parsedAiAnalysis = JSON.parse(donation.ai_analysis);
+      } catch (e) {
+        console.warn('Failed to parse AI analysis:', e);
+      }
+    } else {
+      parsedAiAnalysis = donation.ai_analysis;
+    }
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
@@ -722,6 +752,20 @@ export default function DonationDetailModal() {
                 </View>
               </View>
             </View>
+
+            {/* Map Route Tracking using Leaflet in WebView */}
+            {donation.latitude && donation.longitude ? (
+              <ClaimTrackingMap
+                donationLat={Number(donation.latitude)}
+                donationLng={Number(donation.longitude)}
+                foodName={donation.food_name}
+                pickupAddress={donation.pickup_address}
+                userRole={role as any}
+                ngoLat={activeClaim?.profiles?.latitude ? Number(activeClaim.profiles.latitude) : null}
+                ngoLng={activeClaim?.profiles?.longitude ? Number(activeClaim.profiles.longitude) : null}
+                onRefresh={fetchDetails}
+              />
+            ) : null}
 
             {/* Active Claim status */}
             {activeClaim && (
