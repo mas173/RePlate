@@ -148,4 +148,207 @@ router.put('/settings', requireAuth, async (req, res, next) => {
   }
 });
 
+/**
+ * GET /api/users/addresses
+ * Get user's saved addresses
+ */
+router.get('/addresses', requireAuth, async (req, res, next) => {
+  try {
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .eq('clerk_id', req.auth.userId)
+      .single();
+
+    if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+    const { data: addresses, error } = await supabaseAdmin
+      .from('saved_addresses')
+      .select('*')
+      .eq('profile_id', profile.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    res.status(200).json({ addresses });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/users/addresses
+ * Add a new saved address
+ */
+router.post('/addresses', requireAuth, async (req, res, next) => {
+  try {
+    const { name, address_line, city, state, pincode, latitude, longitude, is_default } = req.body;
+
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .eq('clerk_id', req.auth.userId)
+      .single();
+
+    if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+    if (is_default) {
+      await supabaseAdmin
+        .from('saved_addresses')
+        .update({ is_default: false })
+        .eq('profile_id', profile.id);
+    }
+
+    const { data: address, error } = await supabaseAdmin
+      .from('saved_addresses')
+      .insert([{
+        profile_id: profile.id,
+        name,
+        address_line,
+        city,
+        state,
+        pincode,
+        latitude,
+        longitude,
+        is_default: is_default || false
+      }])
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(201).json({ message: 'Address saved successfully', address });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * PUT /api/users/addresses/:id
+ * Update a saved address
+ */
+router.put('/addresses/:id', requireAuth, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name, address_line, city, state, pincode, latitude, longitude, is_default } = req.body;
+
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .eq('clerk_id', req.auth.userId)
+      .single();
+
+    if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+    if (is_default) {
+      await supabaseAdmin
+        .from('saved_addresses')
+        .update({ is_default: false })
+        .eq('profile_id', profile.id);
+    }
+
+    const { data: address, error } = await supabaseAdmin
+      .from('saved_addresses')
+      .update({
+        name,
+        address_line,
+        city,
+        state,
+        pincode,
+        latitude,
+        longitude,
+        is_default,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .eq('profile_id', profile.id)
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    res.status(200).json({ message: 'Address updated successfully', address });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * DELETE /api/users/addresses/:id
+ * Delete a saved address
+ */
+router.delete('/addresses/:id', requireAuth, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .eq('clerk_id', req.auth.userId)
+      .single();
+
+    if (!profile) return res.status(404).json({ error: 'Profile not found' });
+
+    const { error } = await supabaseAdmin
+      .from('saved_addresses')
+      .delete()
+      .eq('id', id)
+      .eq('profile_id', profile.id);
+
+    if (error) throw error;
+
+    res.status(200).json({ message: 'Address deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * GET /api/users/verify-status
+ * Get verification status
+ */
+router.get('/verify-status', requireAuth, async (req, res, next) => {
+  try {
+    const { data: profile, error } = await supabaseAdmin
+      .from('profiles')
+      .select('is_verified, verification_status, fssai_number, verification_document_url')
+      .eq('clerk_id', req.auth.userId)
+      .single();
+
+    if (error) throw error;
+
+    res.status(200).json({ verification: profile });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/**
+ * POST /api/users/verify
+ * Submit verification details
+ */
+router.post('/verify', requireAuth, async (req, res, next) => {
+  try {
+    const { fssai_number, verification_document_url } = req.body;
+
+    const { data: profile, error } = await supabaseAdmin
+      .from('profiles')
+      .update({
+        fssai_number,
+        verification_document_url,
+        verification_status: 'pending',
+        updated_at: new Date().toISOString()
+      })
+      .eq('clerk_id', req.auth.userId)
+      .select('is_verified, verification_status, fssai_number, verification_document_url')
+      .single();
+
+    if (error) throw error;
+
+    res.status(200).json({ message: 'Verification details submitted', verification: profile });
+  } catch (error) {
+    next(error);
+  }
+});
+
 export default router;

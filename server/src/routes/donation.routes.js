@@ -93,7 +93,7 @@ router.get('/:id', requireAuth, cacheMiddleware('donation', 10), async (req, res
 
     const { data: claims, error: claimsErr } = await supabaseAdmin
       .from('claims')
-      .select('*, profiles:ngo_id(organization_name, email, phone)')
+      .select('*, profiles:ngo_id(organization_name, email, phone, latitude, longitude)')
       .eq('donation_id', id);
 
     if (claimsErr) throw claimsErr;

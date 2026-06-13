@@ -57,7 +57,7 @@ router.get('/user', requireAuth, cacheMiddleware('analytics:user', 30), async (r
   try {
     const { data: profile, error: profileErr } = await supabaseAdmin
       .from('profiles')
-      .select('id')
+      .select('id, role')
       .eq('clerk_id', req.auth.userId)
       .single();
 
@@ -65,20 +65,52 @@ router.get('/user', requireAuth, cacheMiddleware('analytics:user', 30), async (r
       return res.status(404).json({ error: 'Profile not found' });
     }
 
-    const { data, error } = await supabaseAdmin.rpc('get_user_impact', {
-      p_user_id: profile.id,
-    });
+    if (profile.role === 'ngo') {
+      const { data: logs, error: logsErr } = await supabaseAdmin
+        .from('impact_logs')
+        .select('weight_kg, meals_saved, co2_reduced_kg')
+        .eq('ngo_id', profile.id);
 
-    if (error) throw error;
+      if (logsErr) throw logsErr;
 
-    res.status(200).json({
-      donations: data?.total_donations || 0,
-      activeDonations: data?.active_donations || 0,
-      mealsSaved: data?.meals_saved || 0,
-      wasteReduced: data?.weight_saved || 0,
-      co2Reduced: data?.co2_reduced || 0,
-      claimsReceived: data?.claims_received || 0,
-    });
+      const { data: claims, error: claimsErr } = await supabaseAdmin
+        .from('claims')
+        .select('status')
+        .eq('ngo_id', profile.id);
+
+      if (claimsErr) throw claimsErr;
+
+      const mealsSaved = (logs || []).reduce((sum, log) => sum + (log.meals_saved || 0), 0);
+      const wasteReduced = (logs || []).reduce((sum, log) => sum + parseFloat(log.weight_kg || 0), 0);
+      const co2Reduced = (logs || []).reduce((sum, log) => sum + parseFloat(log.co2_reduced_kg || 0), 0);
+
+      const claimsReceived = (claims || []).filter(c => c.status === 'delivered').length;
+      const activeDonations = (claims || []).filter(c => ['pending', 'confirmed', 'picked_up'].includes(c.status)).length;
+
+      return res.status(200).json({
+        donations: claimsReceived,
+        activeDonations,
+        mealsSaved,
+        wasteReduced,
+        co2Reduced,
+        claimsReceived,
+      });
+    } else {
+      const { data, error } = await supabaseAdmin.rpc('get_user_impact', {
+        p_user_id: profile.id,
+      });
+
+      if (error) throw error;
+
+      res.status(200).json({
+        donations: data?.total_donations || 0,
+        activeDonations: data?.active_donations || 0,
+        mealsSaved: data?.meals_saved || 0,
+        wasteReduced: data?.weight_saved || 0,
+        co2Reduced: data?.co2_reduced || 0,
+        claimsReceived: data?.claims_received || 0,
+      });
+    }
   } catch (error) {
     next(error);
   }

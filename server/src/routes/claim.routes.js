@@ -101,7 +101,9 @@ router.get('/', requireAuth, async (req, res, next) => {
               last_name,
               organization_name,
               email,
-              phone
+              phone,
+              latitude,
+              longitude
             )
           `)
           .in('donation_id', donationIds)
@@ -128,7 +130,9 @@ router.get('/', requireAuth, async (req, res, next) => {
             last_name,
             organization_name,
             email,
-            phone
+            phone,
+            latitude,
+            longitude
           )
         `)
         .order('created_at', { ascending: false });

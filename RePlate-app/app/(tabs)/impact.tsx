@@ -542,6 +542,16 @@ const styles = StyleSheet.create({
   categoryPct: { fontSize: 12, fontWeight: '700', color: '#2E7D32' },
   categoryBarBg: { height: 6, backgroundColor: '#F3F4F6', borderRadius: 3, overflow: 'hidden' },
   categoryBarFill: { height: '100%', backgroundColor: '#2E7D32', borderRadius: 3 },
+  chartCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EAF3E9',
+    marginBottom: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 
   // Leaderboard
   leaderCard: { backgroundColor: '#FFFFFF', borderRadius: 16, padding: 14, borderWidth: 1, borderColor: '#EAF3E9', marginBottom: 24, gap: 10 },

@@ -22,10 +22,7 @@ interface Notification {
   message: string;
   is_read: boolean;
   created_at: string;
-  data?: {
-    donation_id?: string;
-    claim_id?: string;
-  };
+  data?: any;
 }
 
 export default function NotificationsScreen() {
@@ -95,10 +92,43 @@ export default function NotificationsScreen() {
       console.error('Failed to mark notification as read:', err);
     }
 
-    // Redirection on clicking the notification
-    const donationId = notification.data?.donation_id;
-    if (donationId) {
-      router.push(`/modal?id=${donationId}`);
+    try {
+      // Safely parse data field if it is serialized as a JSON string
+      let parsedData = notification.data;
+      if (typeof parsedData === 'string') {
+        try {
+          parsedData = JSON.parse(parsedData);
+        } catch (e) {
+          console.warn('Failed to parse notification data JSON string:', e);
+        }
+      }
+
+      let donationId = parsedData?.donation_id || parsedData?.donationId;
+      const claimId = parsedData?.claim_id || parsedData?.claimId;
+
+      // Fallback: If we don't have donationId but we have claimId, try to fetch claims list to resolve donationId
+      if (!donationId && claimId) {
+        try {
+          const claimsRes = await apiClient.get('/claims');
+          const claimsList = claimsRes.data?.claims || claimsRes.data || [];
+          const matchedClaim = claimsList.find((c: any) => c.id === claimId);
+          if (matchedClaim) {
+            donationId = matchedClaim.donation_id || matchedClaim.donation?.id;
+          }
+        } catch (err) {
+          console.warn('Failed to fetch claims to resolve donation_id:', err);
+        }
+      }
+
+      if (donationId) {
+        router.push(`/modal?id=${donationId}`);
+      } else {
+        console.warn('Notification has no donation_id or resolvable claim:', notification);
+        Alert.alert('Info', 'This notification has no associated donation details.');
+      }
+    } catch (err) {
+      console.error('Failed to navigate from notification:', err);
+      Alert.alert('Error', 'Failed to open the related page.');
     }
   };
 
