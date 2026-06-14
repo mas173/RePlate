@@ -51,7 +51,7 @@ app.use(
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  max: 2000, // Increased limit to prevent 'too many requests' during usage
   message: { error: 'Too many requests, please try again later.' },
 });
 app.use('/api/', limiter);

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import { useAppAuth } from '../../hooks/useAppAuth';
 import { Card, Button, Input } from '../../components/ui';
 import { Colors } from '../../constants/theme';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter, useFocusEffect } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { apiClient } from '../../services/api';
 
 interface Donation {
@@ -102,12 +102,11 @@ export default function ExploreScreen() {
     }
   };
 
-  // Fetch data on tab focus so updates are automatically picked up
-  useFocusEffect(
-    useCallback(() => {
-      fetchData();
-    }, [role, profile])
-  );
+  // Fetch data on initial mount. We removed useFocusEffect to prevent repeated API calls
+  // when navigating back from donation detail pages. Use manual refresh to pull new data.
+  useEffect(() => {
+    fetchData();
+  }, [role, profile]);
 
   const onRefresh = () => {
     setRefreshing(true);

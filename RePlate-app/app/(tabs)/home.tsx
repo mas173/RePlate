@@ -156,7 +156,8 @@ export default function HomeScreen() {
   useEffect(() => {
     if (profile) {
       fetchHomeData();
-      const interval = setInterval(() => fetchHomeData(true), 30000);
+      // Polling optimized from 30s to 60s to reduce battery and API usage
+      const interval = setInterval(() => fetchHomeData(true), 60000);
       return () => clearInterval(interval);
     }
   }, [profile, fetchHomeData]);
