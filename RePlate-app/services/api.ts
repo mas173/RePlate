@@ -5,7 +5,7 @@ import type { BackendProfile, ProfileUpdatePayload, UserRole } from '../types/ap
 import Constants from 'expo-constants';
 
 const getBaseUrl = () => {
-  let url = process.env.EXPO_PUBLIC_API_BASE_URL || '';
+  let url = process.env.EXPO_PUBLIC_API_BASE_URL || 'https://replate-68ip.onrender.com/api';
   
   if (url && !url.includes('localhost') && !url.includes('127.0.0.1')) {
     return url;
