@@ -204,11 +204,7 @@ export default function LandingScreen() {
           contentContainerStyle={styles.carouselContainer}
         >
           {/* ==================== SCREEN 1 ==================== */}
-          <ScrollView
-            style={{ width }}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.slideScrollContent}
-          >
+          <View style={[styles.slideScrollContent, { width }]}>
             {/* Slide 1 Pill */}
             <View style={styles.pillContainer}>
               <Text style={styles.pillText}>1 of 3</Text>
@@ -234,57 +230,10 @@ export default function LandingScreen() {
                 resizeMode="cover"
               />
             </Animated.View>
-
-            {/* Features Card List */}
-            <Animated.View style={[styles.featuresContainer, featuresAnimatedStyle]}>
-              <View style={styles.featuresCard}>
-                <View style={styles.featureItem}>
-                  <View style={styles.iconCircle}>
-                    <MaterialCommunityIcons name="recycle" size={22} color="#1B4329" />
-                  </View>
-                  <Text style={styles.featureLabel}>Reduce</Text>
-                  <Text style={styles.featureLabelSub}>Food Waste</Text>
-                </View>
-
-                <View style={styles.featureDivider} />
-
-                <View style={styles.featureItem}>
-                  <View style={styles.iconCircle}>
-                    <MaterialCommunityIcons name="hand-heart" size={22} color="#1B4329" />
-                  </View>
-                  <Text style={styles.featureLabel}>Help</Text>
-                  <Text style={styles.featureLabelSub}>Communities</Text>
-                </View>
-
-                <View style={styles.featureDivider} />
-
-                <View style={styles.featureItem}>
-                  <View style={styles.iconCircle}>
-                    <Ionicons name="earth" size={22} color="#1B4329" />
-                  </View>
-                  <Text style={styles.featureLabel}>Protect Our</Text>
-                  <Text style={styles.featureLabelSub}>Planet</Text>
-                </View>
-
-                <View style={styles.featureDivider} />
-
-                <View style={styles.featureItem}>
-                  <View style={styles.iconCircle}>
-                    <MaterialCommunityIcons name="food-apple" size={22} color="#1B4329" />
-                  </View>
-                  <Text style={styles.featureLabel}>Share Good,</Text>
-                  <Text style={styles.featureLabelSub}>Spread Hope</Text>
-                </View>
-              </View>
-            </Animated.View>
-          </ScrollView>
+          </View>
 
           {/* ==================== SCREEN 2 ==================== */}
-          <ScrollView
-            style={{ width }}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.slideScrollContent}
-          >
+          <View style={[styles.slideScrollContent, { width }]}>
             {/* Slide 2 Pill */}
             <View style={[styles.pillContainer, { backgroundColor: '#E4F0E1' }]}>
               <Text style={[styles.pillText, { color: '#1B4329' }]}>2 of 3</Text>
@@ -301,160 +250,45 @@ export default function LandingScreen() {
               </Text>
             </View>
 
-            {/* Cycle Diagram Container */}
-            <View style={styles.cycleDiagramContainer}>
-              {/* Outer Circular Ring (arrow representation) */}
-              <View style={styles.cycleRing}>
-                {/* Central Circle Logo */}
-                <View style={styles.centerLogoCircle}>
-                  <Image
-                    source={require('../assets/images/mainLogo.png')}
-                    style={styles.cycleCenterLogo}
-                    resizeMode="contain"
-                  />
+            {/* Compact Steps Container */}
+            <View style={styles.compactStepsContainer}>
+              <View style={styles.compactStepRow}>
+                <View style={styles.compactStepIconCircle}>
+                  <Ionicons name="storefront" size={14} color="#1B4329" />
                 </View>
+                <Text style={styles.compactStepText}>
+                  <Text style={styles.compactStepHighlight}>Donors</Text> share surplus food easily.
+                </Text>
               </View>
-
-              {/* Grid Layout for the 4 Cards */}
-              <View style={styles.cycleGrid}>
-                {/* Row 1 */}
-                <View style={styles.cycleRow}>
-                  {/* Card 1: Donors */}
-                  <View style={styles.cycleCard}>
-                    <View style={styles.cycleIconCircle}>
-                      <Ionicons name="storefront-outline" size={18} color="#1B4329" />
-                    </View>
-                    <Text style={styles.cycleCardTitle}>Donors</Text>
-                    <Text style={styles.cycleCardText}>Share surplus food easily</Text>
-                  </View>
-
-                  {/* Card 2: NGOs */}
-                  <View style={styles.cycleCard}>
-                    <View style={styles.cycleIconCircle}>
-                      <Ionicons name="people-outline" size={18} color="#1B4329" />
-                    </View>
-                    <Text style={styles.cycleCardTitle}>NGOs</Text>
-                    <Text style={styles.cycleCardText}>Find and collect food in need</Text>
-                  </View>
+              <View style={styles.compactStepRow}>
+                <View style={styles.compactStepIconCircle}>
+                  <Ionicons name="people" size={14} color="#1B4329" />
                 </View>
-
-                {/* Connecting Arrows Overlay */}
-                <View style={styles.cycleArrowsContainer}>
-                  {/* Top Arrow: Donors -> NGOs */}
-                  <Ionicons name="arrow-forward-outline" size={16} color="#2E7D32" style={styles.arrowTop} />
-                  {/* Right Arrow: NGOs -> Planet */}
-                  <Ionicons name="arrow-down-outline" size={16} color="#2E7D32" style={styles.arrowRight} />
-                  {/* Bottom Arrow: Planet -> Communities */}
-                  <Ionicons name="arrow-back-outline" size={16} color="#2E7D32" style={styles.arrowBottom} />
-                  {/* Left Arrow: Communities -> Donors */}
-                  <Ionicons name="arrow-up-outline" size={16} color="#2E7D32" style={styles.arrowLeft} />
+                <Text style={styles.compactStepText}>
+                  <Text style={styles.compactStepHighlight}>NGOs</Text> claim and rescue food in real-time.
+                </Text>
+              </View>
+              <View style={styles.compactStepRow}>
+                <View style={styles.compactStepIconCircle}>
+                  <Ionicons name="heart" size={14} color="#1B4329" />
                 </View>
-
-                {/* Row 2 */}
-                <View style={styles.cycleRow}>
-                  {/* Card 4: Communities */}
-                  <View style={styles.cycleCard}>
-                    <View style={styles.cycleIconCircle}>
-                      <Ionicons name="heart-outline" size={18} color="#1B4329" />
-                    </View>
-                    <Text style={styles.cycleCardTitle}>Communities</Text>
-                    <Text style={styles.cycleCardText}>Get access to nutritious meals</Text>
-                  </View>
-
-                  {/* Card 3: Planet */}
-                  <View style={styles.cycleCard}>
-                    <View style={styles.cycleIconCircle}>
-                      <Ionicons name="earth-outline" size={18} color="#1B4329" />
-                    </View>
-                    <Text style={styles.cycleCardTitle}>Planet</Text>
-                    <Text style={styles.cycleCardText}>Less waste, better future</Text>
-                  </View>
-                </View>
+                <Text style={styles.compactStepText}>
+                  <Text style={styles.compactStepHighlight}>Communities</Text> receive fresh, nutritious meals.
+                </Text>
               </View>
             </View>
 
-            {/* List Heading */}
-            <View style={[styles.headingSection, { marginTop: 24, marginBottom: 8 }]}>
-              <View style={styles.headingRow}>
-                <Text style={[styles.headingMain, { fontSize: 22 }]}>What This App Does</Text>
-                <Ionicons name="leaf" size={12} color="#2E7D32" style={styles.headingLeaf} />
-              </View>
+            {/* Matchmaking Highlight */}
+            <View style={styles.infoBadgeContainer}>
+              <Ionicons name="flash-sharp" size={14} color="#D97706" style={{ marginRight: 6 }} />
+              <Text style={styles.infoBadgeText}>
+                Real-time matchmaking & smart routing alerts shelters instantly.
+              </Text>
             </View>
-
-            {/* Actions List Card */}
-            <View style={styles.actionsListCard}>
-              {/* Item 1 */}
-              <View style={styles.actionRowItem}>
-                <View style={styles.actionIconCircle}>
-                  <MaterialCommunityIcons name="basket-outline" size={18} color="#2E7D32" />
-                </View>
-                <View style={styles.actionRowContent}>
-                  <Text style={styles.actionRowTitle}>Make Food Donation Easy</Text>
-                  <Text style={styles.actionRowSub}>Create and share food donations in just a few taps.</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
-              </View>
-              <View style={styles.actionDivider} />
-
-              {/* Item 2 */}
-              <View style={styles.actionRowItem}>
-                <View style={styles.actionIconCircle}>
-                  <Ionicons name="search-outline" size={18} color="#2E7D32" />
-                </View>
-                <View style={styles.actionRowContent}>
-                  <Text style={styles.actionRowTitle}>Discover Nearby Donations</Text>
-                  <Text style={styles.actionRowSub}>NGOs can find available food near them in real-time.</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
-              </View>
-              <View style={styles.actionDivider} />
-
-              {/* Item 3 */}
-              <View style={styles.actionRowItem}>
-                <View style={styles.actionIconCircle}>
-                  <Ionicons name="map-outline" size={18} color="#2E7D32" />
-                </View>
-                <View style={styles.actionRowContent}>
-                  <Text style={styles.actionRowTitle}>Smart Map & Navigation</Text>
-                  <Text style={styles.actionRowSub}>Get directions, track pickups, and save time.</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
-              </View>
-              <View style={styles.actionDivider} />
-
-              {/* Item 4 */}
-              <View style={styles.actionRowItem}>
-                <View style={styles.actionIconCircle}>
-                  <Ionicons name="mic-outline" size={18} color="#2E7D32" />
-                </View>
-                <View style={styles.actionRowContent}>
-                  <Text style={styles.actionRowTitle}>AI Voice Assistant</Text>
-                  <Text style={styles.actionRowSub}>Use voice to create donations and get help in your language.</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
-              </View>
-              <View style={styles.actionDivider} />
-
-              {/* Item 5 */}
-              <View style={styles.actionRowItem}>
-                <View style={styles.actionIconCircle}>
-                  <Ionicons name="notifications-outline" size={18} color="#2E7D32" />
-                </View>
-                <View style={styles.actionRowContent}>
-                  <Text style={styles.actionRowTitle}>Real-time Updates</Text>
-                  <Text style={styles.actionRowSub}>Stay informed with notifications and status updates.</Text>
-                </View>
-                <Ionicons name="chevron-forward" size={16} color="#9CA3AF" />
-              </View>
-            </View>
-          </ScrollView>
+          </View>
 
           {/* ==================== SCREEN 3 ==================== */}
-          <ScrollView
-            style={{ width }}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.slideScrollContent}
-          >
+          <View style={[styles.slideScrollContent, { width }]}>
             {/* Slide 3 Pill */}
             <View style={[styles.pillContainer, { backgroundColor: '#E4F0E1' }]}>
               <Text style={[styles.pillText, { color: '#1B4329' }]}>3 of 3</Text>
@@ -471,156 +305,42 @@ export default function LandingScreen() {
               </Text>
             </View>
 
-            {/* Stats Card Container */}
-            <View style={styles.statsMainCard}>
-              {/* Row 1 */}
-              <View style={styles.statsMainRow}>
-                <View style={styles.statCell}>
-                  <MaterialCommunityIcons name="silverware-fork-knife" size={20} color="#2E7D32" />
-                  <Text style={styles.statMainNumber}>24M+</Text>
-                  <Text style={styles.statMainTitle}>Meals Delivered</Text>
-                  <Text style={styles.statMainDesc}>Nutritious meals served to people in need.</Text>
+            {/* Spotlight Stat Card with animation */}
+            <Animated.View style={[styles.spotlightStatCard, featuresAnimatedStyle]}>
+              <View style={styles.spotlightRow}>
+                <View style={styles.spotlightCell}>
+                  <Text style={styles.spotlightNumber}>24M+</Text>
+                  <Text style={styles.spotlightLabel}>Meals Served</Text>
                 </View>
-                <View style={styles.statCellDivider} />
-                <View style={styles.statCell}>
-                  <Ionicons name="leaf-outline" size={20} color="#2E7D32" />
-                  <Text style={styles.statMainNumber}>18K+ Tons</Text>
-                  <Text style={styles.statMainTitle}>Food Saved</Text>
-                  <Text style={styles.statMainDesc}>Good food saved from being wasted every year.</Text>
+                <View style={styles.spotlightDivider} />
+                <View style={styles.spotlightCell}>
+                  <Text style={styles.spotlightNumber}>18K+</Text>
+                  <Text style={styles.spotlightLabel}>Tons Saved</Text>
                 </View>
               </View>
-
-              <View style={styles.statsRowDivider} />
-
-              {/* Row 2 */}
-              <View style={styles.statsMainRow}>
-                <View style={styles.statCell}>
-                  <Ionicons name="people-outline" size={20} color="#2E7D32" />
-                  <Text style={styles.statMainNumber}>1,200+</Text>
-                  <Text style={styles.statMainTitle}>NGO Partners</Text>
-                  <Text style={styles.statMainDesc}>Trusted partners working across communities.</Text>
+              <View style={styles.spotlightStatsDividerLine} />
+              <View style={styles.spotlightRow}>
+                <View style={styles.spotlightCell}>
+                  <Text style={styles.spotlightNumber}>1,200+</Text>
+                  <Text style={styles.spotlightLabel}>NGO Partners</Text>
                 </View>
-                <View style={styles.statCellDivider} />
-                <View style={styles.statCell}>
-                  <Ionicons name="earth-outline" size={20} color="#2E7D32" />
-                  <Text style={styles.statMainNumber}>12+</Text>
-                  <Text style={styles.statMainTitle}>Countries</Text>
-                  <Text style={styles.statMainDesc}>Spreading impact across borders together.</Text>
+                <View style={styles.spotlightDivider} />
+                <View style={styles.spotlightCell}>
+                  <Text style={styles.spotlightNumber}>500+ T</Text>
+                  <Text style={styles.spotlightLabel}>CO₂ Prevented</Text>
                 </View>
               </View>
+            </Animated.View>
 
-              <View style={styles.statsRowDivider} />
-
-              {/* Row 3 */}
-              <View style={styles.statsMainRow}>
-                <View style={styles.statCell}>
-                  <MaterialCommunityIcons name="recycle" size={20} color="#2E7D32" />
-                  <Text style={styles.statMainNumber}>500+ Tons</Text>
-                  <Text style={styles.statMainTitle}>CO₂ Prevented</Text>
-                  <Text style={styles.statMainDesc}>Reducing emissions for a greener tomorrow.</Text>
-                </View>
-                <View style={styles.statCellDivider} />
-                <View style={styles.statCell}>
-                  <MaterialCommunityIcons name="hand-heart" size={20} color="#2E7D32" />
-                  <Text style={styles.statMainNumber}>Millions</Text>
-                  <Text style={styles.statMainTitle}>Lives Touched</Text>
-                  <Text style={styles.statMainDesc}>Small actions creating a big change.</Text>
-                </View>
-              </View>
+            {/* Quote Block (Testimonial) */}
+            <View style={styles.quoteBlock}>
+              <MaterialCommunityIcons name="format-quote-open" size={16} color="#2E7D32" style={styles.quoteIcon} />
+              <Text style={styles.quoteText}>
+                "RePlate helps us source fresh food easily, reducing our food acquisition costs by 40%."
+              </Text>
+              <Text style={styles.quoteAuthor}>— Hope Kitchen Foundation</Text>
             </View>
-
-            {/* Stories Section Title */}
-            <View style={styles.storiesTitleRow}>
-              <View style={styles.headingRow}>
-                <Ionicons name="leaf" size={14} color="#2E7D32" style={{ marginRight: 6 }} />
-                <Text style={styles.storiesTitle}>Stories That Inspire</Text>
-              </View>
-              <TouchableOpacity style={styles.viewAllBtn}>
-                <Text style={styles.viewAllText}>View All</Text>
-                <Ionicons name="chevron-forward" size={14} color="#2E7D32" />
-              </TouchableOpacity>
-            </View>
-
-            {/* Horizontal Stories List */}
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              style={styles.storiesScrollView}
-              contentContainerStyle={styles.storiesContentStyle}
-            >
-              {/* Story 1 */}
-              <View style={styles.storyCard}>
-                <Image
-                  source={require('../assets/images/hero_image.png')}
-                  style={styles.storyCardImage}
-                  resizeMode="cover"
-                />
-                <View style={styles.storyCardContent}>
-                  <View style={styles.storyBadge}>
-                    <Text style={styles.storyBadgeText}>Impact</Text>
-                  </View>
-                  <Text style={styles.storyCardTitle}>How a Simple Meal Changed a Family's Day</Text>
-                  <Text style={styles.storyCardSub}>Real stories from real communities.</Text>
-                  <View style={styles.storyCardFooter}>
-                    <Ionicons name="calendar-outline" size={12} color="#6B7280" style={{ marginRight: 4 }} />
-                    <Text style={styles.storyCardDate}>May 10, 2024</Text>
-                  </View>
-                </View>
-              </View>
-
-              {/* Story 2 */}
-              <View style={styles.storyCard}>
-                <Image
-                  source={require('../assets/images/icon.png')}
-                  style={styles.storyCardImage}
-                  resizeMode="cover"
-                />
-                <View style={styles.storyCardContent}>
-                  <View style={[styles.storyBadge, { backgroundColor: '#F0F9FF' }]}>
-                    <Text style={[styles.storyBadgeText, { color: '#0284C7' }]}>Sustainability</Text>
-                  </View>
-                  <Text style={styles.storyCardTitle}>Why Reducing Food Waste Matters</Text>
-                  <Text style={styles.storyCardSub}>Every action counts for a better planet.</Text>
-                  <View style={styles.storyCardFooter}>
-                    <Ionicons name="calendar-outline" size={12} color="#6B7280" style={{ marginRight: 4 }} />
-                    <Text style={styles.storyCardDate}>Apr 22, 2024</Text>
-                  </View>
-                </View>
-              </View>
-
-              {/* Story 3 */}
-              <View style={styles.storyCard}>
-                <Image
-                  source={require('../assets/images/replateFull.png')}
-                  style={styles.storyCardImage}
-                  resizeMode="cover"
-                />
-                <View style={styles.storyCardContent}>
-                  <View style={[styles.storyBadge, { backgroundColor: '#ECFDF5' }]}>
-                    <Text style={[styles.storyBadgeText, { color: '#059669' }]}>Community</Text>
-                  </View>
-                  <Text style={styles.storyCardTitle}>NGOs Making a Big Difference</Text>
-                  <Text style={styles.storyCardSub}>Meet the heroes behind every meal.</Text>
-                  <View style={styles.storyCardFooter}>
-                    <Ionicons name="calendar-outline" size={12} color="#6B7280" style={{ marginRight: 4 }} />
-                    <Text style={styles.storyCardDate}>Mar 15, 2024</Text>
-                  </View>
-                </View>
-              </View>
-            </ScrollView>
-
-            {/* Be a Part of the Change CTA Card */}
-            <View style={styles.ctaCard}>
-              <View style={styles.ctaIconCircle}>
-                <MaterialCommunityIcons name="food-apple" size={20} color="#2E7D32" />
-              </View>
-              <View style={styles.ctaTextContainer}>
-                <Text style={styles.ctaTitle}>Be a Part of the Change</Text>
-                <Text style={styles.ctaSub}>Your small step can create a big impact.</Text>
-              </View>
-              <Ionicons name="heart" size={20} color="#C1E1B9" style={styles.ctaHeart} />
-            </View>
-          </ScrollView>
+          </View>
         </ScrollView>
       </View>
 
@@ -790,7 +510,7 @@ const styles = StyleSheet.create({
   },
   heroContainer: {
     width: width * 0.88,
-    height: height * 0.28,
+    height: height * 0.22,
     borderBottomLeftRadius: 180,
     borderBottomRightRadius: 180,
     overflow: 'hidden',
@@ -1281,5 +1001,146 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '600',
     color: '#6B7280',
+  },
+  // Compact Steps (Slide 2)
+  compactStepsContainer: {
+    width: width * 0.9,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EAF3E9',
+    gap: 12,
+    marginTop: 8,
+    shadowColor: '#111',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  compactStepRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  compactStepIconCircle: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    backgroundColor: '#E4F0E1',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  compactStepText: {
+    fontSize: 12.5,
+    color: '#4B5563',
+    flex: 1,
+  },
+  compactStepHighlight: {
+    fontWeight: '700',
+    color: '#1B4329',
+  },
+  // Spotlight Stat (Slide 3)
+  spotlightStatCard: {
+    width: width * 0.9,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EAF3E9',
+    alignItems: 'center',
+    marginTop: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  spotlightRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-around',
+    width: '100%',
+    marginBottom: 8,
+  },
+  spotlightCell: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  spotlightDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: '#E5E7EB',
+  },
+  spotlightNumber: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#2E7D32',
+  },
+  spotlightLabel: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#1B4329',
+    marginTop: 2,
+  },
+  spotlightFooterText: {
+    fontSize: 11,
+    color: '#6B7280',
+    textAlign: 'center',
+    marginTop: 4,
+    fontWeight: '500',
+  },
+  spotlightStatsDividerLine: {
+    height: 1,
+    backgroundColor: '#F3F4F6',
+    width: '100%',
+    marginVertical: 10,
+  },
+  infoBadgeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFBEB',
+    borderColor: '#FEF3C7',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 12,
+    width: width * 0.9,
+    alignSelf: 'center',
+  },
+  infoBadgeText: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#B45309',
+    flex: 1,
+    lineHeight: 14,
+  },
+  quoteBlock: {
+    backgroundColor: '#F3F7F1',
+    borderLeftWidth: 3,
+    borderLeftColor: '#2E7D32',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    marginTop: 12,
+    width: width * 0.9,
+    alignSelf: 'center',
+  },
+  quoteIcon: {
+    marginBottom: 4,
+  },
+  quoteText: {
+    fontSize: 11,
+    fontStyle: 'italic',
+    color: '#374151',
+    lineHeight: 15,
+  },
+  quoteAuthor: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: '#1B4329',
+    textAlign: 'right',
+    marginTop: 4,
   },
 });

@@ -22,6 +22,7 @@ import { useRouter } from 'expo-router';
 import { useAppAuth } from '../../hooks/useAppAuth';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { apiClient } from '../../services/api';
+import LocationPickerMap from '../../components/LocationPickerMap';
 
 const { width } = Dimensions.get('window');
 
@@ -412,7 +413,20 @@ export default function SettingsScreen() {
           
           <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
             {isAddingAddress ? (
-              <ScrollView style={styles.modalBody} contentContainerStyle={{ paddingBottom: 40 }}>
+              <ScrollView style={styles.modalBody} contentContainerStyle={{ paddingBottom: 40 }} showsVerticalScrollIndicator={false}>
+                <Text style={styles.formLabel}>Pin Location on Map</Text>
+                <LocationPickerMap
+                  onLocationSelect={(data) => {
+                    setNewAddress(prev => ({
+                      ...prev,
+                      address_line: data.address_line,
+                      city: data.city,
+                      state: data.state,
+                      pincode: data.pincode
+                    }));
+                  }}
+                />
+                
                 <Text style={styles.formLabel}>Address Name (e.g. Main Branch)</Text>
                 <TextInput style={styles.input} value={newAddress.name} onChangeText={t => setNewAddress({...newAddress, name: t})} placeholder="Branch Name" />
                 

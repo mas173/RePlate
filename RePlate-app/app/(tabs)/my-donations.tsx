@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   View,
   Text,
@@ -14,7 +14,7 @@ import { useAppAuth } from '../../hooks/useAppAuth';
 import { apiClient } from '../../services/api';
 import { Colors } from '../../constants/theme';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -52,9 +52,11 @@ export default function MyDonationsScreen() {
     }
   };
 
-  useEffect(() => {
-    fetchDonations();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchDonations();
+    }, [])
+  );
 
   const onRefresh = () => {
     setRefreshing(true);
