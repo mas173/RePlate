@@ -82,20 +82,20 @@ export default function TabLayout() {
         }}
       />
 
-      {/* 5. Profile */}
+      {/* 5. Settings */}
       <Tabs.Screen
-        name="profile"
+        name="settings"
         options={{
-          title: 'Profile',
+          title: 'Settings',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'person' : 'person-outline'} size={21} color={color} />
+            <Ionicons name={focused ? 'settings' : 'settings-outline'} size={21} color={color} />
           ),
         }}
       />
 
       {/* Hidden screens — still routable, just not in the tab bar */}
       <Tabs.Screen name="explore" options={{ href: null }} />
-      <Tabs.Screen name="settings" options={{ href: null }} />
+      <Tabs.Screen name="profile" options={{ href: null }} />
     </Tabs>
   );
 }
