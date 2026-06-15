@@ -59,6 +59,7 @@ export default function HomeScreen() {
     activeNGOs: 0,
   });
   const [activities, setActivities] = useState<any[]>([]);
+  const [activeItem, setActiveItem] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -113,9 +114,9 @@ export default function HomeScreen() {
       const platformRes = await apiClient.get(`/analytics/overview?t=${Date.now()}`);
       setPlatformStats(platformRes.data);
 
-      // 4. Fetch recent activities
-      const donationsRes = await apiClient.get(`/donations?limit=5&t=${Date.now()}`);
-      const claimsRes = await apiClient.get(`/claims?limit=5&t=${Date.now()}`);
+      // 4. Fetch recent activities and active item
+      const donationsRes = await apiClient.get(`/donations?t=${Date.now()}`);
+      const claimsRes = await apiClient.get(`/claims?t=${Date.now()}`);
 
       const rawDonations = donationsRes.data?.donations || [];
       const rawClaims = claimsRes.data?.claims || claimsRes.data || [];
@@ -147,6 +148,46 @@ export default function HomeScreen() {
         .slice(0, 3);
 
       setActivities(combined);
+
+      // Determine active item based on role
+      const isNGO = profile?.role === 'ngo';
+      if (isNGO) {
+        const activeNGOClaims = rawClaims.filter(
+          (c: any) => c.status !== 'completed' && c.status !== 'delivered'
+        );
+        if (activeNGOClaims.length > 0) {
+          const firstClaim = activeNGOClaims[0];
+          setActiveItem({
+            id: firstClaim.donation_id || firstClaim.donationId,
+            food_name: firstClaim.donation?.food_name || 'Food item',
+            status: firstClaim.status || 'pending',
+            pickup_city: firstClaim.donation?.pickup_city || 'Local',
+            expires_at: firstClaim.donation?.expires_at,
+            images: firstClaim.donation?.images || [],
+            type: 'claim',
+          });
+        } else {
+          setActiveItem(null);
+        }
+      } else {
+        const activeDonorList = rawDonations.filter(
+          (d: any) => d.status !== 'completed' && d.status !== 'delivered'
+        );
+        if (activeDonorList.length > 0) {
+          const firstDonation = activeDonorList[0];
+          setActiveItem({
+            id: firstDonation.id,
+            food_name: firstDonation.food_name,
+            status: firstDonation.status || 'available',
+            pickup_city: firstDonation.pickup_city || 'Local',
+            expires_at: firstDonation.expires_at,
+            images: firstDonation.images || [],
+            type: 'donation',
+          });
+        } else {
+          setActiveItem(null);
+        }
+      }
     } catch (err) {
       console.warn('Failed to fetch home screen data:', err);
     } finally {
@@ -451,42 +492,121 @@ export default function HomeScreen() {
 
         {/* Your Active Donations */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Your Active Donations</Text>
-          <TouchableOpacity style={styles.viewAllBtn} onPress={() => router.push('/(tabs)/my-donations')}>
+          <Text style={styles.sectionTitle}>
+            {profile?.role === 'ngo' ? 'Your Active Rescues' : 'Your Active Donations'}
+          </Text>
+          <TouchableOpacity
+            style={styles.viewAllBtn}
+            onPress={() =>
+              router.push(profile?.role === 'ngo' ? ('/(tabs)/activity' as any) : '/(tabs)/my-donations')
+            }
+          >
             <Text style={styles.viewAllText}>View All</Text>
             <Ionicons name="arrow-forward" size={12} color="#2E7D32" style={{ marginLeft: 2 }} />
           </TouchableOpacity>
         </View>
 
         {/* Active Donations Card */}
-        <View style={styles.activeDonationCard}>
-          <Image
-            source={require('../../assets/images/hero_image.png')}
-            style={styles.activeDonationImg}
-          />
-          <View style={styles.activeDonationInfo}>
-            <Text style={styles.activeDonationTitle}>Food Pack</Text>
-            <View style={styles.pendingBadge}>
-              <Text style={styles.pendingBadgeText}>Pending Pickup</Text>
-            </View>
-            <View style={styles.activeDonationMetaRow}>
-              <View style={styles.metaCol}>
-                <Ionicons name="location-outline" size={12} color="#6B7280" />
-                <Text style={styles.metaColText}>2 km away</Text>
+        {activeItem ? (
+          <View style={styles.activeDonationCard}>
+            <Image
+              source={
+                activeItem.images && activeItem.images.length > 0
+                  ? { uri: activeItem.images[0] }
+                  : require('../../assets/images/hero_image.png')
+              }
+              style={styles.activeDonationImg}
+              resizeMode="cover"
+            />
+            <View style={styles.activeDonationInfo}>
+              <Text style={styles.activeDonationTitle} numberOfLines={1}>
+                {activeItem.food_name}
+              </Text>
+              <View
+                style={[
+                  styles.pendingBadge,
+                  {
+                    backgroundColor:
+                      activeItem.status === 'completed' || activeItem.status === 'delivered'
+                        ? '#DCFCE7'
+                        : activeItem.status === 'available'
+                        ? '#E6F4EA'
+                        : '#DBEAFE',
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.pendingBadgeText,
+                    {
+                      color:
+                        activeItem.status === 'completed' || activeItem.status === 'delivered'
+                          ? '#16A34A'
+                          : activeItem.status === 'available'
+                          ? '#2E7D32'
+                          : '#2563EB',
+                    },
+                  ]}
+                >
+                  {activeItem.status.replace('_', ' ').toUpperCase()}
+                </Text>
               </View>
-              <View style={styles.metaCol}>
-                <Ionicons name="time-outline" size={12} color="#6B7280" />
-                <Text style={styles.metaColText}>Today, 5:00 PM</Text>
+              <View style={styles.activeDonationMetaRow}>
+                <View style={styles.metaCol}>
+                  <Ionicons name="location-outline" size={12} color="#6B7280" />
+                  <Text style={styles.metaColText} numberOfLines={1}>
+                    {activeItem.pickup_city || 'Local'}
+                  </Text>
+                </View>
+                {activeItem.expires_at && (
+                  <View style={styles.metaCol}>
+                    <Ionicons name="time-outline" size={12} color="#6B7280" />
+                    <Text style={styles.metaColText} numberOfLines={1}>
+                      {new Date(activeItem.expires_at).toLocaleDateString([], {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </Text>
+                  </View>
+                )}
               </View>
             </View>
+            <TouchableOpacity
+              style={styles.viewDetailsBtn}
+              onPress={() => router.push(`/modal?id=${activeItem.id}`)}
+            >
+              <Text style={styles.viewDetailsBtnText}>View Details</Text>
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            style={styles.viewDetailsBtn}
-            onPress={() => router.push('/(tabs)/my-donations')}
-          >
-            <Text style={styles.viewDetailsBtnText}>View Details</Text>
-          </TouchableOpacity>
-        </View>
+        ) : (
+          <View style={styles.activeDonationCard}>
+            <View style={[styles.qaIconCircle, { backgroundColor: '#E6F4EA', marginRight: 12 }]}>
+              <Ionicons
+                name={profile?.role === 'ngo' ? 'restaurant-outline' : 'gift-outline'}
+                size={20}
+                color="#2E7D32"
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.activeDonationTitle}>All caught up!</Text>
+              <Text style={[styles.metaColText, { marginTop: 4 }]}>
+                {profile?.role === 'ngo'
+                  ? 'No active claims at the moment.'
+                  : 'No active listings at the moment.'}
+              </Text>
+            </View>
+            <TouchableOpacity
+              style={styles.viewDetailsBtn}
+              onPress={() =>
+                router.push(profile?.role === 'ngo' ? ('/(tabs)/activity' as any) : '/(tabs)/donate')
+              }
+            >
+              <Text style={styles.viewDetailsBtnText}>
+                {profile?.role === 'ngo' ? 'Rescue Food' : 'Donate Food'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* Your Lifetime Impact */}
         <View style={styles.lifetimeImpactCard}>
@@ -1025,10 +1145,11 @@ const styles = StyleSheet.create({
   },
   saladBowlHandIllustration: {
     position: 'absolute',
-    right: -24,
-    bottom: 0,
-    width: 160,
-    height: 160,
+    right: -30,
+    bottom: -100,
+    width: 220,
+    height: 330,
+    resizeMode: 'contain',
     opacity: 0.95,
   },
   sectionHeader: {
@@ -1296,10 +1417,11 @@ const styles = StyleSheet.create({
   },
   communityGlobeIllustration: {
     position: 'absolute',
-    right: -10,
-    bottom: -10,
-    width: 130,
-    height: 130,
+    right: -25,
+    bottom: -75,
+    width: 180,
+    height: 270,
+    resizeMode: 'contain',
   },
   recentActivityStagesCard: {
     width: '100%',

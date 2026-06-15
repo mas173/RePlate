@@ -46,7 +46,7 @@ export default function TabLayout() {
         options={{
           title: 'Donations',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'mail' : 'mail-outline'} size={21} color={color} />
+            <Ionicons name={focused ? 'gift' : 'gift-outline'} size={21} color={color} />
           ),
         }}
       />
