@@ -36,6 +36,38 @@ const CATEGORY_LABELS: Record<string, { label: string; icon: string }> = {
   other: { label: 'Other', icon: '🍴' },
 };
 
+const getCategoryIcon = (category: string) => {
+  const cat = (category || '').toLowerCase();
+  if (cat.includes('cooked') || cat.includes('meal')) {
+    return { lib: MaterialCommunityIcons, name: 'food' as const, color: '#2E7D32', bg: '#E6F4EA' };
+  }
+  if (cat.includes('produce') || cat.includes('veg') || cat.includes('raw')) {
+    return { lib: MaterialCommunityIcons, name: 'carrot' as const, color: '#EA580C', bg: '#FFF7ED' };
+  }
+  if (cat.includes('bakery') || cat.includes('bread')) {
+    return { lib: MaterialCommunityIcons, name: 'bread-slice' as const, color: '#D97706', bg: '#FEF3C7' };
+  }
+  if (cat.includes('dairy') || cat.includes('milk')) {
+    return { lib: MaterialCommunityIcons, name: 'cow' as const, color: '#2563EB', bg: '#EBF5FF' };
+  }
+  if (cat.includes('bev') || cat.includes('drink')) {
+    return { lib: Ionicons, name: 'cafe-outline' as const, color: '#06B6D4', bg: '#ECFEFF' };
+  }
+  if (cat.includes('packaged') || cat.includes('pack')) {
+    return { lib: MaterialCommunityIcons, name: 'package-variant-closed' as const, color: '#7C3AED', bg: '#F3E8FF' };
+  }
+  if (cat.includes('fruit')) {
+    return { lib: MaterialCommunityIcons, name: 'food-apple' as const, color: '#EF4444', bg: '#FEE2E2' };
+  }
+  if (cat.includes('grain')) {
+    return { lib: MaterialCommunityIcons, name: 'barley' as const, color: '#84CC16', bg: '#F7FEE7' };
+  }
+  if (cat.includes('meat')) {
+    return { lib: MaterialCommunityIcons, name: 'food-steak' as const, color: '#B91C1C', bg: '#FEE2E2' };
+  }
+  return { lib: Ionicons, name: 'fast-food-outline' as const, color: '#4B5563', bg: '#F3F4F6' };
+};
+
 export default function HomeScreen() {
   const { profile, user } = useAppAuth();
   const router = useRouter();
@@ -164,6 +196,7 @@ export default function HomeScreen() {
             pickup_city: firstClaim.donation?.pickup_city || 'Local',
             expires_at: firstClaim.donation?.expires_at,
             images: firstClaim.donation?.images || [],
+            category: firstClaim.donation?.category || 'other',
             type: 'claim',
           });
         } else {
@@ -182,6 +215,7 @@ export default function HomeScreen() {
             pickup_city: firstDonation.pickup_city || 'Local',
             expires_at: firstDonation.expires_at,
             images: firstDonation.images || [],
+            category: firstDonation.category || 'other',
             type: 'donation',
           });
         } else {
@@ -355,6 +389,13 @@ export default function HomeScreen() {
 
         {/* YOUR IMPACT Green Card */}
         <View style={styles.impactCard}>
+          {/* Salad Bowl Hand Illustration Overlay */}
+          <Image
+            source={require('../../assets/images/salad_bowl_hand.png')}
+            style={styles.saladBowlHandIllustration}
+            resizeMode="contain"
+          />
+
           <View style={styles.impactCardHeader}>
             <Text style={styles.impactTitle}>YOUR IMPACT</Text>
             <Ionicons name="leaf-outline" size={14} color="#FFFFFF" style={{ marginLeft: 6 }} />
@@ -405,13 +446,6 @@ export default function HomeScreen() {
             </View>
             <Ionicons name="arrow-forward" size={16} color="#1B4329" />
           </TouchableOpacity>
-
-          {/* Salad Bowl Hand Illustration Overlay */}
-          <Image
-            source={require('../../assets/images/salad_bowl_hand.png')}
-            style={styles.saladBowlHandIllustration}
-            resizeMode="contain"
-          />
         </View>
 
         {/* Quick Actions */}
@@ -509,15 +543,26 @@ export default function HomeScreen() {
         {/* Active Donations Card */}
         {activeItem ? (
           <View style={styles.activeDonationCard}>
-            <Image
-              source={
-                activeItem.images && activeItem.images.length > 0
-                  ? { uri: activeItem.images[0] }
-                  : require('../../assets/images/hero_image.png')
-              }
-              style={styles.activeDonationImg}
-              resizeMode="cover"
-            />
+            {activeItem.images && activeItem.images.length > 0 ? (
+              <Image
+                source={{ uri: activeItem.images[0] }}
+                style={styles.activeDonationImg}
+                resizeMode="cover"
+              />
+            ) : (
+              (() => {
+                const iconInfo = getCategoryIcon(activeItem.category);
+                return (
+                  <View style={[styles.activeDonationImgPlaceholder, { backgroundColor: iconInfo.bg }]}>
+                    {iconInfo.lib === Ionicons ? (
+                      <Ionicons name={iconInfo.name as any} size={24} color={iconInfo.color} />
+                    ) : (
+                      <MaterialCommunityIcons name={iconInfo.name as any} size={24} color={iconInfo.color} />
+                    )}
+                  </View>
+                );
+              })()
+            )}
             <View style={styles.activeDonationInfo}>
               <Text style={styles.activeDonationTitle} numberOfLines={1}>
                 {activeItem.food_name}
@@ -610,44 +655,44 @@ export default function HomeScreen() {
 
         {/* Your Lifetime Impact */}
         <View style={styles.lifetimeImpactCard}>
-          <View style={styles.lifetimeImpactLeft}>
+          <View style={styles.lifetimeImpactTopRow}>
             <Text style={styles.lifetimeImpactTitle}>Your Lifetime Impact</Text>
-            <View style={styles.lifetimeMetricsRow}>
-              <View style={styles.lifetimeMetricItem}>
-                <View style={styles.lifetimeIconCircle}>
-                  <MaterialCommunityIcons name="silverware-fork-knife" size={14} color="#2E7D32" />
-                </View>
-                <Text style={styles.lifetimeMetricValText}>
-                  {meals} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>Meals</Text>
-                </Text>
+            <TouchableOpacity style={styles.viewAnalyticsCircleBtn} onPress={handleOpenAnalytics}>
+              <Text style={styles.viewAnalyticsText}>View Analytics</Text>
+              <View style={styles.analyticsArrowIconWrap}>
+                <Ionicons name="arrow-forward" size={12} color="#111827" />
               </View>
-
-              <View style={styles.lifetimeMetricItem}>
-                <View style={styles.lifetimeIconCircle}>
-                  <Ionicons name="people" size={14} color="#2E7D32" />
-                </View>
-                <Text style={styles.lifetimeMetricValText}>
-                  {meals * 3} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>People</Text>
-                </Text>
-              </View>
-
-              <View style={styles.lifetimeMetricItem}>
-                <View style={styles.lifetimeIconCircle}>
-                  <Ionicons name="leaf" size={14} color="#2E7D32" />
-                </View>
-                <Text style={styles.lifetimeMetricValText}>
-                  {pWeight ? pWeight.toFixed(1) : '0'} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>kg</Text>
-                </Text>
-              </View>
-            </View>
+            </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.viewAnalyticsCircleBtn} onPress={handleOpenAnalytics}>
-            <Text style={styles.viewAnalyticsText}>View Analytics</Text>
-            <View style={styles.analyticsArrowIconWrap}>
-              <Ionicons name="arrow-forward" size={12} color="#111827" />
+          <View style={styles.lifetimeMetricsRow}>
+            <View style={styles.lifetimeMetricItem}>
+              <View style={styles.lifetimeIconCircle}>
+                <MaterialCommunityIcons name="silverware-fork-knife" size={14} color="#2E7D32" />
+              </View>
+              <Text style={styles.lifetimeMetricValText}>
+                {meals} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>Meals</Text>
+              </Text>
             </View>
-          </TouchableOpacity>
+
+            <View style={styles.lifetimeMetricItem}>
+              <View style={styles.lifetimeIconCircle}>
+                <Ionicons name="people" size={14} color="#2E7D32" />
+              </View>
+              <Text style={styles.lifetimeMetricValText}>
+                {meals * 3} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>People</Text>
+              </Text>
+            </View>
+
+            <View style={styles.lifetimeMetricItem}>
+              <View style={styles.lifetimeIconCircle}>
+                <Ionicons name="leaf" size={14} color="#2E7D32" />
+              </View>
+              <Text style={styles.lifetimeMetricValText}>
+                {pWeight ? pWeight.toFixed(1) : '0'} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>kg</Text>
+              </Text>
+            </View>
+          </View>
         </View>
 
         {/* RePlate Community Banner */}
@@ -1146,11 +1191,13 @@ const styles = StyleSheet.create({
   saladBowlHandIllustration: {
     position: 'absolute',
     right: -30,
-    bottom: -100,
+    bottom: -50,
     width: 220,
     height: 330,
     resizeMode: 'contain',
-    opacity: 0.95,
+    opacity: 0.35,
+    transform: [{ scaleX: -1 }],
+    zIndex: -1,
   },
   sectionHeader: {
     width: '100%',
@@ -1242,6 +1289,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginRight: 12,
   },
+  activeDonationImgPlaceholder: {
+    width: 58,
+    height: 58,
+    borderRadius: 10,
+    marginRight: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   activeDonationInfo: {
     flex: 1,
   },
@@ -1298,25 +1353,26 @@ const styles = StyleSheet.create({
     borderColor: '#EAF3E9',
     borderRadius: 16,
     padding: 14,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: 'column',
+    alignItems: 'stretch',
     marginBottom: 24,
   },
-  lifetimeImpactLeft: {
-    flex: 1,
-    paddingRight: 6,
+  lifetimeImpactTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 10,
   },
   lifetimeImpactTitle: {
     fontSize: 11,
     fontWeight: '700',
     color: '#6B7280',
-    marginBottom: 8,
   },
   lifetimeMetricsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 16,
   },
   lifetimeMetricItem: {
     flexDirection: 'row',
