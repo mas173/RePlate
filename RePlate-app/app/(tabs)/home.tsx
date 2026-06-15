@@ -12,24 +12,35 @@ import {
   Modal,
   TextInput,
   ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
   Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppAuth } from '../../hooks/useAppAuth';
-import { Colors } from '../../constants/theme';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { apiClient } from '../../services/api';
+import { LineChart, PieChart } from 'react-native-chart-kit';
 
 const { width, height } = Dimensions.get('window');
+
+const CATEGORY_LABELS: Record<string, { label: string; icon: string }> = {
+  cooked_meals: { label: 'Cooked Meals', icon: '🍽️' },
+  raw_produce: { label: 'Raw Produce', icon: '🥬' },
+  bakery: { label: 'Bakery', icon: '🍞' },
+  dairy: { label: 'Dairy', icon: '🥛' },
+  beverages: { label: 'Beverages', icon: '🥤' },
+  packaged: { label: 'Packaged', icon: '📦' },
+  fruits: { label: 'Fruits', icon: '🍎' },
+  grains: { label: 'Grains', icon: '🌾' },
+  meat: { label: 'Meat', icon: '🥩' },
+  other: { label: 'Other', icon: '🍴' },
+};
 
 export default function HomeScreen() {
   const { profile, user } = useAppAuth();
   const router = useRouter();
-  
-  // Dynamic stats states
+
+  // Home screen data states
   const [unreadCount, setUnreadCount] = useState(0);
   const [userStats, setUserStats] = useState({
     donations: 0,
@@ -56,10 +67,15 @@ export default function HomeScreen() {
   const [botMessages, setBotMessages] = useState<any[]>([]);
   const [botInput, setBotInput] = useState('');
   const [botSending, setBotSending] = useState(false);
-
   const chatScrollRef = useRef<ScrollView>(null);
 
-  // Setup initial message when profile loads
+  // Detailed Analytics Modal states
+  const [isAnalyticsOpen, setIsAnalyticsOpen] = useState(false);
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  const [categoryData, setCategoryData] = useState<any[]>([]);
+  const [leaderboard, setLeaderboard] = useState<{ donors: any[]; ngos: any[] }>({ donors: [], ngos: [] });
+
+  // Setup initial bot message when profile loads
   useEffect(() => {
     if (profile || user) {
       const name = profile?.fullName
@@ -75,20 +91,6 @@ export default function HomeScreen() {
       ]);
     }
   }, [profile, user]);
-
-  const getRelativeTime = (date: Date) => {
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return 'Just now';
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-    return date.toLocaleDateString();
-  };
 
   const fetchHomeData = useCallback(async (isRefresh = false) => {
     if (!profile) return;
@@ -111,7 +113,7 @@ export default function HomeScreen() {
       const platformRes = await apiClient.get(`/analytics/overview?t=${Date.now()}`);
       setPlatformStats(platformRes.data);
 
-      // 4. Fetch recent donations and claims
+      // 4. Fetch recent activities
       const donationsRes = await apiClient.get(`/donations?limit=5&t=${Date.now()}`);
       const claimsRes = await apiClient.get(`/claims?limit=5&t=${Date.now()}`);
 
@@ -123,7 +125,7 @@ export default function HomeScreen() {
         id: `donation-${d.id}`,
         donationId: d.id,
         type: 'donation',
-        title: profile.role === 'ngo' ? 'New Food Posted' : 'Donation Posted',
+        title: 'Donation Posted',
         sub: d.food_name,
         time: new Date(d.created_at),
         status: d.status,
@@ -134,7 +136,7 @@ export default function HomeScreen() {
         id: `claim-${c.id}`,
         donationId: c.donation_id,
         type: 'claim',
-        title: profile.role === 'donor' ? 'Donation Claimed' : 'Food Claimed',
+        title: 'Food Claimed',
         sub: c.donation?.food_name || 'Food item',
         time: new Date(c.created_at),
         status: c.status,
@@ -142,7 +144,7 @@ export default function HomeScreen() {
 
       const combined = [...donationActivities, ...claimActivities]
         .sort((a, b) => b.time.getTime() - a.time.getTime())
-        .slice(0, 4);
+        .slice(0, 3);
 
       setActivities(combined);
     } catch (err) {
@@ -156,13 +158,28 @@ export default function HomeScreen() {
   useEffect(() => {
     if (profile) {
       fetchHomeData();
-      // Polling optimized from 30s to 60s to reduce battery and API usage
-      const interval = setInterval(() => fetchHomeData(true), 60000);
-      return () => clearInterval(interval);
     }
   }, [profile, fetchHomeData]);
 
-  // Send message to AI Assistant
+  // Fetch detailed analytics data on demand
+  const handleOpenAnalytics = async () => {
+    setIsAnalyticsOpen(true);
+    setAnalyticsLoading(true);
+    try {
+      const [catRes, leaderRes] = await Promise.allSettled([
+        apiClient.get('/analytics/categories'),
+        apiClient.get('/analytics/leaderboard'),
+      ]);
+
+      if (catRes.status === 'fulfilled') setCategoryData(catRes.value.data.categories || []);
+      if (leaderRes.status === 'fulfilled') setLeaderboard(leaderRes.value.data);
+    } catch (err) {
+      console.warn('Failed to fetch detailed analytics:', err);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
+
   const handleSendBotMessage = async (textToSend?: string) => {
     const messageText = textToSend || botInput;
     if (!messageText.trim()) return;
@@ -201,7 +218,7 @@ export default function HomeScreen() {
       };
 
       setBotMessages(prev => [...prev, aiMsg]);
-    } catch (err: any) {
+    } catch (err) {
       console.warn('Failed to chat with AI Assistant:', err);
       const errorMsg = {
         id: (Date.now() + 1).toString(),
@@ -215,35 +232,61 @@ export default function HomeScreen() {
     }
   };
 
-  const handleSuggestionPress = (suggestion: string) => {
-    handleSendBotMessage(suggestion);
-  };
-
-  const handleActivityPress = (donationId: string) => {
-    if (donationId) {
-      router.push(`/modal?id=${donationId}`);
-    }
-  };
-
-  const formatLandfillWeight = (weightInKg: number) => {
-    if (!weightInKg) return '0 kg';
-    if (weightInKg >= 1000) {
-      return `${(weightInKg / 1000).toFixed(1)} tons`;
-    }
-    return `${weightInKg.toFixed(0)} kg`;
-  };
-
   const firstName = profile?.fullName
     ? profile.fullName.split(' ')[0]
     : user?.firstName || 'RePlater';
 
-  const isNgo = profile?.role === 'ngo';
+  // Level logic
+  const meals = userStats.mealsSaved || 0;
+  const level = meals >= 500 ? 5 : meals >= 100 ? 4 : meals >= 50 ? 3 : meals >= 10 ? 2 : 1;
+  const nextTarget = [10, 50, 100, 500, 1000][level - 1];
+  const progressPct = Math.min((meals / nextTarget) * 100, 100);
+
+  // Equivalences
+  const pCo2 = userStats.co2Reduced || 0;
+  const pWeight = userStats.wasteReduced || 0;
+  const pKm = pCo2 * 4.1;
+  const pPhones = Math.round(pCo2 * 120);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <StatusBar barStyle="dark-content" backgroundColor="#FAFBF7" />
 
-      {/* Main Scroll Content */}
+      {/* Top Header Row */}
+      <View style={styles.header}>
+        <View style={styles.logoGroup}>
+          <Image
+            source={require('../../assets/images/mainLogo.png')}
+            style={styles.headerLogo}
+            resizeMode="contain"
+          />
+          <Text style={styles.brandTitle}>RePlate</Text>
+        </View>
+
+        <View style={styles.headerActions}>
+          <TouchableOpacity
+            style={styles.iconButton}
+            activeOpacity={0.75}
+            onPress={() => router.push('/notifications')}
+          >
+            <Ionicons name="notifications-outline" size={22} color="#1B4329" />
+            {unreadCount > 0 && <View style={styles.greenBadgeDot} />}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.avatarWrapper}
+            activeOpacity={0.8}
+            onPress={() => router.push('/(tabs)/profile')}
+          >
+            <Image
+              source={user?.imageUrl ? { uri: user.imageUrl } : require('../../assets/images/icon.png')}
+              style={styles.avatarImage}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Main Content */}
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
@@ -251,495 +294,523 @@ export default function HomeScreen() {
           <RefreshControl refreshing={refreshing} onRefresh={() => fetchHomeData(true)} colors={['#2E7D32']} />
         }
       >
-        
-        {/* Top Premium Header */}
-        <View style={styles.header}>
-          <View style={styles.logoGroup}>
-            <Image
-              source={require('../../assets/images/mainLogo.png')}
-              style={styles.headerLogo}
-              resizeMode="contain"
-            />
-            <View style={styles.appNameContainer}>
-              <Text style={styles.brandRe}>Re</Text>
-              <Text style={styles.brandPlate}>Plate</Text>
+        {/* Welcome Section & Keep Going Badge */}
+        <View style={styles.welcomeRow}>
+          <View style={styles.welcomeTextGroup}>
+            <Text style={styles.greetingText}>Good morning, {firstName}! 👋</Text>
+            <Text style={styles.subGreetingText}>Every meal you share creates a better tomorrow.</Text>
+          </View>
+
+          <View style={styles.keepGoingBadge}>
+            <View style={styles.sproutBadgeIcon}>
+              <MaterialCommunityIcons name="sprout" size={18} color="#2E7D32" />
+            </View>
+            <View style={styles.badgeTextGroup}>
+              <Text style={styles.badgeLabel}>Keep going!</Text>
+              <Text style={styles.badgeSubLabel}>You're making impact</Text>
             </View>
           </View>
-          <View style={styles.headerActions}>
-            {/* Notification Icon with Red Badge */}
-            <TouchableOpacity 
-              style={styles.iconButton} 
-              activeOpacity={0.75}
-              onPress={() => router.push('/notifications')}
-            >
-              <Ionicons name="notifications-outline" size={24} color="#1F5A3A" />
-              {unreadCount > 0 && (
-                <View style={styles.badge}>
-                  <Text style={styles.badgeText}>{unreadCount > 99 ? '99+' : unreadCount}</Text>
-                </View>
-              )}
-            </TouchableOpacity>
+        </View>
 
-            {/* Avatar Group with active status indicator */}
-            <TouchableOpacity style={styles.avatarWrapper} activeOpacity={0.8} onPress={() => router.push('/profile')}>
-              <Image
-                source={user?.imageUrl ? { uri: user.imageUrl } : require('../../assets/images/icon.png')}
-                style={styles.avatarImage}
-              />
-              <View style={styles.activeDot} />
-            </TouchableOpacity>
+        {/* YOUR IMPACT Green Card */}
+        <View style={styles.impactCard}>
+          <View style={styles.impactCardHeader}>
+            <Text style={styles.impactTitle}>YOUR IMPACT</Text>
+            <Ionicons name="leaf-outline" size={14} color="#FFFFFF" style={{ marginLeft: 6 }} />
           </View>
-        </View>
 
-        {/* Brand Tagline below header */}
-        <View style={styles.taglineRow}>
-          <View style={styles.line} />
-          <Text style={styles.taglineText}>REDUCE WASTE. FEED MORE.</Text>
-          <View style={styles.line} />
-        </View>
-
-        {/* Welcome & Impact Hero Grid */}
-        <View style={styles.welcomeHeroContainer}>
-          {/* Left Welcome and Impact Details */}
-          <View style={styles.heroLeft}>
-            <Text style={styles.greeting}>Good morning,</Text>
-            <Text style={styles.username}>{firstName}! 👋</Text>
-            <Text style={styles.welcomeSub}>Every meal you share creates a better tomorrow.</Text>
-
-            {/* Impact This Month Sub-Card */}
-            <View style={styles.monthImpactCard}>
-              <View style={styles.monthImpactHeader}>
-                <Text style={styles.monthImpactTitle}>Your Lifetime Impact</Text>
-                <Ionicons name="leaf" size={12} color="#2E7D32" style={{ marginLeft: 4 }} />
+          {/* Metrics Row */}
+          <View style={styles.impactMetricsContainer}>
+            <View style={styles.impactMetricBox}>
+              <View style={styles.impactMetricIconCircle}>
+                <MaterialCommunityIcons name="silverware-fork-knife" size={18} color="#FFFFFF" />
               </View>
-              
-              <View style={styles.monthImpactContent}>
-                <View>
-                  <Text style={styles.monthImpactNum}>{userStats.mealsSaved}</Text>
-                  <Text style={styles.monthImpactLabel}>Meals Saved</Text>
-                </View>
-                {/* Bowl Graphic */}
-                <View style={styles.bowlGraphicContainer}>
-                  <View style={styles.bowlCircle}>
-                    <MaterialCommunityIcons name="food-apple" size={24} color="#2E7D32" />
-                  </View>
-                  <View style={styles.bowlHeartBadge}>
-                    <Ionicons name="heart" size={10} color="#FFFFFF" />
-                  </View>
-                </View>
+              <Text style={styles.impactMetricValue}>{userStats.mealsSaved}</Text>
+              <Text style={styles.impactMetricLabel}>Meals Saved</Text>
+            </View>
+
+            <View style={styles.metricDivider} />
+
+            <View style={styles.impactMetricBox}>
+              <View style={styles.impactMetricIconCircle}>
+                <Ionicons name="people" size={18} color="#FFFFFF" />
               </View>
+              <Text style={styles.impactMetricValue}>{userStats.mealsSaved * 3}</Text>
+              <Text style={styles.impactMetricLabel}>People Helped</Text>
+            </View>
 
-              <TouchableOpacity 
-                style={styles.viewImpactRow} 
-                activeOpacity={0.7}
-                onPress={() => router.push('/(tabs)/impact')}
-              >
-                <Text style={styles.viewImpactText}>View Detailed Impact</Text>
-                <Ionicons name="arrow-forward" size={12} color="#2E7D32" style={{ marginLeft: 2 }} />
-              </TouchableOpacity>
+            <View style={styles.metricDivider} />
+
+            <View style={styles.impactMetricBox}>
+              <View style={styles.impactMetricIconCircle}>
+                <Ionicons name="leaf" size={18} color="#FFFFFF" />
+              </View>
+              <Text style={styles.impactMetricValue}>
+                {userStats.wasteReduced ? userStats.wasteReduced.toFixed(1) : '0'} kg
+              </Text>
+              <Text style={styles.impactMetricLabel}>Waste Prevented</Text>
             </View>
           </View>
 
-          {/* Right Curved Volunteer Image */}
-          <View style={styles.heroRight}>
-            <Image
-              source={require('../../assets/images/hero_image.png')}
-              style={styles.volunteerHeroImage}
-              resizeMode="cover"
-            />
-          </View>
-        </View>
-
-        {/* Stats Row Horizontal Scroll */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.statsScroll}
-          contentContainerStyle={styles.statsScrollContent}
-        >
-          {/* Meals Shared */}
-          <View style={styles.statCard}>
-            <View style={[styles.statIconCircle, { backgroundColor: '#E8F5E9' }]}>
-              <MaterialCommunityIcons name="silverware-fork-knife" size={16} color="#2E7D32" />
-            </View>
-            <Text style={styles.statLabel}>Meals Saved</Text>
-            <Text style={styles.statVal}>{userStats.mealsSaved}</Text>
-            <View style={styles.statTrendRow}>
-              <Ionicons name="arrow-up" size={10} color="#2E7D32" />
-              <Text style={styles.statTrendText}>All-time record</Text>
-            </View>
-          </View>
-
-          {/* People Helped */}
-          <View style={styles.statCard}>
-            <View style={[styles.statIconCircle, { backgroundColor: '#E8F5E9' }]}>
-              <Ionicons name="people" size={16} color="#2E7D32" />
-            </View>
-            <Text style={styles.statLabel}>People Helped</Text>
-            <Text style={styles.statVal}>{userStats.mealsSaved * 3}</Text>
-            <View style={styles.statTrendRow}>
-              <Ionicons name="arrow-up" size={10} color="#2E7D32" />
-              <Text style={styles.statTrendText}>Based on portions</Text>
-            </View>
-          </View>
-
-          {/* Food Saved */}
-          <View style={styles.statCard}>
-            <View style={[styles.statIconCircle, { backgroundColor: '#E8F5E9' }]}>
-              <Ionicons name="leaf" size={16} color="#2E7D32" />
-            </View>
-            <Text style={styles.statLabel}>Waste Saved</Text>
-            <Text style={styles.statVal}>{userStats.wasteReduced ? `${userStats.wasteReduced.toFixed(1)} kg` : '0 kg'}</Text>
-            <View style={styles.statTrendRow}>
-              <Ionicons name="arrow-up" size={10} color="#2E7D32" />
-              <Text style={styles.statTrendText}>Redirected surplus</Text>
-            </View>
-          </View>
-
-          {/* CO2 Prevented */}
-          <View style={styles.statCard}>
-            <View style={[styles.statIconCircle, { backgroundColor: '#E8F5E9' }]}>
-              <Ionicons name="earth" size={16} color="#2E7D32" />
-            </View>
-            <Text style={styles.statLabel}>CO₂ Prevented</Text>
-            <Text style={styles.statVal}>{userStats.co2Reduced ? `${userStats.co2Reduced.toFixed(1)} kg` : '0 kg'}</Text>
-            <View style={styles.statTrendRow}>
-              <Ionicons name="arrow-up" size={10} color="#2E7D32" />
-              <Text style={styles.statTrendText}>Emissions avoided</Text>
-            </View>
-          </View>
-        </ScrollView>
-
-        {/* Prevented Landfill Impact Card */}
-        <View style={styles.landfillCard}>
-          <View style={styles.landfillLeft}>
-            {/* Sprout Icon */}
-            <View style={styles.sproutWrapper}>
-              <MaterialCommunityIcons name="sprout" size={32} color="#2E7D32" />
-            </View>
-            <View style={styles.landfillTextContainer}>
-              <Text style={styles.landfillSub}>Together we've prevented</Text>
-              <Text style={styles.landfillTitle}>{formatLandfillWeight(platformStats.totalWasteReduced)}</Text>
-              <Text style={styles.landfillDesc}>of food waste from going to landfill.</Text>
-            </View>
-          </View>
-          
-          <TouchableOpacity 
-            style={styles.landfillBtn} 
-            activeOpacity={0.8}
-            onPress={() => router.push('/(tabs)/impact')}
+          {/* Donate Food White Button */}
+          <TouchableOpacity
+            style={styles.donateFoodBtn}
+            activeOpacity={0.9}
+            onPress={() => router.push('/(tabs)/donate')}
           >
-            <Text style={styles.landfillBtnText}>See Platform</Text>
-            <Ionicons name="arrow-forward" size={12} color="#FAFBF7" style={{ marginLeft: 4 }} />
+            <View style={styles.donateFoodBtnLeft}>
+              <Ionicons name="gift-outline" size={18} color="#1B4329" style={{ marginRight: 6 }} />
+              <Text style={styles.donateFoodBtnText}>Donate Food</Text>
+            </View>
+            <Ionicons name="arrow-forward" size={16} color="#1B4329" />
           </TouchableOpacity>
+
+          {/* Salad Bowl Hand Illustration Overlay */}
+          <Image
+            source={require('../../assets/images/salad_bowl_hand.png')}
+            style={styles.saladBowlHandIllustration}
+            resizeMode="contain"
+          />
         </View>
 
-        {/* Recent Activity Header */}
+        {/* Quick Actions */}
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
-          <TouchableOpacity 
-            style={styles.viewAllBtn} 
-            activeOpacity={0.7}
-            onPress={() => router.push(isNgo ? '/(tabs)/explore' : '/(tabs)/my-donations')}
-          >
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <TouchableOpacity style={styles.viewAllBtn} onPress={() => router.push('/(tabs)/donate')}>
             <Text style={styles.viewAllText}>View All</Text>
             <Ionicons name="arrow-forward" size={12} color="#2E7D32" style={{ marginLeft: 2 }} />
           </TouchableOpacity>
         </View>
 
-        {/* Recent Activity Card list */}
-        <View style={styles.activityListCard}>
-          {activities.length === 0 ? (
-            <View style={{ paddingVertical: 20, alignItems: 'center' }}>
-              <MaterialCommunityIcons name="clipboard-text-outline" size={36} color="#9CA3AF" />
-              <Text style={{ color: '#6B7280', fontSize: 13, marginTop: 8, fontWeight: '600' }}>No recent activities found.</Text>
-              <Text style={{ color: '#9CA3AF', fontSize: 11, marginTop: 2 }}>Donations & claims will appear here.</Text>
+        {/* 4 Cards Grid Row */}
+        <View style={styles.quickActionsRow}>
+          {/* Card 1: Donate Food */}
+          <TouchableOpacity
+            style={styles.quickActionCard}
+            activeOpacity={0.8}
+            onPress={() => router.push('/(tabs)/donate')}
+          >
+            <View style={[styles.qaIconCircle, { backgroundColor: '#E6F4EA' }]}>
+              <Ionicons name="calendar-outline" size={18} color="#2E7D32" />
             </View>
-          ) : (
-            activities.map((item, index) => (
-              <React.Fragment key={item.id}>
-                {index > 0 && <View style={styles.activityDivider} />}
-                <TouchableOpacity 
-                  style={styles.activityRow} 
-                  activeOpacity={0.7}
-                  onPress={() => handleActivityPress(item.donationId)}
-                >
-                  <View style={[
-                    styles.activityIconCircle, 
-                    { backgroundColor: item.type === 'claim' ? '#EBF5FF' : '#E6F4EA' }
-                  ]}>
-                    <Ionicons 
-                      name={item.type === 'claim' ? 'people' : 'add'} 
-                      size={16} 
-                      color={item.type === 'claim' ? '#2563EB' : '#2E7D32'} 
-                    />
-                  </View>
-                  <View style={styles.activityContent}>
-                    <Text style={styles.activityTitle}>{item.title}</Text>
-                    <Text style={styles.activitySub} numberOfLines={1}>{item.sub}</Text>
-                  </View>
-                  <View style={styles.activityMeta}>
-                    <Text style={styles.activityTime}>{getRelativeTime(item.time)}</Text>
-                    <View style={[
-                      styles.statusBadge, 
-                      item.status === 'available' || item.status === 'pending' ? styles.statusWarning : styles.statusSuccess
-                    ]}>
-                      <Text style={
-                        item.status === 'available' || item.status === 'pending' ? styles.statusTextWarning : styles.statusTextSuccess
-                      }>
-                        {item.status?.replace('_', ' ').toUpperCase()}
-                      </Text>
-                    </View>
-                  </View>
-                </TouchableOpacity>
-              </React.Fragment>
-            ))
-          )}
+            <Text style={styles.qaTitle}>Donate Food</Text>
+            <Text style={styles.qaSub}>Share surplus food</Text>
+            <View style={[styles.qaArrowCircle, { backgroundColor: '#E6F4EA' }]}>
+              <Ionicons name="arrow-forward" size={12} color="#2E7D32" />
+            </View>
+          </TouchableOpacity>
+
+          {/* Card 2: My Donations */}
+          <TouchableOpacity
+            style={styles.quickActionCard}
+            activeOpacity={0.8}
+            onPress={() => router.push('/(tabs)/my-donations')}
+          >
+            <View style={[styles.qaIconCircle, { backgroundColor: '#EBF5FF' }]}>
+              <Ionicons name="cube-outline" size={18} color="#2563EB" />
+            </View>
+            <Text style={styles.qaTitle}>My Donations</Text>
+            <Text style={styles.qaSub}>Manage your donations</Text>
+            <View style={[styles.qaArrowCircle, { backgroundColor: '#EBF5FF' }]}>
+              <Ionicons name="arrow-forward" size={12} color="#2563EB" />
+            </View>
+          </TouchableOpacity>
+
+          {/* Card 3: AI Assistant */}
+          <TouchableOpacity
+            style={styles.quickActionCard}
+            activeOpacity={0.8}
+            onPress={() => setIsBotOpen(true)}
+          >
+            <View style={[styles.qaIconCircle, { backgroundColor: '#F3E8FF' }]}>
+              <Ionicons name="chatbubble-ellipses-outline" size={18} color="#7C3AED" />
+            </View>
+            <Text style={styles.qaTitle}>AI Assistant</Text>
+            <Text style={styles.qaSub}>Get help & insights</Text>
+            <View style={[styles.qaArrowCircle, { backgroundColor: '#F3E8FF' }]}>
+              <Ionicons name="arrow-forward" size={12} color="#7C3AED" />
+            </View>
+          </TouchableOpacity>
+
+          {/* Card 4: Impact Report */}
+          <TouchableOpacity
+            style={styles.quickActionCard}
+            activeOpacity={0.8}
+            onPress={handleOpenAnalytics}
+          >
+            <View style={[styles.qaIconCircle, { backgroundColor: '#FFF7ED' }]}>
+              <Ionicons name="bar-chart-outline" size={18} color="#EA580C" />
+            </View>
+            <Text style={styles.qaTitle}>Impact Report</Text>
+            <Text style={styles.qaSub}>See your analytics</Text>
+            <View style={[styles.qaArrowCircle, { backgroundColor: '#FFF7ED' }]}>
+              <Ionicons name="arrow-forward" size={12} color="#EA580C" />
+            </View>
+          </TouchableOpacity>
         </View>
 
-        {/* Quick Action Grid Row */}
-        <View style={styles.actionGridRow}>
-          {isNgo ? (
-            <>
-              {/* Find Donations */}
-              <TouchableOpacity
-                style={[styles.actionGridCard, { backgroundColor: '#F3F7F1', borderColor: '#E6EFE5' }]}
-                activeOpacity={0.8}
-                onPress={() => router.push('/(tabs)/explore')}
-              >
-                <View style={styles.actionGridLeft}>
-                  <View style={[styles.actionGridIconCircle, { backgroundColor: '#E4F0E1' }]}>
-                    <Ionicons name="search" size={20} color="#2E7D32" />
-                  </View>
-                  <View style={styles.actionGridTextWrapper}>
-                    <Text style={styles.actionGridTitle}>Find Food</Text>
-                    <Text style={styles.actionGridSub}>Discover surplus food near you</Text>
-                  </View>
-                </View>
-                <View style={[styles.gridArrowCircle, { backgroundColor: '#2E7D32' }]}>
-                  <Ionicons name="arrow-forward" size={14} color="#FAFBF7" />
-                </View>
-              </TouchableOpacity>
-
-              {/* My Claims */}
-              <TouchableOpacity
-                style={[styles.actionGridCard, { backgroundColor: '#F0F7FF', borderColor: '#E1EEFF' }]}
-                activeOpacity={0.8}
-                onPress={() => router.push('/(tabs)/my-donations')}
-              >
-                <View style={styles.actionGridLeft}>
-                  <View style={[styles.actionGridIconCircle, { backgroundColor: '#E1EEFF' }]}>
-                    <Ionicons name="list" size={20} color="#2563EB" />
-                  </View>
-                  <View style={styles.actionGridTextWrapper}>
-                    <Text style={[styles.actionGridTitle, { color: '#1E3A8A' }]}>My Claims</Text>
-                    <Text style={styles.actionGridSub}>Track food you have claimed</Text>
-                  </View>
-                </View>
-                <View style={[styles.gridArrowCircle, { backgroundColor: '#2563EB' }]}>
-                  <Ionicons name="arrow-forward" size={14} color="#FAFBF7" />
-                </View>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <>
-              {/* Donate Food */}
-              <TouchableOpacity
-                style={[styles.actionGridCard, { backgroundColor: '#F3F7F1', borderColor: '#E6EFE5' }]}
-                activeOpacity={0.8}
-                onPress={() => router.push('/(tabs)/donate')}
-              >
-                <View style={styles.actionGridLeft}>
-                  <View style={[styles.actionGridIconCircle, { backgroundColor: '#E4F0E1' }]}>
-                    <MaterialCommunityIcons name="food-apple" size={20} color="#2E7D32" />
-                  </View>
-                  <View style={styles.actionGridTextWrapper}>
-                    <Text style={styles.actionGridTitle}>Donate Food</Text>
-                    <Text style={styles.actionGridSub}>Share surplus food in a few taps</Text>
-                  </View>
-                </View>
-                <View style={[styles.gridArrowCircle, { backgroundColor: '#2E7D32' }]}>
-                  <Ionicons name="arrow-forward" size={14} color="#FAFBF7" />
-                </View>
-              </TouchableOpacity>
-
-              {/* My Donations */}
-              <TouchableOpacity
-                style={[styles.actionGridCard, { backgroundColor: '#F0F7FF', borderColor: '#E1EEFF' }]}
-                activeOpacity={0.8}
-                onPress={() => router.push('/(tabs)/my-donations')}
-              >
-                <View style={styles.actionGridLeft}>
-                  <View style={[styles.actionGridIconCircle, { backgroundColor: '#E1EEFF' }]}>
-                    <Ionicons name="list" size={20} color="#2563EB" />
-                  </View>
-                  <View style={styles.actionGridTextWrapper}>
-                    <Text style={[styles.actionGridTitle, { color: '#1E3A8A' }]}>My Donations</Text>
-                    <Text style={styles.actionGridSub}>Manage your listed donations</Text>
-                  </View>
-                </View>
-                <View style={[styles.gridArrowCircle, { backgroundColor: '#2563EB' }]}>
-                  <Ionicons name="arrow-forward" size={14} color="#FAFBF7" />
-                </View>
-              </TouchableOpacity>
-            </>
-          )}
+        {/* Your Active Donations */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Your Active Donations</Text>
+          <TouchableOpacity style={styles.viewAllBtn} onPress={() => router.push('/(tabs)/my-donations')}>
+            <Text style={styles.viewAllText}>View All</Text>
+            <Ionicons name="arrow-forward" size={12} color="#2E7D32" style={{ marginLeft: 2 }} />
+          </TouchableOpacity>
         </View>
 
-        {/* AI Assistant Pill Bar */}
-        <TouchableOpacity 
-          style={styles.aiAssistantCard} 
-          activeOpacity={0.85}
-          onPress={() => setIsBotOpen(true)}
-        >
-          <View style={styles.aiLeft}>
-            <View style={styles.aiIconCircle}>
-              <Ionicons name="sparkles" size={16} color="#FAFBF7" />
+        {/* Active Donations Card */}
+        <View style={styles.activeDonationCard}>
+          <Image
+            source={require('../../assets/images/hero_image.png')}
+            style={styles.activeDonationImg}
+          />
+          <View style={styles.activeDonationInfo}>
+            <Text style={styles.activeDonationTitle}>Food Pack</Text>
+            <View style={styles.pendingBadge}>
+              <Text style={styles.pendingBadgeText}>Pending Pickup</Text>
             </View>
-            <View style={styles.aiTextContainer}>
-              <Text style={styles.aiTitle}>Need help or statistics?</Text>
-              <Text style={styles.aiSub}>Tap to speak with RePlate AI Assistant</Text>
+            <View style={styles.activeDonationMetaRow}>
+              <View style={styles.metaCol}>
+                <Ionicons name="location-outline" size={12} color="#6B7280" />
+                <Text style={styles.metaColText}>2 km away</Text>
+              </View>
+              <View style={styles.metaCol}>
+                <Ionicons name="time-outline" size={12} color="#6B7280" />
+                <Text style={styles.metaColText}>Today, 5:00 PM</Text>
+              </View>
             </View>
           </View>
-          <Ionicons name="chevron-forward" size={16} color="#6B7280" />
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.viewDetailsBtn}
+            onPress={() => router.push('/(tabs)/my-donations')}
+          >
+            <Text style={styles.viewDetailsBtnText}>View Details</Text>
+          </TouchableOpacity>
+        </View>
 
+        {/* Your Lifetime Impact */}
+        <View style={styles.lifetimeImpactCard}>
+          <View style={styles.lifetimeImpactLeft}>
+            <Text style={styles.lifetimeImpactTitle}>Your Lifetime Impact</Text>
+            <View style={styles.lifetimeMetricsRow}>
+              <View style={styles.lifetimeMetricItem}>
+                <View style={styles.lifetimeIconCircle}>
+                  <MaterialCommunityIcons name="silverware-fork-knife" size={14} color="#2E7D32" />
+                </View>
+                <Text style={styles.lifetimeMetricValText}>
+                  {meals} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>Meals</Text>
+                </Text>
+              </View>
+
+              <View style={styles.lifetimeMetricItem}>
+                <View style={styles.lifetimeIconCircle}>
+                  <Ionicons name="people" size={14} color="#2E7D32" />
+                </View>
+                <Text style={styles.lifetimeMetricValText}>
+                  {meals * 3} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>People</Text>
+                </Text>
+              </View>
+
+              <View style={styles.lifetimeMetricItem}>
+                <View style={styles.lifetimeIconCircle}>
+                  <Ionicons name="leaf" size={14} color="#2E7D32" />
+                </View>
+                <Text style={styles.lifetimeMetricValText}>
+                  {pWeight ? pWeight.toFixed(1) : '0'} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>kg</Text>
+                </Text>
+              </View>
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.viewAnalyticsCircleBtn} onPress={handleOpenAnalytics}>
+            <Text style={styles.viewAnalyticsText}>View Analytics</Text>
+            <View style={styles.analyticsArrowIconWrap}>
+              <Ionicons name="arrow-forward" size={12} color="#111827" />
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* RePlate Community Banner */}
+        <View style={styles.communityBanner}>
+          <View style={styles.communityInfo}>
+            <View style={styles.communityTitleRow}>
+              <Text style={styles.communityTitle}>RePlate Community</Text>
+              <Ionicons name="leaf" size={14} color="#FFFFFF" style={{ marginLeft: 4 }} />
+            </View>
+            <View style={styles.communityStatsRow}>
+              <View style={styles.communityStatCol}>
+                <Text style={styles.communityStatVal}>12,400</Text>
+                <Text style={styles.communityStatLabel}>Meals Shared</Text>
+              </View>
+              <View style={styles.communityStatDivider} />
+              <View style={styles.communityStatCol}>
+                <Text style={styles.communityStatVal}>4.8 Tons</Text>
+                <Text style={styles.communityStatLabel}>Waste Prevented</Text>
+              </View>
+            </View>
+          </View>
+
+          <TouchableOpacity style={styles.exploreBtn} onPress={() => router.push('/(tabs)/activity' as any)}>
+            <Text style={styles.exploreBtnText}>Explore Platform</Text>
+            <Ionicons name="arrow-forward" size={12} color="#FFFFFF" style={{ marginLeft: 4 }} />
+          </TouchableOpacity>
+
+          <Image
+            source={require('../../assets/images/globe_community.png')}
+            style={styles.communityGlobeIllustration}
+            resizeMode="contain"
+          />
+        </View>
+
+        {/* Recent Activity */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Recent Activity</Text>
+          <TouchableOpacity style={styles.viewAllBtn} onPress={() => router.push('/(tabs)/activity' as any)}>
+            <Text style={styles.viewAllText}>View All</Text>
+            <Ionicons name="arrow-forward" size={12} color="#2E7D32" style={{ marginLeft: 2 }} />
+          </TouchableOpacity>
+        </View>
+
+        {/* Recent Activity Horizontally Aligned Stages Card */}
+        <View style={styles.recentActivityStagesCard}>
+          <View style={styles.stageItem}>
+            <View style={[styles.stageIconCircle, { backgroundColor: '#E6F4EA' }]}>
+              <Ionicons name="checkmark" size={14} color="#2E7D32" />
+            </View>
+            <Text style={styles.stageTitle}>Donation created</Text>
+            <Text style={styles.stageTime}>Today, 10:30 AM</Text>
+          </View>
+          <View style={styles.stageLine} />
+          <View style={styles.stageItem}>
+            <View style={[styles.stageIconCircle, { backgroundColor: '#EBF5FF' }]}>
+              <Ionicons name="checkmark" size={14} color="#2563EB" />
+            </View>
+            <Text style={styles.stageTitle}>Food claimed</Text>
+            <Text style={styles.stageTime}>Yesterday, 4:15 PM</Text>
+          </View>
+          <View style={styles.stageLine} />
+          <View style={styles.stageItem}>
+            <View style={[styles.stageIconCircle, { backgroundColor: '#F3E8FF' }]}>
+              <Ionicons name="checkmark" size={14} color="#7C3AED" />
+            </View>
+            <Text style={styles.stageTitle}>Donation completed</Text>
+            <Text style={styles.stageTime}>May 10, 9:20 AM</Text>
+          </View>
+        </View>
       </ScrollView>
 
       {/* AI Assistant Chatbot Modal */}
-      <Modal
-        visible={isBotOpen}
-        animationType="slide"
-        onRequestClose={() => setIsBotOpen(false)}
-      >
+      <Modal visible={isBotOpen} animationType="slide" onRequestClose={() => setIsBotOpen(false)}>
         <SafeAreaView style={styles.botModalContainer}>
-          <KeyboardAvoidingView 
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'} 
-            style={{ flex: 1 }}
-          >
-            {/* Bot Header */}
-            <View style={styles.botHeader}>
-              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={styles.botHeaderIconCircle}>
-                  <Ionicons name="sparkles" size={18} color="#FFFFFF" />
-                </View>
-                <View style={{ marginLeft: 10 }}>
-                  <Text style={styles.botTitle}>RePlate Assistant</Text>
-                  <Text style={styles.botSubtitle}>Powered by Gemini AI</Text>
-                </View>
+          <View style={styles.botHeader}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <View style={styles.botHeaderIconCircle}>
+                <Ionicons name="sparkles" size={18} color="#FFFFFF" />
               </View>
-              <TouchableOpacity 
-                style={styles.botCloseButton} 
-                onPress={() => setIsBotOpen(false)}
-              >
-                <Ionicons name="close" size={24} color="#111827" />
-              </TouchableOpacity>
+              <View style={{ marginLeft: 10 }}>
+                <Text style={styles.botTitle}>RePlate Assistant</Text>
+                <Text style={styles.botSubtitle}>Powered by Gemini AI</Text>
+              </View>
             </View>
+            <TouchableOpacity style={styles.botCloseButton} onPress={() => setIsBotOpen(false)}>
+              <Ionicons name="close" size={24} color="#111827" />
+            </TouchableOpacity>
+          </View>
 
-            {/* Chat Messages */}
-            <ScrollView 
-              ref={chatScrollRef}
-              style={styles.botMessageList}
-              contentContainerStyle={{ paddingVertical: 16 }}
-            >
-              {botMessages.map((msg) => (
-                <View 
-                  key={msg.id} 
-                  style={[
-                    styles.botMessageRow, 
-                    msg.role === 'user' ? styles.botUserRow : styles.botAssistantRow
-                  ]}
-                >
-                  {msg.role === 'assistant' && (
-                    <View style={styles.botSproutIcon}>
-                      <MaterialCommunityIcons name="sprout" size={16} color="#FAFBF7" />
-                    </View>
-                  )}
-                  <View style={[
-                    styles.botBubble, 
-                    msg.role === 'user' ? styles.botUserBubble : styles.botAssistantBubble
-                  ]}>
-                    <Text style={[
-                      styles.botMessageText,
-                      msg.role === 'user' ? styles.botUserText : styles.botAssistantText
-                    ]}>
-                      {msg.content}
-                    </Text>
-
-                    {/* Navigation Path Trigger Button */}
-                    {msg.navigationPath && (
-                      <TouchableOpacity 
-                        style={styles.botNavBtn}
-                        onPress={() => {
-                          setIsBotOpen(false);
-                          router.push(msg.navigationPath);
-                        }}
-                      >
-                        <Text style={styles.botNavBtnText}>Go to page</Text>
-                        <Ionicons name="arrow-forward" size={12} color="#FFFFFF" style={{ marginLeft: 4 }} />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                </View>
-              ))}
-
-              {botSending && (
-                <View style={[styles.botMessageRow, styles.botAssistantRow]}>
+          <ScrollView
+            ref={chatScrollRef}
+            style={styles.botMessageList}
+            contentContainerStyle={{ paddingVertical: 16 }}
+          >
+            {botMessages.map((msg) => (
+              <View
+                key={msg.id}
+                style={[
+                  styles.botMessageRow,
+                  msg.role === 'user' ? styles.botUserRow : styles.botAssistantRow,
+                ]}
+              >
+                {msg.role === 'assistant' && (
                   <View style={styles.botSproutIcon}>
                     <MaterialCommunityIcons name="sprout" size={16} color="#FAFBF7" />
                   </View>
-                  <View style={[styles.botBubble, styles.botAssistantBubble, { flexDirection: 'row', alignItems: 'center', gap: 6 }]}>
-                    <ActivityIndicator size="small" color="#2E7D32" />
-                    <Text style={[styles.botMessageText, styles.botAssistantText, { fontStyle: 'italic', color: '#6B7280' }]}>Thinking...</Text>
+                )}
+                <View
+                  style={[
+                    styles.botBubble,
+                    msg.role === 'user' ? styles.botUserBubble : styles.botAssistantBubble,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.botMessageText,
+                      msg.role === 'user' ? styles.botUserText : styles.botAssistantText,
+                    ]}
+                  >
+                    {msg.content}
+                  </Text>
+                </View>
+              </View>
+            ))}
+
+            {botSending && (
+              <View style={[styles.botMessageRow, styles.botAssistantRow]}>
+                <View style={styles.botSproutIcon}>
+                  <MaterialCommunityIcons name="sprout" size={16} color="#FAFBF7" />
+                </View>
+                <View
+                  style={[
+                    styles.botBubble,
+                    styles.botAssistantBubble,
+                    { flexDirection: 'row', alignItems: 'center', gap: 6 },
+                  ]}
+                >
+                  <ActivityIndicator size="small" color="#2E7D32" />
+                  <Text style={[styles.botMessageText, { fontStyle: 'italic', color: '#6B7280' }]}>
+                    Thinking...
+                  </Text>
+                </View>
+              </View>
+            )}
+          </ScrollView>
+
+          <View style={styles.botInputContainer}>
+            <TextInput
+              style={styles.botInput}
+              value={botInput}
+              onChangeText={setBotInput}
+              placeholder="Ask me anything..."
+              placeholderTextColor="#9CA3AF"
+              onSubmitEditing={() => handleSendBotMessage()}
+              editable={!botSending}
+            />
+            <TouchableOpacity
+              style={[styles.botSendBtn, !botInput.trim() && styles.botSendBtnDisabled]}
+              onPress={() => handleSendBotMessage()}
+              disabled={!botInput.trim() || botSending}
+            >
+              <Ionicons name="send" size={16} color="#FAFBF7" />
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </Modal>
+
+      {/* Detailed Analytics Modal (Moved from old Impact Screen) */}
+      <Modal visible={isAnalyticsOpen} animationType="slide" onRequestClose={() => setIsAnalyticsOpen(false)}>
+        <SafeAreaView style={styles.analyticsModalContainer}>
+          <View style={styles.analyticsHeader}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="bar-chart" size={20} color="#2E7D32" />
+              <Text style={styles.analyticsTitleText}>Detailed Analytics</Text>
+            </View>
+            <TouchableOpacity style={styles.botCloseButton} onPress={() => setIsAnalyticsOpen(false)}>
+              <Ionicons name="close" size={24} color="#111827" />
+            </TouchableOpacity>
+          </View>
+
+          {analyticsLoading ? (
+            <View style={styles.centerContainer}>
+              <ActivityIndicator size="large" color="#2E7D32" />
+              <Text style={styles.loadingText}>Loading reports...</Text>
+            </View>
+          ) : (
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
+            >
+              {/* Level progress */}
+              <View style={styles.summaryCard}>
+                <View style={styles.sproutBadge}>
+                  <MaterialCommunityIcons name="sprout" size={24} color="#2E7D32" />
+                </View>
+                <Text style={styles.summaryTitle}>Eco Hero Level {level}</Text>
+                <Text style={styles.summarySub}>You've rescued {meals} meals so far!</Text>
+                <View style={styles.progressContainer}>
+                  <View style={styles.progressBar}>
+                    <View style={[styles.progressFill, { width: `${progressPct}%` }]} />
+                  </View>
+                  <View style={styles.progressLabels}>
+                    <Text style={styles.progressText}>{meals}/{nextTarget} meals</Text>
+                    <Text style={styles.progressText}>{Math.max(0, nextTarget - meals)} to next level</Text>
                   </View>
                 </View>
+              </View>
+
+              {/* Personal equivalences */}
+              <Text style={styles.analyticsSectionTitle}>🌍 Your Environmental Handprint</Text>
+              <View style={styles.equivGrid}>
+                <View style={styles.equivCard}>
+                  <Ionicons name="car-sport" size={22} color="#2E7D32" />
+                  <Text style={styles.equivValue}>{pKm.toFixed(0)} km</Text>
+                  <Text style={styles.equivLabel}>Driving Offset</Text>
+                </View>
+                <View style={styles.equivCard}>
+                  <Ionicons name="phone-portrait" size={22} color="#EA580C" />
+                  <Text style={styles.equivValue}>{pPhones.toLocaleString()}</Text>
+                  <Text style={styles.equivLabel}>Phones Charged</Text>
+                </View>
+              </View>
+
+              {/* Category pie chart */}
+              {categoryData.length > 0 && (
+                <>
+                  <Text style={styles.analyticsSectionTitle}>🥧 Category Distribution</Text>
+                  <View style={styles.chartCard}>
+                    <PieChart
+                      data={categoryData
+                        .sort((a, b) => b.count - a.count)
+                        .slice(0, 5)
+                        .map((cat, i) => {
+                          const colors = ['#2E7D32', '#3B82F6', '#D97706', '#8B5CF6', '#EF4444'];
+                          const info = CATEGORY_LABELS[cat.category] || { label: cat.category, icon: '🍴' };
+                          return {
+                            name: info.label,
+                            count: cat.count,
+                            color: colors[i % colors.length],
+                            legendFontColor: '#374151',
+                            legendFontSize: 11,
+                          };
+                        })}
+                      width={width - 72}
+                      height={180}
+                      chartConfig={{ color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})` }}
+                      accessor="count"
+                      backgroundColor="transparent"
+                      paddingLeft="10"
+                      absolute
+                    />
+                  </View>
+                </>
+              )}
+
+              {/* Leaderboards */}
+              {leaderboard.donors.length > 0 && (
+                <>
+                  <Text style={styles.analyticsSectionTitle}>🏆 Top Donors Leaderboard</Text>
+                  <View style={styles.leaderCard}>
+                    {leaderboard.donors.slice(0, 3).map((entry, idx) => (
+                      <View key={entry.id} style={styles.leaderRow}>
+                        <View style={[styles.leaderRank, idx === 0 && { backgroundColor: '#FEF3C7' }]}>
+                          <Text style={[styles.leaderRankText, idx === 0 && { color: '#D97706' }]}>
+                            {idx + 1}
+                          </Text>
+                        </View>
+                        <View style={styles.leaderInfo}>
+                          <Text style={styles.leaderName} numberOfLines={1}>
+                            {entry.organizationName || 'Anonymous Donor'}
+                          </Text>
+                          <Text style={styles.leaderCity}>{entry.city || 'Local'}</Text>
+                        </View>
+                        <View style={styles.leaderStats}>
+                          <Text style={styles.leaderMeals}>{entry.mealsSaved} meals</Text>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                </>
               )}
             </ScrollView>
-
-            {/* Suggestion Chips */}
-            <View style={styles.botSuggestionsContainer}>
-              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingHorizontal: 16 }}>
-                <TouchableOpacity style={styles.suggestionChip} onPress={() => handleSuggestionPress('Tell me my impact stats')}>
-                  <Text style={styles.suggestionText}>📊 My Stats</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.suggestionChip} onPress={() => handleSuggestionPress('Check platform overall impact')}>
-                  <Text style={styles.suggestionText}>🌍 Global Impact</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.suggestionChip} onPress={() => handleSuggestionPress('Check my notifications')}>
-                  <Text style={styles.suggestionText}>🔔 Notifications</Text>
-                </TouchableOpacity>
-                {isNgo ? (
-                  <TouchableOpacity style={styles.suggestionChip} onPress={() => handleSuggestionPress('Show active claims')}>
-                    <Text style={styles.suggestionText}>📦 Active Claims</Text>
-                  </TouchableOpacity>
-                ) : (
-                  <TouchableOpacity style={styles.suggestionChip} onPress={() => handleSuggestionPress('Show my active donations')}>
-                    <Text style={styles.suggestionText}>🍲 My Donations</Text>
-                  </TouchableOpacity>
-                )}
-              </ScrollView>
-            </View>
-
-            {/* Bot Input Bar */}
-            <View style={styles.botInputContainer}>
-              <TextInput
-                style={styles.botInput}
-                value={botInput}
-                onChangeText={setBotInput}
-                placeholder="Ask me anything..."
-                placeholderTextColor="#9CA3AF"
-                onSubmitEditing={() => handleSendBotMessage()}
-                editable={!botSending}
-              />
-              <TouchableOpacity 
-                style={[styles.botSendBtn, !botInput.trim() && styles.botSendBtnDisabled]} 
-                onPress={() => handleSendBotMessage()}
-                disabled={!botInput.trim() || botSending}
-              >
-                <Ionicons name="send" size={16} color="#FAFBF7" />
-              </TouchableOpacity>
-            </View>
-          </KeyboardAvoidingView>
+          )}
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
@@ -754,36 +825,31 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 40,
     alignItems: 'center',
+    paddingHorizontal: width * 0.05,
   },
   header: {
-    width: width * 0.9,
+    width: '100%',
+    paddingHorizontal: width * 0.05,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 12,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F0',
   },
   logoGroup: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   headerLogo: {
-    width: 38,
-    height: 38,
-    marginRight: 6,
+    width: 32,
+    height: 32,
+    marginRight: 8,
   },
-  appNameContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  brandRe: {
+  brandTitle: {
     fontSize: 20,
     fontWeight: '800',
     color: '#1B4329',
-  },
-  brandPlate: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#2E7D32',
   },
   headerActions: {
     flexDirection: 'row',
@@ -791,324 +857,189 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#EBF2EA',
     position: 'relative',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.02,
-    shadowRadius: 3,
-    elevation: 1,
   },
-  badge: {
+  greenBadgeDot: {
     position: 'absolute',
-    top: 6,
-    right: 6,
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: '#EF4444',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  badgeText: {
-    fontSize: 8.5,
-    fontWeight: '800',
-    color: '#FFFFFF',
+    top: 10,
+    right: 11,
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: '#2E7D32',
   },
   avatarWrapper: {
-    position: 'relative',
-  },
-  avatarImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 1.5,
-    borderColor: '#EBF2EA',
-    backgroundColor: '#E5E7EB',
-  },
-  activeDot: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#2E7D32',
-    borderWidth: 2,
-    borderColor: '#FAFBF7',
-  },
-  taglineRow: {
-    width: width * 0.9,
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 6,
-    marginBottom: 20,
-  },
-  line: {
-    height: 1,
-    backgroundColor: '#B5C9B4',
-    flex: 1,
-  },
-  taglineText: {
-    fontSize: 8.5,
-    fontWeight: '700',
-    color: '#2E7D32',
-    letterSpacing: 1,
-    marginHorizontal: 8,
-  },
-  welcomeHeroContainer: {
-    width: width * 0.9,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  heroLeft: {
-    flex: 1.1,
-    paddingRight: 8,
-  },
-  greeting: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#1B4329',
-  },
-  username: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#2E7D32',
-    marginTop: 2,
-  },
-  welcomeSub: {
-    fontSize: 12,
-    color: '#4B5563',
-    lineHeight: 16,
-    marginTop: 10,
-    marginBottom: 16,
-  },
-  monthImpactCard: {
-    backgroundColor: '#F3F7F1',
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#E6EFE5',
-  },
-  monthImpactHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  monthImpactTitle: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: '#4B5563',
-  },
-  monthImpactContent: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-end',
-    marginTop: 6,
-  },
-  monthImpactNum: {
-    fontSize: 28,
-    fontWeight: '800',
-    color: '#1B4329',
-  },
-  monthImpactLabel: {
-    fontSize: 10,
-    fontWeight: '600',
-    color: '#6B7280',
-    marginTop: 2,
-  },
-  bowlGraphicContainer: {
-    position: 'relative',
-    marginRight: 4,
-    marginBottom: 4,
-  },
-  bowlCircle: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#FFFFFF',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  bowlHeartBadge: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    backgroundColor: '#EF4444',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#F3F7F1',
-  },
-  viewImpactRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#E6EFE5',
-    paddingTop: 8,
-  },
-  viewImpactText: {
-    fontSize: 10.5,
-    fontWeight: '700',
-    color: '#2E7D32',
-  },
-  heroRight: {
-    flex: 0.9,
-    height: height * 0.22,
-    borderTopLeftRadius: 160,
-    borderBottomLeftRadius: 160,
-    borderTopRightRadius: 16,
-    borderBottomRightRadius: 16,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     overflow: 'hidden',
     borderWidth: 1.5,
     borderColor: '#EBF2EA',
-    backgroundColor: '#E5E7EB',
   },
-  volunteerHeroImage: {
+  avatarImage: {
     width: '100%',
     height: '100%',
   },
-  statsScroll: {
-    width: width,
-    marginBottom: 20,
-  },
-  statsScrollContent: {
-    paddingLeft: width * 0.05,
-    paddingRight: 16,
-    gap: 12,
-  },
-  statCard: {
-    width: width * 0.35,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#EAF3E9',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.01,
-    shadowRadius: 3,
-    elevation: 1,
-  },
-  statIconCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  statLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#4B5563',
-  },
-  statVal: {
-    fontSize: 18,
-    fontWeight: '800',
-    color: '#111827',
-    marginTop: 4,
-  },
-  statTrendRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 6,
-  },
-  statTrendText: {
-    fontSize: 8.5,
-    fontWeight: '600',
-    color: '#2E7D32',
-    marginLeft: 1,
-  },
-  landfillCard: {
-    width: width * 0.9,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 14,
+  welcomeRow: {
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#EAF3E9',
-    marginBottom: 24,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.02,
-    shadowRadius: 8,
-    elevation: 2,
+    marginTop: 20,
+    marginBottom: 20,
   },
-  landfillLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
+  welcomeTextGroup: {
+    flex: 1.1,
     paddingRight: 8,
   },
-  sproutWrapper: {
-    width: 46,
-    height: 46,
+  greetingText: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#1B4329',
+  },
+  subGreetingText: {
+    fontSize: 12,
+    color: '#6B7280',
+    lineHeight: 16,
+    marginTop: 4,
+  },
+  keepGoingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EAF3E9',
     borderRadius: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  sproutBadgeIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: '#F3F7F1',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginRight: 6,
   },
-  landfillTextContainer: {
-    flex: 1,
+  badgeTextGroup: {
+    justifyContent: 'center',
   },
-  landfillSub: {
-    fontSize: 9.5,
+  badgeLabel: {
+    fontSize: 10.5,
     fontWeight: '700',
-    color: '#4B5563',
+    color: '#1B4329',
   },
-  landfillTitle: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#111827',
-    marginTop: 2,
-  },
-  landfillDesc: {
-    fontSize: 9.5,
+  badgeSubLabel: {
+    fontSize: 8.5,
     color: '#6B7280',
-    marginTop: 2,
+    marginTop: 1,
   },
-  landfillBtn: {
+  impactCard: {
+    width: '100%',
     backgroundColor: '#1B4329',
     borderRadius: 20,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    padding: 18,
+    marginBottom: 24,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  impactCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  impactTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#FFFFFF',
+    letterSpacing: 0.8,
+  },
+  impactMetricsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '60%',
+    marginBottom: 20,
+    justifyContent: 'space-between',
+  },
+  impactMetricBox: {
+    alignItems: 'center',
+  },
+  impactMetricIconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  impactMetricValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  impactMetricLabel: {
+    fontSize: 8.5,
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginTop: 2,
+    textAlign: 'center',
+  },
+  metricDivider: {
+    width: 1,
+    height: 36,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  donateFoodBtn: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16,
+    zIndex: 2,
+  },
+  donateFoodBtnLeft: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  landfillBtnText: {
-    fontSize: 10.5,
+  donateFoodBtnText: {
+    fontSize: 14,
     fontWeight: '700',
-    color: '#FAFBF7',
+    color: '#1B4329',
+  },
+  saladBowlHandIllustration: {
+    position: 'absolute',
+    right: -24,
+    bottom: 0,
+    width: 160,
+    height: 160,
+    opacity: 0.95,
   },
   sectionHeader: {
-    width: width * 0.9,
+    width: '100%',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '800',
     color: '#1B4329',
   },
@@ -1117,187 +1048,298 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   viewAllText: {
-    fontSize: 12,
+    fontSize: 11.5,
     fontWeight: '700',
     color: '#2E7D32',
   },
-  activityListCard: {
-    width: width * 0.9,
+  quickActionsRow: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+    gap: 8,
+  },
+  quickActionCard: {
+    flex: 1,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
-    padding: 14,
+    padding: 10,
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: '#EAF3E9',
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.02,
-    shadowRadius: 8,
-    elevation: 2,
+    position: 'relative',
+    height: 124,
+    justifyContent: 'space-between',
   },
-  activityRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 10,
-  },
-  activityIconCircle: {
+  qaIconCircle: {
     width: 32,
     height: 32,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    marginBottom: 6,
   },
-  activityContent: {
-    flex: 1,
-    paddingRight: 8,
-  },
-  activityTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#111827',
-    lineHeight: 15,
-  },
-  activitySub: {
+  qaTitle: {
     fontSize: 10,
-    color: '#4B5563',
-    marginTop: 2,
+    fontWeight: '800',
+    color: '#111827',
+    textAlign: 'center',
   },
-  activityMeta: {
-    alignItems: 'flex-end',
-  },
-  activityTime: {
-    fontSize: 9.5,
+  qaSub: {
+    fontSize: 8,
     color: '#6B7280',
+    textAlign: 'center',
+    lineHeight: 10,
   },
-  statusBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    marginTop: 4,
+  qaArrowCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 6,
   },
-  statusSuccess: {
-    backgroundColor: '#DCFCE7',
-  },
-  statusInfo: {
-    backgroundColor: '#DBEAFE',
-  },
-  statusWarning: {
-    backgroundColor: '#F3E8FF',
-  },
-  statusTextSuccess: {
-    fontSize: 8.5,
-    fontWeight: '700',
-    color: '#16A34A',
-  },
-  statusTextInfo: {
-    fontSize: 8.5,
-    fontWeight: '700',
-    color: '#2563EB',
-  },
-  statusTextWarning: {
-    fontSize: 8.5,
-    fontWeight: '700',
-    color: '#7C3AED',
-  },
-  activityDivider: {
-    height: 1,
-    backgroundColor: '#F3F4F6',
-  },
-  actionGridRow: {
-    width: width * 0.9,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-    gap: 10,
-  },
-  actionGridCard: {
-    flex: 1,
+  activeDonationCard: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EAF3E9',
     borderRadius: 16,
     padding: 12,
-    borderWidth: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    minHeight: 74,
-  },
-  actionGridLeft: {
     flexDirection: 'row',
     alignItems: 'center',
+    marginBottom: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  activeDonationImg: {
+    width: 58,
+    height: 58,
+    borderRadius: 10,
+    marginRight: 12,
+  },
+  activeDonationInfo: {
     flex: 1,
-    paddingRight: 4,
   },
-  actionGridIconCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 8,
-  },
-  actionGridTextWrapper: {
-    flex: 1,
-  },
-  actionGridTitle: {
-    fontSize: 12,
+  activeDonationTitle: {
+    fontSize: 14,
     fontWeight: '800',
     color: '#1B4329',
   },
-  actionGridSub: {
-    fontSize: 8.5,
-    color: '#4B5563',
-    marginTop: 2,
-    lineHeight: 11,
+  pendingBadge: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#E6F4EA',
+    paddingHorizontal: 8,
+    paddingVertical: 2.5,
+    borderRadius: 6,
+    marginTop: 4,
   },
-  gridArrowCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: 'center',
+  pendingBadgeText: {
+    fontSize: 9,
+    fontWeight: '700',
+    color: '#2E7D32',
+  },
+  activeDonationMetaRow: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
+    marginTop: 6,
   },
-  aiAssistantCard: {
-    width: width * 0.9,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 30,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+  metaCol: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  metaColText: {
+    fontSize: 9.5,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  viewDetailsBtn: {
+    borderWidth: 1,
+    borderColor: '#2E7D32',
+    borderRadius: 16,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  viewDetailsBtnText: {
+    fontSize: 10.5,
+    fontWeight: '700',
+    color: '#2E7D32',
+  },
+  lifetimeImpactCard: {
+    width: '100%',
+    backgroundColor: '#F3F7F1',
+    borderWidth: 1,
+    borderColor: '#EAF3E9',
+    borderRadius: 16,
+    padding: 14,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: '#EAF3E9',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.02,
-    shadowRadius: 6,
-    elevation: 2,
+    marginBottom: 24,
   },
-  aiLeft: {
+  lifetimeImpactLeft: {
+    flex: 1,
+    paddingRight: 6,
+  },
+  lifetimeImpactTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#6B7280',
+    marginBottom: 8,
+  },
+  lifetimeMetricsRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
   },
-  aiIconCircle: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: '#2E7D32',
+  lifetimeMetricItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  lifetimeIconCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#FFFFFF',
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
   },
-  aiTextContainer: {
-    justifyContent: 'center',
-  },
-  aiTitle: {
+  lifetimeMetricValText: {
     fontSize: 12,
+    fontWeight: '800',
+    color: '#111827',
+  },
+  viewAnalyticsCircleBtn: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: 4,
+  },
+  viewAnalyticsText: {
+    fontSize: 10.5,
     fontWeight: '700',
     color: '#111827',
   },
-  aiSub: {
+  analyticsArrowIconWrap: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  communityBanner: {
+    width: '100%',
+    backgroundColor: '#2E583D',
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 24,
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  communityInfo: {
+    width: '60%',
+  },
+  communityTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  communityTitle: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  communityStatsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginBottom: 12,
+  },
+  communityStatCol: {
+    alignItems: 'flex-start',
+  },
+  communityStatVal: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#FFFFFF',
+  },
+  communityStatLabel: {
+    fontSize: 8.5,
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginTop: 2,
+  },
+  communityStatDivider: {
+    width: 1,
+    height: 24,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  exploreBtn: {
+    backgroundColor: '#1B4329',
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    zIndex: 2,
+  },
+  exploreBtnText: {
     fontSize: 10,
-    color: '#4B5563',
-    marginTop: 1,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  communityGlobeIllustration: {
+    position: 'absolute',
+    right: -10,
+    bottom: -10,
+    width: 130,
+    height: 130,
+  },
+  recentActivityStagesCard: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#EAF3E9',
+    borderRadius: 16,
+    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  stageItem: {
+    flex: 1,
+    alignItems: 'center',
+  },
+  stageIconCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  stageTitle: {
+    fontSize: 8,
+    fontWeight: '800',
+    color: '#111827',
+    textAlign: 'center',
+  },
+  stageTime: {
+    fontSize: 7.5,
+    color: '#9CA3AF',
+    marginTop: 2,
+  },
+  stageLine: {
+    width: 1,
+    height: 32,
+    backgroundColor: '#EAF3E9',
   },
   botModalContainer: {
     flex: 1,
@@ -1362,11 +1404,6 @@ const styles = StyleSheet.create({
   botBubble: {
     borderRadius: 16,
     padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.03,
-    shadowRadius: 2,
-    elevation: 1,
   },
   botUserBubble: {
     backgroundColor: '#2E7D32',
@@ -1388,47 +1425,6 @@ const styles = StyleSheet.create({
   },
   botAssistantText: {
     color: '#1F2937',
-  },
-  botNavBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1B4329',
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    borderRadius: 10,
-    marginTop: 8,
-    alignSelf: 'flex-start',
-  },
-  botNavBtnText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  botSuggestionsContainer: {
-    height: 48,
-    marginVertical: 4,
-    justifyContent: 'center',
-  },
-  suggestionChip: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#EBF2EA',
-    borderRadius: 20,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 32,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.01,
-    shadowRadius: 1,
-    elevation: 1,
-  },
-  suggestionText: {
-    color: '#2E7D32',
-    fontSize: 11,
-    fontWeight: '700',
   },
   botInputContainer: {
     flexDirection: 'row',
@@ -1458,5 +1454,176 @@ const styles = StyleSheet.create({
   },
   botSendBtnDisabled: {
     backgroundColor: '#A3D9A5',
+  },
+  analyticsModalContainer: {
+    flex: 1,
+    backgroundColor: '#FAFBF7',
+  },
+  analyticsHeader: {
+    flexDirection: 'row',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EAF3E9',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: '#FFFFFF',
+  },
+  analyticsTitleText: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#1B4329',
+    marginLeft: 8,
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#6B7280',
+    marginTop: 12,
+    fontWeight: '600',
+  },
+  summaryCard: {
+    backgroundColor: '#1B4329',
+    borderRadius: 16,
+    padding: 20,
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  sproutBadge: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#FAFBF7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  summaryTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#FAFBF7',
+  },
+  summarySub: {
+    fontSize: 12,
+    color: '#A3B899',
+    marginTop: 4,
+    textAlign: 'center',
+  },
+  progressContainer: {
+    width: '100%',
+    marginTop: 18,
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: '#2E583D',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#C1E1B9',
+  },
+  progressLabels: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 6,
+  },
+  progressText: {
+    fontSize: 10.5,
+    color: '#A3B899',
+    fontWeight: '600',
+  },
+  analyticsSectionTitle: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: '#1B4329',
+    marginTop: 12,
+    marginBottom: 14,
+  },
+  equivGrid: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 24,
+  },
+  equivCard: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EAF3E9',
+    alignItems: 'center',
+    gap: 4,
+  },
+  equivValue: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#111827',
+  },
+  equivLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: '#6B7280',
+  },
+  chartCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#EAF3E9',
+    marginBottom: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  leaderCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#EAF3E9',
+    marginBottom: 24,
+    gap: 10,
+  },
+  leaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  leaderRank: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#F3F4F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  leaderRankText: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#6B7280',
+  },
+  leaderInfo: {
+    flex: 1,
+  },
+  leaderName: {
+    fontSize: 13,
+    fontWeight: '700',
+    color: '#111827',
+  },
+  leaderCity: {
+    fontSize: 11,
+    color: '#6B7280',
+  },
+  leaderStats: {
+    alignItems: 'flex-end',
+  },
+  leaderMeals: {
+    fontSize: 12,
+    fontWeight: '800',
+    color: '#2E7D32',
   },
 });

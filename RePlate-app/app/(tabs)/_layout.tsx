@@ -46,7 +46,7 @@ export default function TabLayout() {
         options={{
           title: 'Donations',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'gift' : 'gift-outline'} size={21} color={color} />
+            <Ionicons name={focused ? 'mail' : 'mail-outline'} size={21} color={color} />
           ),
         }}
       />
@@ -71,31 +71,31 @@ export default function TabLayout() {
         }}
       />
 
-      {/* 4. Impact */}
+      {/* 4. Activity */}
       <Tabs.Screen
-        name="impact"
+        name="activity"
         options={{
-          title: 'Impact',
+          title: 'Activity',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'bar-chart' : 'bar-chart-outline'} size={21} color={color} />
+            <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={21} color={color} />
           ),
         }}
       />
 
-      {/* 5. Settings */}
+      {/* 5. Profile */}
       <Tabs.Screen
-        name="settings"
+        name="profile"
         options={{
-          title: 'Settings',
+          title: 'Profile',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'settings' : 'settings-outline'} size={21} color={color} />
+            <Ionicons name={focused ? 'person' : 'person-outline'} size={21} color={color} />
           ),
         }}
       />
 
       {/* Hidden screens — still routable, just not in the tab bar */}
       <Tabs.Screen name="explore" options={{ href: null }} />
-      <Tabs.Screen name="profile" options={{ href: null }} />
+      <Tabs.Screen name="settings" options={{ href: null }} />
     </Tabs>
   );
 }
