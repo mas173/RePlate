@@ -92,10 +92,6 @@ function AuthGuard() {
         setIsSigningOut(false);
       }
     } else {
-      if (!isProfileLoaded) {
-        console.log('[AuthGuard] Signed in but profile not loaded, returning');
-        return;
-      }
       if (inAuthGroup || !isProtectedRoute) {
         console.log('[AuthGuard] Signed in and on auth/public route, redirecting to /(tabs)/home');
         setTimeout(() => {
@@ -103,15 +99,15 @@ function AuthGuard() {
         }, 0);
       }
     }
-  }, [isLoaded, isSplashComplete, isSignedIn, isProfileLoaded, segments, navigationState?.key]);
+  }, [isLoaded, isSplashComplete, isSignedIn, segments, navigationState?.key]);
 
   useEffect(() => {
-    if (isLoaded && isSplashComplete && (!isSignedIn || isProfileLoaded)) {
+    if (isLoaded && isSplashComplete) {
       SplashScreen.hideAsync().catch(() => {});
     }
-  }, [isLoaded, isSplashComplete, isSignedIn, isProfileLoaded]);
+  }, [isLoaded, isSplashComplete]);
 
-  if (!isLoaded || !isSplashComplete || (isSignedIn && !isProfileLoaded)) {
+  if (!isLoaded || !isSplashComplete) {
     return <AnimatedSplashScreen />;
   }
 
