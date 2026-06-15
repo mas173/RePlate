@@ -69,123 +69,7 @@ const getCategoryIcon = (category: string) => {
   return { lib: Ionicons, name: 'fast-food-outline' as const, color: '#4B5563', bg: '#F3F4F6' };
 };
 
-function HomeSkeleton() {
-  const fadeAnim = useRef(new Animated.Value(0.3)).current;
 
-  useEffect(() => {
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(fadeAnim, {
-          toValue: 0.8,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 0.3,
-          duration: 800,
-          useNativeDriver: true,
-        }),
-      ])
-    ).start();
-  }, [fadeAnim]);
-
-  return (
-    <SafeAreaView style={[styles.container, { backgroundColor: '#F9FBF8' }]}>
-      {/* Skeleton Header */}
-      <View style={styles.header}>
-        <View style={styles.logoGroup}>
-          <View style={{ width: 45, height: 16, borderRadius: 4, backgroundColor: '#E1E8E2' }} />
-          <View style={{ width: 100, height: 22, marginTop: 6, borderRadius: 4, backgroundColor: '#E1E8E2' }} />
-        </View>
-        <View style={styles.headerActions}>
-          <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#E1E8E2' }} />
-          <View style={{ width: 40, height: 40, borderRadius: 20, marginLeft: 12, backgroundColor: '#E1E8E2' }} />
-        </View>
-      </View>
-
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={[styles.scrollContent, { paddingTop: 0 }]}>
-        <Animated.View style={{ opacity: fadeAnim }}>
-          {/* Welcome Section Greeting */}
-          <View style={{ marginBottom: 20 }}>
-            <View style={{ width: 140, height: 22, borderRadius: 4, backgroundColor: '#E1E8E2' }} />
-            <View style={{ width: 220, height: 14, marginTop: 8, borderRadius: 4, backgroundColor: '#E1E8E2' }} />
-          </View>
-
-          {/* Large Impact Card (Dark Green background but lighter skeleton inner parts) */}
-          <View style={[styles.impactCard, { backgroundColor: '#1B4329' }]}>
-            <View style={{ width: 90, height: 14, borderRadius: 4, backgroundColor: '#2E583D' }} />
-            <View style={[styles.impactMetricsContainer, { marginTop: 24, marginBottom: 24 }]}>
-              <View style={[styles.impactMetricBox, { alignItems: 'center' }]}>
-                <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#2E583D' }} />
-                <View style={{ width: 40, height: 18, marginTop: 8, borderRadius: 4, backgroundColor: '#2E583D' }} />
-                <View style={{ width: 60, height: 12, marginTop: 6, borderRadius: 4, backgroundColor: '#2E583D' }} />
-              </View>
-              <View style={[styles.metricDivider, { backgroundColor: '#2E583D' }]} />
-              <View style={[styles.impactMetricBox, { alignItems: 'center' }]}>
-                <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#2E583D' }} />
-                <View style={{ width: 40, height: 18, marginTop: 8, borderRadius: 4, backgroundColor: '#2E583D' }} />
-                <View style={{ width: 60, height: 12, marginTop: 6, borderRadius: 4, backgroundColor: '#2E583D' }} />
-              </View>
-              <View style={[styles.metricDivider, { backgroundColor: '#2E583D' }]} />
-              <View style={[styles.impactMetricBox, { alignItems: 'center' }]}>
-                <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#2E583D' }} />
-                <View style={{ width: 40, height: 18, marginTop: 8, borderRadius: 4, backgroundColor: '#2E583D' }} />
-                <View style={{ width: 60, height: 12, marginTop: 6, borderRadius: 4, backgroundColor: '#2E583D' }} />
-              </View>
-            </View>
-            <View style={{ width: '100%', height: 48, borderRadius: 24, backgroundColor: '#FFFFFF', opacity: 0.15 }} />
-          </View>
-
-          {/* Quick Actions Title */}
-          <View style={{ marginTop: 24, marginBottom: 12 }}>
-            <View style={{ width: 110, height: 18, borderRadius: 4, backgroundColor: '#E1E8E2' }} />
-          </View>
-
-          {/* Quick Actions Row */}
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 24 }}>
-            {[1, 2, 3, 4].map((i) => (
-              <View key={i} style={{ width: (width - 64) / 4, height: 95, borderRadius: 16, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#EBF2EA', padding: 10, alignItems: 'center', justifyContent: 'center' }}>
-                <View style={{ width: 32, height: 32, borderRadius: 16, backgroundColor: '#E1E8E2' }} />
-                <View style={{ width: 45, height: 10, marginTop: 10, borderRadius: 2, backgroundColor: '#E1E8E2' }} />
-              </View>
-            ))}
-          </View>
-
-          {/* Active Donation Card Title */}
-          <View style={{ marginBottom: 12 }}>
-            <View style={{ width: 150, height: 18, borderRadius: 4, backgroundColor: '#E1E8E2' }} />
-          </View>
-
-          {/* Active Donation Card */}
-          <View style={[styles.activeDonationCard, { padding: 12 }]}>
-            <View style={{ width: 58, height: 58, borderRadius: 10, backgroundColor: '#E1E8E2' }} />
-            <View style={{ flex: 1, marginLeft: 12 }}>
-              <View style={{ width: 120, height: 14, borderRadius: 3, backgroundColor: '#E1E8E2' }} />
-              <View style={{ width: 60, height: 12, marginTop: 8, borderRadius: 3, backgroundColor: '#E1E8E2' }} />
-            </View>
-            <View style={{ width: 75, height: 28, borderRadius: 14, backgroundColor: '#E1E8E2' }} />
-          </View>
-
-          {/* Lifetime Impact Card */}
-          <View style={[styles.lifetimeImpactCard, { marginTop: 24 }]}>
-            <View style={styles.lifetimeImpactTopRow}>
-              <View style={{ width: 130, height: 14, borderRadius: 4, backgroundColor: '#E1E8E2' }} />
-              <View style={{ width: 90, height: 14, borderRadius: 4, backgroundColor: '#E1E8E2' }} />
-            </View>
-            <View style={[styles.lifetimeMetricsRow, { marginTop: 8 }]}>
-              {[1, 2, 3].map((i) => (
-                <View key={i} style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#E1E8E2' }} />
-                  <View style={{ width: 45, height: 12, marginLeft: 6, borderRadius: 3, backgroundColor: '#E1E8E2' }} />
-                </View>
-              ))}
-            </View>
-          </View>
-        </Animated.View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
 
 export default function HomeScreen() {
   const { profile, user } = useAppAuth();
@@ -442,9 +326,29 @@ export default function HomeScreen() {
   const pKm = pCo2 * 4.1;
   const pPhones = Math.round(pCo2 * 120);
 
-  if (!profile || (loading && !refreshing)) {
-    return <HomeSkeleton />;
-  }
+  const isDataLoading = !profile || (loading && !refreshing);
+  const fadeAnim = useRef(new Animated.Value(0.3)).current;
+
+  useEffect(() => {
+    if (isDataLoading) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(fadeAnim, {
+            toValue: 0.8,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+          Animated.timing(fadeAnim, {
+            toValue: 0.3,
+            duration: 800,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    } else {
+      fadeAnim.setValue(1);
+    }
+  }, [isDataLoading, fadeAnim]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
@@ -525,37 +429,59 @@ export default function HomeScreen() {
           </View>
 
           {/* Metrics Row */}
-          <View style={styles.impactMetricsContainer}>
-            <View style={styles.impactMetricBox}>
-              <View style={styles.impactMetricIconCircle}>
-                <MaterialCommunityIcons name="silverware-fork-knife" size={18} color="#FFFFFF" />
+          {isDataLoading ? (
+            <Animated.View style={[styles.impactMetricsContainer, { opacity: fadeAnim, borderBottomWidth: 0 }]}>
+              <View style={[styles.impactMetricBox, { alignItems: 'center' }]}>
+                <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: '#FFFFFF', opacity: 0.2 }} />
+                <View style={{ width: 35, height: 16, marginTop: 8, borderRadius: 4, backgroundColor: '#FFFFFF', opacity: 0.2 }} />
+                <View style={{ width: 55, height: 10, marginTop: 6, borderRadius: 3, backgroundColor: '#FFFFFF', opacity: 0.2 }} />
               </View>
-              <Text style={styles.impactMetricValue}>{userStats.mealsSaved}</Text>
-              <Text style={styles.impactMetricLabel}>Meals Saved</Text>
-            </View>
-
-            <View style={styles.metricDivider} />
-
-            <View style={styles.impactMetricBox}>
-              <View style={styles.impactMetricIconCircle}>
-                <Ionicons name="people" size={18} color="#FFFFFF" />
+              <View style={[styles.metricDivider, { backgroundColor: '#FFFFFF', opacity: 0.2 }]} />
+              <View style={[styles.impactMetricBox, { alignItems: 'center' }]}>
+                <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: '#FFFFFF', opacity: 0.2 }} />
+                <View style={{ width: 35, height: 16, marginTop: 8, borderRadius: 4, backgroundColor: '#FFFFFF', opacity: 0.2 }} />
+                <View style={{ width: 55, height: 10, marginTop: 6, borderRadius: 3, backgroundColor: '#FFFFFF', opacity: 0.2 }} />
               </View>
-              <Text style={styles.impactMetricValue}>{userStats.mealsSaved * 3}</Text>
-              <Text style={styles.impactMetricLabel}>People Helped</Text>
-            </View>
-
-            <View style={styles.metricDivider} />
-
-            <View style={styles.impactMetricBox}>
-              <View style={styles.impactMetricIconCircle}>
-                <Ionicons name="leaf" size={18} color="#FFFFFF" />
+              <View style={[styles.metricDivider, { backgroundColor: '#FFFFFF', opacity: 0.2 }]} />
+              <View style={[styles.impactMetricBox, { alignItems: 'center' }]}>
+                <View style={{ width: 18, height: 18, borderRadius: 9, backgroundColor: '#FFFFFF', opacity: 0.2 }} />
+                <View style={{ width: 35, height: 16, marginTop: 8, borderRadius: 4, backgroundColor: '#FFFFFF', opacity: 0.2 }} />
+                <View style={{ width: 55, height: 10, marginTop: 6, borderRadius: 3, backgroundColor: '#FFFFFF', opacity: 0.2 }} />
               </View>
-              <Text style={styles.impactMetricValue}>
-                {userStats.wasteReduced ? userStats.wasteReduced.toFixed(1) : '0'} kg
-              </Text>
-              <Text style={styles.impactMetricLabel}>Waste Prevented</Text>
+            </Animated.View>
+          ) : (
+            <View style={styles.impactMetricsContainer}>
+              <View style={styles.impactMetricBox}>
+                <View style={styles.impactMetricIconCircle}>
+                  <MaterialCommunityIcons name="silverware-fork-knife" size={18} color="#FFFFFF" />
+                </View>
+                <Text style={styles.impactMetricValue}>{userStats.mealsSaved}</Text>
+                <Text style={styles.impactMetricLabel}>Meals Saved</Text>
+              </View>
+
+              <View style={styles.metricDivider} />
+
+              <View style={styles.impactMetricBox}>
+                <View style={styles.impactMetricIconCircle}>
+                  <Ionicons name="people" size={18} color="#FFFFFF" />
+                </View>
+                <Text style={styles.impactMetricValue}>{userStats.mealsSaved * 3}</Text>
+                <Text style={styles.impactMetricLabel}>People Helped</Text>
+              </View>
+
+              <View style={styles.metricDivider} />
+
+              <View style={styles.impactMetricBox}>
+                <View style={styles.impactMetricIconCircle}>
+                  <Ionicons name="leaf" size={18} color="#FFFFFF" />
+                </View>
+                <Text style={styles.impactMetricValue}>
+                  {userStats.wasteReduced ? userStats.wasteReduced.toFixed(1) : '0'} kg
+                </Text>
+                <Text style={styles.impactMetricLabel}>Waste Prevented</Text>
+              </View>
             </View>
-          </View>
+          )}
 
           {/* Donate Food White Button */}
           <TouchableOpacity
@@ -664,7 +590,16 @@ export default function HomeScreen() {
         </View>
 
         {/* Active Donations Card */}
-        {activeItem ? (
+        {isDataLoading ? (
+          <Animated.View style={[styles.activeDonationCard, { opacity: fadeAnim, padding: 12 }]}>
+            <View style={{ width: 58, height: 58, borderRadius: 10, backgroundColor: '#E1E8E2' }} />
+            <View style={{ flex: 1, marginLeft: 12 }}>
+              <View style={{ width: 120, height: 14, borderRadius: 3, backgroundColor: '#E1E8E2' }} />
+              <View style={{ width: 60, height: 12, marginTop: 8, borderRadius: 3, backgroundColor: '#E1E8E2' }} />
+            </View>
+            <View style={{ width: 75, height: 28, borderRadius: 14, backgroundColor: '#E1E8E2' }} />
+          </Animated.View>
+        ) : activeItem ? (
           <View style={styles.activeDonationCard}>
             {activeItem.images && activeItem.images.length > 0 ? (
               <Image
@@ -788,34 +723,45 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
 
-          <View style={styles.lifetimeMetricsRow}>
-            <View style={styles.lifetimeMetricItem}>
-              <View style={styles.lifetimeIconCircle}>
-                <MaterialCommunityIcons name="silverware-fork-knife" size={14} color="#2E7D32" />
+          {isDataLoading ? (
+            <Animated.View style={[styles.lifetimeMetricsRow, { opacity: fadeAnim, marginTop: 8 }]}>
+              {[1, 2, 3].map((i) => (
+                <View key={i} style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: '#E1E8E2' }} />
+                  <View style={{ width: 45, height: 12, marginLeft: 6, borderRadius: 3, backgroundColor: '#E1E8E2' }} />
+                </View>
+              ))}
+            </Animated.View>
+          ) : (
+            <View style={styles.lifetimeMetricsRow}>
+              <View style={styles.lifetimeMetricItem}>
+                <View style={styles.lifetimeIconCircle}>
+                  <MaterialCommunityIcons name="silverware-fork-knife" size={14} color="#2E7D32" />
+                </View>
+                <Text style={styles.lifetimeMetricValText}>
+                  {meals} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>Meals</Text>
+                </Text>
               </View>
-              <Text style={styles.lifetimeMetricValText}>
-                {meals} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>Meals</Text>
-              </Text>
-            </View>
 
-            <View style={styles.lifetimeMetricItem}>
-              <View style={styles.lifetimeIconCircle}>
-                <Ionicons name="people" size={14} color="#2E7D32" />
+              <View style={styles.lifetimeMetricItem}>
+                <View style={styles.lifetimeIconCircle}>
+                  <Ionicons name="people" size={14} color="#2E7D32" />
+                </View>
+                <Text style={styles.lifetimeMetricValText}>
+                  {meals * 3} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>People</Text>
+                </Text>
               </View>
-              <Text style={styles.lifetimeMetricValText}>
-                {meals * 3} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>People</Text>
-              </Text>
-            </View>
 
-            <View style={styles.lifetimeMetricItem}>
-              <View style={styles.lifetimeIconCircle}>
-                <Ionicons name="leaf" size={14} color="#2E7D32" />
+              <View style={styles.lifetimeMetricItem}>
+                <View style={styles.lifetimeIconCircle}>
+                  <Ionicons name="leaf" size={14} color="#2E7D32" />
+                </View>
+                <Text style={styles.lifetimeMetricValText}>
+                  {pWeight ? pWeight.toFixed(1) : '0'} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>kg</Text>
+                </Text>
               </View>
-              <Text style={styles.lifetimeMetricValText}>
-                {pWeight ? pWeight.toFixed(1) : '0'} <Text style={{ fontWeight: '500', color: '#6B7280', fontSize: 10 }}>kg</Text>
-              </Text>
             </View>
-          </View>
+          )}
         </View>
 
         {/* RePlate Community Banner */}
