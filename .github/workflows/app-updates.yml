@@ -10,6 +10,8 @@ jobs:
   update:
     name: Publish EAS Update
     runs-on: ubuntu-latest
+    environment:
+     name: ${{ github.ref_name == 'main' && 'expo-production' || 'expo-preview' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,3 +45,4 @@ jobs:
       - name: Publish Update
         run: eas update --branch ${{ steps.determine-branch.outputs.branch }} --auto
         working-directory: RePlate-app
+
