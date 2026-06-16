@@ -84,13 +84,16 @@ function AuthGuard() {
     if (!isSignedIn) {
       if (isProtectedRoute) {
         console.log('[AuthGuard] Logged out but on protected route, redirecting to /');
+        setIsSigningOut(true);
         setTimeout(() => {
           router.replace('/');
-          setTimeout(() => setIsSigningOut(false), 300);
+          setTimeout(() => setIsSigningOut(false), 800);
         }, 50);
       } else {
-        console.log('[AuthGuard] Logged out and on public route, setting isSigningOut to false');
-        setIsSigningOut(false);
+        console.log('[AuthGuard] Logged out and on public route');
+        if (!isSigningOut) {
+          setIsSigningOut(false);
+        }
       }
     } else {
       if (inAuthGroup || !isProtectedRoute) {
@@ -112,30 +115,32 @@ function AuthGuard() {
     return <AnimatedSplashScreen />;
   }
 
-  if (isSigningOut) {
-    return (
-      <View style={styles.loadingContainer}>
-        <Image
-          source={require('../assets/images/mainLogo.png')}
-          style={styles.loadingLogo}
-          resizeMode="contain"
-        />
-        <ActivityIndicator size="large" color="#2E7D32" style={{ marginTop: 24 }} />
-        <Text style={styles.loadingText}>Signing out safely...</Text>
-      </View>
-    );
-  }
-
   // Use Stack here instead of Slot so that nested screens keep the parent screens in the stack.
   // This prevents unmounting of the bottom tabs when navigating to a modal.
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="modal" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
-      <Stack.Screen name="notifications" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
-      <Stack.Screen name="(auth)" />
-    </Stack>
+    <View style={{ flex: 1 }}>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="index" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="modal" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="notifications" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
+        <Stack.Screen name="(auth)" />
+      </Stack>
+
+      {isSigningOut && (
+        <View style={StyleSheet.absoluteFill}>
+          <View style={styles.loadingContainer}>
+            <Image
+              source={require('../assets/images/mainLogo.png')}
+              style={styles.loadingLogo}
+              resizeMode="contain"
+            />
+            <ActivityIndicator size="large" color="#2E7D32" style={{ marginTop: 24 }} />
+            <Text style={styles.loadingText}>Signing out safely...</Text>
+          </View>
+        </View>
+      )}
+    </View>
   );
 }
 
