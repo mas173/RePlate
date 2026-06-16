@@ -35,10 +35,24 @@ function AuthGuard() {
   const [prevSignedIn, setPrevSignedIn] = useState<boolean | null>(null);
   const [isSplashComplete, setIsSplashComplete] = useState(false);
 
+  // Compute route properties in render scope so we can conditionally show splash
+  const routeSegments = segments as string[];
+  const inAuthGroup = routeSegments[0] === '(auth)';
+  
+  const isPublicRoute = 
+    routeSegments.length === 0 || 
+    (routeSegments.length === 1 && routeSegments[0] === 'index') ||
+    routeSegments[0] === '(auth)' || 
+    routeSegments[0] === 'oauth-callback';
+    
+  const isProtectedRoute = !isPublicRoute;
+
+  const isReadyToHideSplash = isLoaded && isSplashComplete && (!isSignedIn || isProtectedRoute);
+
   useEffect(() => {
     const timer = setTimeout(() => {
       setIsSplashComplete(true);
-    }, 2000);
+    }, 1000);
     return () => clearTimeout(timer);
   }, []);
 
@@ -65,19 +79,6 @@ function AuthGuard() {
       return;
     }
 
-    const routeSegments = segments as string[];
-    const inAuthGroup = routeSegments[0] === '(auth)';
-    
-    // A route is public if it's the root '/' or in '(auth)' group or oauth callback.
-    // Everything else is protected.
-    const isPublicRoute = 
-      routeSegments.length === 0 || 
-      (routeSegments.length === 1 && routeSegments[0] === 'index') ||
-      routeSegments[0] === '(auth)' || 
-      routeSegments[0] === 'oauth-callback';
-      
-    const isProtectedRoute = !isPublicRoute;
-
     console.log('[AuthGuard] routeSegments:', routeSegments, 'isProtectedRoute:', isProtectedRoute, 'inAuthGroup:', inAuthGroup);
 
     if (!isSignedIn) {
@@ -102,12 +103,12 @@ function AuthGuard() {
   }, [isLoaded, isSplashComplete, isSignedIn, segments, navigationState?.key]);
 
   useEffect(() => {
-    if (isLoaded && isSplashComplete) {
+    if (isReadyToHideSplash) {
       SplashScreen.hideAsync().catch(() => {});
     }
-  }, [isLoaded, isSplashComplete]);
+  }, [isReadyToHideSplash]);
 
-  if (!isLoaded || !isSplashComplete) {
+  if (!isReadyToHideSplash) {
     return <AnimatedSplashScreen />;
   }
 
