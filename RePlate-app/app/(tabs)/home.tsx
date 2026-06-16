@@ -24,6 +24,15 @@ import { LineChart, PieChart } from 'react-native-chart-kit';
 
 const { width, height } = Dimensions.get('window');
 
+const formatNumber = (num: number) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+const formatWaste = (kg: number) => {
+  if (kg >= 1000) {
+    return `${(kg / 1000).toFixed(1)} Tons`;
+  }
+  return `${kg} kg`;
+};
+
 const CATEGORY_LABELS: Record<string, { label: string; icon: string }> = {
   cooked_meals: { label: 'Cooked Meals', icon: '🍽️' },
   raw_produce: { label: 'Raw Produce', icon: '🥬' },
@@ -772,15 +781,35 @@ export default function HomeScreen() {
               <Ionicons name="leaf" size={14} color="#FFFFFF" style={{ marginLeft: 4 }} />
             </View>
             <View style={styles.communityStatsRow}>
-              <View style={styles.communityStatCol}>
-                <Text style={styles.communityStatVal}>12,400</Text>
-                <Text style={styles.communityStatLabel}>Meals Shared</Text>
-              </View>
-              <View style={styles.communityStatDivider} />
-              <View style={styles.communityStatCol}>
-                <Text style={styles.communityStatVal}>4.8 Tons</Text>
-                <Text style={styles.communityStatLabel}>Waste Prevented</Text>
-              </View>
+              {isDataLoading ? (
+                <Animated.View style={{ flexDirection: 'row', alignItems: 'center', opacity: fadeAnim }}>
+                  <View style={styles.communityStatCol}>
+                    <View style={{ width: 60, height: 22, borderRadius: 4, backgroundColor: 'rgba(255, 255, 255, 0.25)', marginBottom: 4 }} />
+                    <Text style={styles.communityStatLabel}>Meals Shared</Text>
+                  </View>
+                  <View style={styles.communityStatDivider} />
+                  <View style={styles.communityStatCol}>
+                    <View style={{ width: 70, height: 22, borderRadius: 4, backgroundColor: 'rgba(255, 255, 255, 0.25)', marginBottom: 4 }} />
+                    <Text style={styles.communityStatLabel}>Waste Prevented</Text>
+                  </View>
+                </Animated.View>
+              ) : (
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={styles.communityStatCol}>
+                    <Text style={styles.communityStatVal}>
+                      {formatNumber(platformStats.totalMealsSaved || 0)}
+                    </Text>
+                    <Text style={styles.communityStatLabel}>Meals Shared</Text>
+                  </View>
+                  <View style={styles.communityStatDivider} />
+                  <View style={styles.communityStatCol}>
+                    <Text style={styles.communityStatVal}>
+                      {formatWaste(platformStats.totalWasteReduced || 0)}
+                    </Text>
+                    <Text style={styles.communityStatLabel}>Waste Prevented</Text>
+                  </View>
+                </View>
+              )}
             </View>
           </View>
 
@@ -794,42 +823,6 @@ export default function HomeScreen() {
             style={styles.communityGlobeIllustration}
             resizeMode="contain"
           />
-        </View>
-
-        {/* Recent Activity */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recent Activity</Text>
-          <TouchableOpacity style={styles.viewAllBtn} onPress={() => router.push('/(tabs)/activity' as any)}>
-            <Text style={styles.viewAllText}>View All</Text>
-            <Ionicons name="arrow-forward" size={12} color="#2E7D32" style={{ marginLeft: 2 }} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Recent Activity Horizontally Aligned Stages Card */}
-        <View style={styles.recentActivityStagesCard}>
-          <View style={styles.stageItem}>
-            <View style={[styles.stageIconCircle, { backgroundColor: '#E6F4EA' }]}>
-              <Ionicons name="checkmark" size={14} color="#2E7D32" />
-            </View>
-            <Text style={styles.stageTitle}>Donation created</Text>
-            <Text style={styles.stageTime}>Today, 10:30 AM</Text>
-          </View>
-          <View style={styles.stageLine} />
-          <View style={styles.stageItem}>
-            <View style={[styles.stageIconCircle, { backgroundColor: '#EBF5FF' }]}>
-              <Ionicons name="checkmark" size={14} color="#2563EB" />
-            </View>
-            <Text style={styles.stageTitle}>Food claimed</Text>
-            <Text style={styles.stageTime}>Yesterday, 4:15 PM</Text>
-          </View>
-          <View style={styles.stageLine} />
-          <View style={styles.stageItem}>
-            <View style={[styles.stageIconCircle, { backgroundColor: '#F3E8FF' }]}>
-              <Ionicons name="checkmark" size={14} color="#7C3AED" />
-            </View>
-            <Text style={styles.stageTitle}>Donation completed</Text>
-            <Text style={styles.stageTime}>May 10, 9:20 AM</Text>
-          </View>
         </View>
       </ScrollView>
 
