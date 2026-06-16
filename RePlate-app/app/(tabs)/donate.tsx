@@ -11,15 +11,12 @@ import {
   Image,
   Dimensions,
   Modal,
-  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
 import { apiClient } from '../../services/api';
-import { Colors } from '../../constants/theme';
 import LocationPickerMap from '../../components/LocationPickerMap';
 
 const { width } = Dimensions.get('window');
@@ -76,16 +73,59 @@ export default function DonateScreen() {
   const [pickupFrom, setPickupFrom] = useState('');
   const [pickupTo, setPickupTo] = useState('');
   const [instructions, setInstructions] = useState('');
-  const [isLocating, setIsLocating] = useState(false);
 
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Loading state for default address so the map renders with correct initial coordinates
-  const [defaultAddressLoaded, setDefaultAddressLoaded] = useState(false);
   const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
   const [isAddressModalVisible, setIsAddressModalVisible] = useState(false);
   const [tempMapLocation, setTempMapLocation] = useState<any>(null);
+
+  // Fetch user's default address (with saved addresses first, fallback to profile address)
+  const fetchDefaultAddress = async () => {
+    try {
+      const response = await apiClient.get('/users/addresses');
+      let addressSet = false;
+      if (response.data && response.data.addresses) {
+        setSavedAddresses(response.data.addresses);
+        // Find default address
+        let targetAddr = response.data.addresses.find((a: any) => a.is_default);
+        // Fallback to first saved address if no default is marked
+        if (!targetAddr && response.data.addresses.length > 0) {
+          targetAddr = response.data.addresses[0];
+        }
+        if (targetAddr) {
+          setAddress(targetAddr.address_line || '');
+          setCity(targetAddr.city || '');
+          setState(targetAddr.state || '');
+          setPincode(targetAddr.pincode || '');
+          if (targetAddr.latitude && targetAddr.longitude) {
+            setLatitude(parseFloat(targetAddr.latitude));
+            setLongitude(parseFloat(targetAddr.longitude));
+          }
+          addressSet = true;
+        }
+      }
+      
+      // Fallback to profile organization address if no saved address was set
+      if (!addressSet) {
+        const profileRes = await apiClient.get('/users/profile');
+        if (profileRes.data && profileRes.data.profile) {
+          const prof = profileRes.data.profile;
+          setAddress(prof.organization_address || '');
+          setCity(prof.city || '');
+          setState(prof.state || '');
+          setPincode(prof.pincode || '');
+          if (prof.latitude && prof.longitude) {
+            setLatitude(parseFloat(prof.latitude));
+            setLongitude(parseFloat(prof.longitude));
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load default address', err);
+    }
+  };
 
   // Auto-set default dates and location
   useEffect(() => {
@@ -96,31 +136,6 @@ export default function DonateScreen() {
     setExpiryDate(`${yyyy}-${mm}-${dd}`);
     setExpiryTime('20:00');
 
-    // Fetch user's default address
-    const fetchDefaultAddress = async () => {
-      try {
-        const response = await apiClient.get('/users/addresses');
-        if (response.data && response.data.addresses) {
-          setSavedAddresses(response.data.addresses);
-          const defaultAddr = response.data.addresses.find((a: any) => a.is_default);
-          if (defaultAddr) {
-            setAddress(defaultAddr.address_line || '');
-            setCity(defaultAddr.city || '');
-            setState(defaultAddr.state || '');
-            setPincode(defaultAddr.pincode || '');
-            if (defaultAddr.latitude && defaultAddr.longitude) {
-              setLatitude(parseFloat(defaultAddr.latitude));
-              setLongitude(parseFloat(defaultAddr.longitude));
-            }
-          }
-        }
-      } catch (err) {
-        console.warn('Failed to load default address', err);
-      } finally {
-        setDefaultAddressLoaded(true);
-      }
-    };
-    
     fetchDefaultAddress();
   }, []);
 
@@ -242,39 +257,7 @@ export default function DonateScreen() {
     }
   };
 
-  // GPS Location autofill
-  const handleUseMyLocation = async () => {
-    setIsLocating(true);
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'GPS location access is required.');
-        setIsLocating(false);
-        return;
-      }
-      const position = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-      const { latitude, longitude } = position.coords;
-      setLatitude(latitude);
-      setLongitude(longitude);
 
-      const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
-      if (geocode && geocode.length > 0) {
-        const item = geocode[0];
-        setAddress(`${item.streetNumber || ''} ${item.street || ''} ${item.district || ''}`.trim());
-        setCity(item.city || item.subregion || '');
-        setState(item.region || '');
-        setPincode(item.postalCode || '');
-        Alert.alert('Location Located 📍', 'Address auto-filled successfully.');
-      }
-    } catch (err: any) {
-      console.warn('GPS location error:', err);
-      Alert.alert('Location Failed', 'Could not fetch current coordinates. Please enter manually.');
-    } finally {
-      setIsLocating(false);
-    }
-  };
 
   // Step validator
   const validateStep = () => {
@@ -401,6 +384,7 @@ export default function DonateScreen() {
     setPickupTo('');
     setInstructions('');
     setCurrentStep(1);
+    fetchDefaultAddress();
   };
 
   // Step 1 Renderer
@@ -628,23 +612,67 @@ export default function DonateScreen() {
       <Text style={styles.sectionTitle}>Pickup Location</Text>
       <Text style={styles.sectionSubtitle}>Specify where and when the NGO should collect the donation.</Text>
 
-      <View style={styles.selectedAddressCard}>
-        <View style={styles.selectedAddressHeader}>
-          <Ionicons name="location" size={24} color="#2E7D32" />
-          <View style={styles.selectedAddressTextContainer}>
-            {address ? (
-              <>
-                <Text style={styles.selectedAddressLine}>{address}</Text>
-                <Text style={styles.selectedAddressSubline}>{city}, {state} - {pincode}</Text>
-              </>
-            ) : (
-              <Text style={styles.noAddressText}>No location selected</Text>
-            )}
-          </View>
+      <TouchableOpacity 
+        style={styles.selectAddressBtn} 
+        onPress={() => setIsAddressModalVisible(true)}
+      >
+        <Ionicons name="map-outline" size={18} color="#2E7D32" />
+        <Text style={styles.selectAddressBtnText}>Select Saved Address / Map</Text>
+      </TouchableOpacity>
+
+      {latitude && longitude && (
+        <View style={styles.coordinatesCard}>
+          <Ionicons name="pin" size={16} color="#2E7D32" />
+          <Text style={styles.coordinatesText}>
+            Map Location Selected: {latitude.toFixed(5)}, {longitude.toFixed(5)}
+          </Text>
         </View>
-        <TouchableOpacity style={styles.changeAddressBtn} onPress={() => setIsAddressModalVisible(true)}>
-          <Text style={styles.changeAddressBtnText}>Change Address</Text>
-        </TouchableOpacity>
+      )}
+
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Street Address *</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="e.g. 123 MG Road, Suite 400"
+          value={address}
+          onChangeText={setAddress}
+          placeholderTextColor="#9CA3AF"
+        />
+      </View>
+
+      <View style={styles.inputRow}>
+        <View style={{ flex: 1, marginRight: 12 }}>
+          <Text style={styles.label}>City *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Mumbai"
+            value={city}
+            onChangeText={setCity}
+            placeholderTextColor="#9CA3AF"
+          />
+        </View>
+        <View style={{ flex: 1 }}>
+          <Text style={styles.label}>State *</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="MH"
+            value={state}
+            onChangeText={setState}
+            placeholderTextColor="#9CA3AF"
+          />
+        </View>
+      </View>
+
+      <View style={styles.inputGroup}>
+        <Text style={styles.label}>Pincode *</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="400001"
+          keyboardType="numeric"
+          value={pincode}
+          onChangeText={setPincode}
+          placeholderTextColor="#9CA3AF"
+        />
       </View>
 
       <View style={styles.inputRow}>
@@ -1631,6 +1659,28 @@ const styles = StyleSheet.create({
   confirmLocationBtnText: {
     color: '#FFFFFF',
     fontSize: 15,
+    fontWeight: '700',
+  },
+  selectAddressBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#2E7D32',
+    height: 46,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 16,
+    shadowColor: '#2E7D32',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  selectAddressBtnText: {
+    color: '#2E7D32',
+    fontSize: 14,
     fontWeight: '700',
   },
 });

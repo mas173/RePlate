@@ -71,13 +71,13 @@ export default function TabLayout() {
         }}
       />
 
-      {/* 4. Impact */}
+      {/* 4. Activity */}
       <Tabs.Screen
-        name="impact"
+        name="activity"
         options={{
-          title: 'Impact',
+          title: 'Activity',
           tabBarIcon: ({ color, focused }) => (
-            <Ionicons name={focused ? 'bar-chart' : 'bar-chart-outline'} size={21} color={color} />
+            <Ionicons name={focused ? 'receipt' : 'receipt-outline'} size={21} color={color} />
           ),
         }}
       />

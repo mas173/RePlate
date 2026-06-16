@@ -5,14 +5,14 @@ import type { BackendProfile, ProfileUpdatePayload, UserRole } from '../types/ap
 import Constants from 'expo-constants';
 
 const getBaseUrl = () => {
-  let url = process.env.EXPO_PUBLIC_API_BASE_URL || '';
+  let url = process.env.EXPO_PUBLIC_API_BASE_URL || 'https://replate-68ip.onrender.com/api';
   
   if (url && !url.includes('localhost') && !url.includes('127.0.0.1')) {
     return url;
   }
   
   // Auto-detect host IP from Expo Metro server address (crucial for physical devices on same Wi-Fi)
-  const debuggerHost = Constants.expoConfig?.hostUri || Constants.manifest2?.extra?.expoGoLaunchMetadata?.debuggerHost;
+  const debuggerHost = Constants.expoConfig?.hostUri || (Constants.manifest2?.extra as any)?.expoGoLaunchMetadata?.debuggerHost;
   if (debuggerHost) {
     const ip = debuggerHost.split(':')[0];
     return `http://${ip}:5000/api`;
