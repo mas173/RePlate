@@ -118,8 +118,8 @@ function AuthGuard() {
   // Use Stack here instead of Slot so that nested screens keep the parent screens in the stack.
   // This prevents unmounting of the bottom tabs when navigating to a modal.
   return (
-    <View style={{ flex: 1 }}>
-      <Stack screenOptions={{ headerShown: false }}>
+    <View style={{ flex: 1, backgroundColor: '#FAFBF7' }}>
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: '#FAFBF7' } }}>
         <Stack.Screen name="index" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="modal" options={{ presentation: 'modal', animation: 'slide_from_bottom' }} />
