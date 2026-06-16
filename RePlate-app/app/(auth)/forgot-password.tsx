@@ -108,7 +108,7 @@ export default function ForgotPasswordScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
           <Image
-            source={require('../../assets/images/icon.png')}
+            source={require('../../assets/images/mainLogo.png')}
             style={styles.logo}
             resizeMode="contain"
           />
@@ -210,10 +210,9 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   logo: {
-    width: 80,
-    height: 80,
+    width: 72,
+    height: 72,
     marginBottom: 16,
-    borderRadius: 20,
   },
   title: {
     fontSize: 32,
