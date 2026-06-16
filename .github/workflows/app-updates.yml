@@ -1,0 +1,46 @@
+name: Expo EAS Update
+
+on:
+  push:
+    branches:
+      - main
+      - Dev/expo-app
+      - development
+
+jobs:
+  update:
+    name: Publish EAS Update
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          cache: 'npm'
+          cache-dependency-path: RePlate-app/package-lock.json
+
+      - name: Setup EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: RePlate-app
+
+      - name: Determine Branch
+        id: determine-branch
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "branch=production" >> $GITHUB_OUTPUT
+          else
+            echo "branch=preview" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish Update
+        run: eas update --branch ${{ steps.determine-branch.outputs.branch }} --auto
+        working-directory: RePlate-app

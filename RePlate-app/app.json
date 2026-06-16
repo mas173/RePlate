@@ -4,17 +4,27 @@
     "slug": "RePlate",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/app_icon.png",
     "scheme": "replate",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vickyraj898.replate",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "RePlate requires access to your location to select and auto-fill donation addresses and show nearby rescue points."
+      }
     },
     "android": {
+      "package": "com.vickyraj898.replate",
+      "versionCode": 1,
+      "permissions": [
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION"
+      ],
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundColor": "#FAFBF7",
+        "foregroundImage": "./assets/images/app_icon.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
@@ -45,6 +55,18 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "b15f35ca-6df8-4566-8fca-8a07fbababee"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/b15f35ca-6df8-4566-8fca-8a07fbababee"
     }
   }
 }

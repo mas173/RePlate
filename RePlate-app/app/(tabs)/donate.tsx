@@ -10,14 +10,14 @@ import {
   Alert,
   Image,
   Dimensions,
+  Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import * as Location from 'expo-location';
 import { apiClient } from '../../services/api';
-import { Colors } from '../../constants/theme';
+import LocationPickerMap from '../../components/LocationPickerMap';
 
 const { width } = Dimensions.get('window');
 
@@ -73,12 +73,61 @@ export default function DonateScreen() {
   const [pickupFrom, setPickupFrom] = useState('');
   const [pickupTo, setPickupTo] = useState('');
   const [instructions, setInstructions] = useState('');
-  const [isLocating, setIsLocating] = useState(false);
 
   // Submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [savedAddresses, setSavedAddresses] = useState<any[]>([]);
+  const [isAddressModalVisible, setIsAddressModalVisible] = useState(false);
+  const [tempMapLocation, setTempMapLocation] = useState<any>(null);
 
-  // Auto-set default dates
+  // Fetch user's default address (with saved addresses first, fallback to profile address)
+  const fetchDefaultAddress = async () => {
+    try {
+      const response = await apiClient.get('/users/addresses');
+      let addressSet = false;
+      if (response.data && response.data.addresses) {
+        setSavedAddresses(response.data.addresses);
+        // Find default address
+        let targetAddr = response.data.addresses.find((a: any) => a.is_default);
+        // Fallback to first saved address if no default is marked
+        if (!targetAddr && response.data.addresses.length > 0) {
+          targetAddr = response.data.addresses[0];
+        }
+        if (targetAddr) {
+          setAddress(targetAddr.address_line || '');
+          setCity(targetAddr.city || '');
+          setState(targetAddr.state || '');
+          setPincode(targetAddr.pincode || '');
+          if (targetAddr.latitude && targetAddr.longitude) {
+            setLatitude(parseFloat(targetAddr.latitude));
+            setLongitude(parseFloat(targetAddr.longitude));
+          }
+          addressSet = true;
+        }
+      }
+      
+      // Fallback to profile organization address if no saved address was set
+      if (!addressSet) {
+        const profileRes = await apiClient.get('/users/profile');
+        if (profileRes.data && profileRes.data.profile) {
+          const prof = profileRes.data.profile;
+          setAddress(prof.organization_address || '');
+          setCity(prof.city || '');
+          setState(prof.state || '');
+          setPincode(prof.pincode || '');
+          if (prof.latitude && prof.longitude) {
+            setLatitude(parseFloat(prof.latitude));
+            setLongitude(parseFloat(prof.longitude));
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load default address', err);
+    }
+  };
+
+  // Auto-set default dates and location
   useEffect(() => {
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -86,6 +135,8 @@ export default function DonateScreen() {
     const dd = String(today.getDate()).padStart(2, '0');
     setExpiryDate(`${yyyy}-${mm}-${dd}`);
     setExpiryTime('20:00');
+
+    fetchDefaultAddress();
   }, []);
 
   // AI Categorize Food Name
@@ -206,39 +257,7 @@ export default function DonateScreen() {
     }
   };
 
-  // GPS Location autofill
-  const handleUseMyLocation = async () => {
-    setIsLocating(true);
-    try {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== 'granted') {
-        Alert.alert('Permission Denied', 'GPS location access is required.');
-        setIsLocating(false);
-        return;
-      }
-      const position = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.Balanced,
-      });
-      const { latitude, longitude } = position.coords;
-      setLatitude(latitude);
-      setLongitude(longitude);
 
-      const geocode = await Location.reverseGeocodeAsync({ latitude, longitude });
-      if (geocode && geocode.length > 0) {
-        const item = geocode[0];
-        setAddress(`${item.streetNumber || ''} ${item.street || ''} ${item.district || ''}`.trim());
-        setCity(item.city || item.subregion || '');
-        setState(item.region || '');
-        setPincode(item.postalCode || '');
-        Alert.alert('Location Located 📍', 'Address auto-filled successfully.');
-      }
-    } catch (err: any) {
-      console.warn('GPS location error:', err);
-      Alert.alert('Location Failed', 'Could not fetch current coordinates. Please enter manually.');
-    } finally {
-      setIsLocating(false);
-    }
-  };
 
   // Step validator
   const validateStep = () => {
@@ -365,6 +384,7 @@ export default function DonateScreen() {
     setPickupTo('');
     setInstructions('');
     setCurrentStep(1);
+    fetchDefaultAddress();
   };
 
   // Step 1 Renderer
@@ -592,22 +612,19 @@ export default function DonateScreen() {
       <Text style={styles.sectionTitle}>Pickup Location</Text>
       <Text style={styles.sectionSubtitle}>Specify where and when the NGO should collect the donation.</Text>
 
-      <TouchableOpacity style={styles.gpsButton} onPress={handleUseMyLocation} disabled={isLocating}>
-        {isLocating ? (
-          <ActivityIndicator size="small" color="#FFFFFF" />
-        ) : (
-          <>
-            <Ionicons name="location" size={18} color="#FFFFFF" />
-            <Text style={styles.gpsButtonText}>Use My GPS Location</Text>
-          </>
-        )}
+      <TouchableOpacity 
+        style={styles.selectAddressBtn} 
+        onPress={() => setIsAddressModalVisible(true)}
+      >
+        <Ionicons name="map-outline" size={18} color="#2E7D32" />
+        <Text style={styles.selectAddressBtnText}>Select Saved Address / Map</Text>
       </TouchableOpacity>
 
       {latitude && longitude && (
         <View style={styles.coordinatesCard}>
           <Ionicons name="pin" size={16} color="#2E7D32" />
           <Text style={styles.coordinatesText}>
-            GPS Pin: Lat: {latitude.toFixed(5)}, Lng: {longitude.toFixed(5)}
+            Map Location Selected: {latitude.toFixed(5)}, {longitude.toFixed(5)}
           </Text>
         </View>
       )}
@@ -894,6 +911,87 @@ export default function DonateScreen() {
           )}
         </View>
       )}
+
+      {/* --- Change Address Modal --- */}
+      <Modal visible={isAddressModalVisible} animationType="slide" onRequestClose={() => setIsAddressModalVisible(false)}>
+        <SafeAreaView style={styles.modalContainer}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>Select Pickup Location</Text>
+            <TouchableOpacity onPress={() => setIsAddressModalVisible(false)} style={styles.modalCloseBtn}>
+              <Ionicons name="close" size={24} color="#111827" />
+            </TouchableOpacity>
+          </View>
+          
+          <ScrollView style={styles.modalBody} showsVerticalScrollIndicator={false}>
+            {savedAddresses.length > 0 && (
+              <>
+                <Text style={styles.savedAddressListTitle}>Saved Addresses</Text>
+                {savedAddresses.map((addr, index) => {
+                  // If we don't have a reliable ID, just use index, but prefer address_line to identify
+                  const isSelected = address === addr.address_line;
+                  return (
+                    <TouchableOpacity
+                      key={addr.id || index}
+                      style={[styles.savedAddressItem, isSelected && styles.savedAddressItemSelected]}
+                      onPress={() => {
+                        setAddress(addr.address_line || '');
+                        setCity(addr.city || '');
+                        setState(addr.state || '');
+                        setPincode(addr.pincode || '');
+                        if (addr.latitude && addr.longitude) {
+                          setLatitude(parseFloat(addr.latitude));
+                          setLongitude(parseFloat(addr.longitude));
+                        }
+                        setIsAddressModalVisible(false);
+                      }}
+                    >
+                      <View style={styles.savedAddressIconWrapper}>
+                        <Ionicons name={addr.is_default ? "star" : "business"} size={18} color="#2E7D32" />
+                      </View>
+                      <View style={styles.savedAddressInfo}>
+                        <Text style={styles.savedAddressName}>
+                          {addr.name || 'Address'} {addr.is_default && <Text style={{color: '#EAB308', fontSize: 12}}> (Default)</Text>}
+                        </Text>
+                        <Text style={styles.savedAddressDetail}>{addr.address_line}</Text>
+                        <Text style={styles.savedAddressDetail}>{addr.city}, {addr.state} - {addr.pincode}</Text>
+                      </View>
+                      {isSelected && <Ionicons name="checkmark-circle" size={24} color="#2E7D32" />}
+                    </TouchableOpacity>
+                  );
+                })}
+              </>
+            )}
+
+            <View style={styles.mapPickerContainer}>
+              <Text style={styles.mapPickerTitle}>Or Pick a Location on Map</Text>
+              <LocationPickerMap
+                initialLatitude={latitude || undefined}
+                initialLongitude={longitude || undefined}
+                onLocationSelect={(data) => {
+                  setTempMapLocation(data);
+                }}
+              />
+              <TouchableOpacity
+                style={styles.confirmLocationBtn}
+                onPress={() => {
+                  if (tempMapLocation) {
+                    setLatitude(tempMapLocation.latitude);
+                    setLongitude(tempMapLocation.longitude);
+                    setAddress(tempMapLocation.address_line);
+                    setCity(tempMapLocation.city);
+                    setState(tempMapLocation.state);
+                    setPincode(tempMapLocation.pincode);
+                  }
+                  setIsAddressModalVisible(false);
+                }}
+              >
+                <Text style={styles.confirmLocationBtnText}>Confirm Map Location</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={{ height: 40 }} />
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -1413,6 +1511,176 @@ const styles = StyleSheet.create({
   successSecondaryButtonText: {
     color: '#2E7D32',
     fontSize: 15,
+    fontWeight: '700',
+  },
+  // Address UX Styles
+  selectedAddressCard: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  selectedAddressHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  selectedAddressTextContainer: {
+    marginLeft: 10,
+    flex: 1,
+  },
+  selectedAddressLine: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#1B4329',
+    marginBottom: 2,
+  },
+  selectedAddressSubline: {
+    fontSize: 13,
+    color: '#6B7280',
+    lineHeight: 18,
+  },
+  noAddressText: {
+    fontSize: 15,
+    color: '#9CA3AF',
+    fontStyle: 'italic',
+    marginTop: 2,
+  },
+  changeAddressBtn: {
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 8,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  changeAddressBtnText: {
+    color: '#2E7D32',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#FAFBF7',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EAF3E9',
+    backgroundColor: '#FFFFFF',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#111827',
+  },
+  modalCloseBtn: {
+    padding: 4,
+  },
+  modalBody: {
+    padding: 20,
+  },
+  savedAddressListTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#374151',
+    marginBottom: 12,
+  },
+  savedAddressItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    padding: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#EAF3E9',
+    marginBottom: 10,
+  },
+  savedAddressItemSelected: {
+    borderColor: '#2E7D32',
+    backgroundColor: '#F2FCEE',
+  },
+  savedAddressIconWrapper: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: '#E8F5E9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  savedAddressInfo: {
+    flex: 1,
+  },
+  savedAddressName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#111827',
+  },
+  savedAddressDetail: {
+    fontSize: 12,
+    color: '#6B7280',
+    marginTop: 2,
+  },
+  mapPickerContainer: {
+    marginTop: 24,
+    borderTopWidth: 1,
+    borderTopColor: '#E5E7EB',
+    paddingTop: 20,
+  },
+  mapPickerTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#374151',
+    marginBottom: 12,
+  },
+  confirmLocationBtn: {
+    backgroundColor: '#2E7D32',
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 16,
+    shadowColor: '#2E7D32',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  confirmLocationBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  selectAddressBtn: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#2E7D32',
+    height: 46,
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    marginBottom: 16,
+    shadowColor: '#2E7D32',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
+  },
+  selectAddressBtnText: {
+    color: '#2E7D32',
+    fontSize: 14,
     fontWeight: '700',
   },
 });

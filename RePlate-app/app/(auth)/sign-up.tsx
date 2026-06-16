@@ -18,6 +18,7 @@ import * as Linking from 'expo-linking';
 import { Colors } from '../../constants/theme';
 import { Button, Input } from '../../components/ui';
 import { useAppAuth } from '../../hooks/useAppAuth';
+import { getClerkFriendlyMessage } from '../../services/clerkErrorHelper';
 
 // Required for Expo OAuth redirect to work properly
 WebBrowser.maybeCompleteAuthSession();
@@ -68,7 +69,7 @@ export default function SignUpScreen() {
       }
     } catch (err: any) {
       console.error('Google sign-up error:', err);
-      const message = err?.errors?.[0]?.message || 'Google sign-up failed. Please try again.';
+      const message = getClerkFriendlyMessage(err, 'Google sign-up failed. Please try again.');
       Alert.alert('Google Sign Up Failed', message);
     } finally {
       setGoogleLoading(false);
@@ -121,7 +122,7 @@ export default function SignUpScreen() {
       setPendingVerification(true);
     } catch (err: any) {
       console.error(err);
-      const message = err?.errors?.[0]?.message || 'Registration failed';
+      const message = getClerkFriendlyMessage(err, 'Registration failed');
       Alert.alert('Sign Up Failed', message);
     } finally {
       setLoading(false);
@@ -158,7 +159,7 @@ export default function SignUpScreen() {
       }
     } catch (err: any) {
       console.error(err);
-      const message = err?.errors?.[0]?.message || 'Verification failed';
+      const message = getClerkFriendlyMessage(err, 'Verification failed');
       Alert.alert('Verification Failed', message);
     } finally {
       setLoading(false);
