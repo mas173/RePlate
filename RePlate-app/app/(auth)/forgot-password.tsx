@@ -13,6 +13,7 @@ import { useSignIn } from '@clerk/clerk-expo';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../constants/theme';
 import { Button, Input } from '../../components/ui';
+import { getClerkFriendlyMessage } from '../../services/clerkErrorHelper';
 
 export default function ForgotPasswordScreen() {
   const { signIn, isLoaded } = useSignIn();
@@ -44,7 +45,7 @@ export default function ForgotPasswordScreen() {
       Alert.alert('Reset Code Sent', 'Please check your email for the password reset code.');
     } catch (err: any) {
       console.error(err);
-      const message = err?.errors?.[0]?.message || 'Failed to send reset code';
+      const message = getClerkFriendlyMessage(err, 'Failed to send reset code');
       Alert.alert('Reset Request Failed', message);
     } finally {
       setLoading(false);
@@ -92,7 +93,7 @@ export default function ForgotPasswordScreen() {
       }
     } catch (err: any) {
       console.error(err);
-      const message = err?.errors?.[0]?.message || 'Failed to reset password';
+      const message = getClerkFriendlyMessage(err, 'Failed to reset password');
       Alert.alert('Reset Password Failed', message);
     } finally {
       setLoading(false);

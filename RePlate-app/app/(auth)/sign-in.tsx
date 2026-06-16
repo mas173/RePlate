@@ -18,6 +18,7 @@ import * as Linking from 'expo-linking';
 import { Colors } from '../../constants/theme';
 import { Button, Input } from '../../components/ui';
 import { Ionicons } from '@expo/vector-icons';
+import { getClerkFriendlyMessage } from '../../services/clerkErrorHelper';
 
 // Required for Expo OAuth redirect to work properly
 WebBrowser.maybeCompleteAuthSession();
@@ -49,7 +50,7 @@ export default function SignInScreen() {
       }
     } catch (err: any) {
       console.error('Google sign-in error:', err);
-      const message = err?.errors?.[0]?.message || 'Google sign-in failed. Please try again.';
+      const message = getClerkFriendlyMessage(err, 'Google sign-in failed. Please try again.');
       Alert.alert('Google Sign In Failed', message);
     } finally {
       setGoogleLoading(false);
@@ -93,7 +94,7 @@ export default function SignInScreen() {
       }
     } catch (err: any) {
       console.error(err);
-      const message = err?.errors?.[0]?.message || 'Invalid email or password';
+      const message = getClerkFriendlyMessage(err, 'Invalid email or password');
       Alert.alert('Authentication Failed', message);
     } finally {
       setLoading(false);
