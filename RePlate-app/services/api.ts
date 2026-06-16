@@ -12,7 +12,7 @@ const getBaseUrl = () => {
   }
   
   // Auto-detect host IP from Expo Metro server address (crucial for physical devices on same Wi-Fi)
-  const debuggerHost = Constants.expoConfig?.hostUri || Constants.manifest2?.extra?.expoGoLaunchMetadata?.debuggerHost;
+  const debuggerHost = Constants.expoConfig?.hostUri || (Constants.manifest2?.extra as any)?.expoGoLaunchMetadata?.debuggerHost;
   if (debuggerHost) {
     const ip = debuggerHost.split(':')[0];
     return `http://${ip}:5000/api`;
