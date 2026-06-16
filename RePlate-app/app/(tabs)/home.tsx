@@ -780,9 +780,8 @@ export default function HomeScreen() {
               <Text style={styles.communityTitle}>RePlate Community</Text>
               <Ionicons name="leaf" size={14} color="#FFFFFF" style={{ marginLeft: 4 }} />
             </View>
-            <View style={styles.communityStatsRow}>
               {isDataLoading ? (
-                <Animated.View style={{ flexDirection: 'row', alignItems: 'center', opacity: fadeAnim }}>
+                <Animated.View style={[styles.communityStatsRow, { opacity: fadeAnim, marginBottom: 0 }]}>
                   <View style={styles.communityStatCol}>
                     <View style={{ width: 60, height: 22, borderRadius: 4, backgroundColor: 'rgba(255, 255, 255, 0.25)', marginBottom: 4 }} />
                     <Text style={styles.communityStatLabel}>Meals Shared</Text>
@@ -794,7 +793,7 @@ export default function HomeScreen() {
                   </View>
                 </Animated.View>
               ) : (
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={[styles.communityStatsRow, { marginBottom: 0 }]}>
                   <View style={styles.communityStatCol}>
                     <Text style={styles.communityStatVal}>
                       {formatNumber(platformStats.totalMealsSaved || 0)}
@@ -810,7 +809,6 @@ export default function HomeScreen() {
                   </View>
                 </View>
               )}
-            </View>
           </View>
 
           <TouchableOpacity style={styles.exploreBtn} onPress={() => router.push('/(tabs)/activity' as any)}>
@@ -1497,7 +1495,7 @@ const styles = StyleSheet.create({
   communityStatsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 20,
     marginBottom: 12,
   },
   communityStatCol: {
