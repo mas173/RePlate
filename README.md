@@ -83,13 +83,21 @@ RePlate builds an efficient bridge between **food donors** and **NGOs** to ensur
 
 Select if your project participates in any track:
 
-- [ ] **Expo Track** – Built using Expo  
+- [X] **Expo Track** – Built using Expo  
 - [ ] **Neo4j Track** – Uses AuraDB as primary database  
 - [ ] **Base44 Track** – Prototype/Final Product built using Base44  
 
 Provide a short note on how you used the partner technology:
 
-> _Explain your implementation here (if applicable)_
+> We built the RePlate mobile app using **Expo SDK 54** with React Native 0.81.5
+> and the New Architecture enabled. **Expo Router 6** powers our file-based
+> navigation across Donor, NGO, and Admin flows. We used **expo-image-picker**
+> to capture food photos for Gemini Vision AI analysis, **expo-location** for
+> real-time GPS-based NGO matching, and **expo-secure-store** with Clerk Expo
+> for secure authentication. UI is styled with NativeWind 4 (Tailwind CSS for
+> React Native) and **@expo/vector-icons**. The app is shipped via **EAS Build**
+> for native binaries and **EAS Update** for OTA(over-the-air) patches - keeping
+> Android in sync without full store re-submissions.
 
 ---
 
@@ -118,8 +126,8 @@ Provide a short note on how you used the partner technology:
 ## 📽️ Demo & Deliverables
 
 - **Demo Video Link (Mandatory):** [Paste link]  
-- **Deployment Link (Recommended):** [Paste link]  
-- **Pitch Deck / PPT (Optional):** [Paste link]  
+- **Deployment Link (Recommended):** [Here](https://www.getreplate.qzz.io/)  
+- **Pitch Deck / PPT (Optional):** [Paste link]
 
 ---
 
@@ -185,7 +193,8 @@ npm run dev
 
 ## 🏁 Final Words
 
-RePlate is built to create an accessible, zero-waste food logistics system. Navigating regional speech variations and real-time mapping synchronization under time constraints pushed us to iterate fast. A special thanks to all partners and sponsors for making these AI and mapping tools available to work with!
+RePlate is built to create an accessible, zero-waste food logistics system. Building this under time pressure taught us more than any classroom could. Handling regional speech variations across 10+ Indian languages, synchronizing live maps with donation state, and ensuring AI safety checks don't slow down urgent pickups - each challenge forced us to think like engineers simultaneously. A special thanks to Google (Gemini), Sarvam AI, MapTiler, Supabase, Clerk, and
+Expo for making these tools and features available for us to work with.
 
 ---
 

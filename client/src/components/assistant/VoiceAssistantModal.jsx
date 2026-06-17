@@ -49,11 +49,11 @@ export default function VoiceAssistantModal({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:justify-end sm:p-6 pointer-events-none">
+      <div className="fixed inset-0 z-[9999] flex items-end justify-end p-4 sm:p-6 pointer-events-none">
         {/* Full screen backdrop click on mobile to close modal */}
         <div
           onClick={onClose}
-          className="fixed inset-0 bg-slate-900/30 dark:bg-slate-950/40 backdrop-blur-sm pointer-events-auto block sm:hidden"
+          className="fixed inset-0 z-10 bg-slate-900/30 dark:bg-slate-950/40 backdrop-blur-sm pointer-events-auto block sm:hidden"
         />
 
         {/* Floating Modal Window */}
@@ -62,10 +62,11 @@ export default function VoiceAssistantModal({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 100, scale: 0.95 }}
           transition={{ duration: 0.25, ease: 'easeOut' }}
-          className="w-full sm:w-[420px] h-[85vh] sm:h-[600px] bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/60 rounded-t-2xl sm:rounded-2xl shadow-xl flex flex-col pointer-events-auto overflow-hidden mr-0 sm:mr-4 mb-0 sm:mb-20"
+          className="relative z-20 w-full max-w-[380px] sm:max-w-[420px] h-[60dvh] sm:h-[600px] bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/60 rounded-2xl shadow-xl flex flex-col pointer-events-auto overflow-hidden mb-20 sm:mb-20"
         >
+
           {/* Header */}
-          <div className="px-4 py-3.5 bg-gradient-to-r from-primary-600 via-primary-550 to-teal-500 text-white flex items-center justify-between shrink-0 shadow-md">
+          <div className="px-4 py-3.5 bg-gradient-to-r from-primary-600 via-primary-500 to-teal-500 text-white flex items-center justify-between shrink-0 shadow-md">
             <div className="flex items-center gap-2">
               <div className="w-7 h-7 rounded-lg bg-white/10 flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-white animate-pulse" />
@@ -160,7 +161,7 @@ export default function VoiceAssistantModal({
                   'w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300 shadow-sm border focus:outline-none shrink-0 relative overflow-hidden',
                   isRecording
                     ? 'bg-red-500 hover:bg-red-600 text-white border-red-400 animate-pulse scale-105'
-                    : 'bg-primary-50 hover:bg-primary-100 dark:bg-slate-900 dark:hover:bg-slate-800/80 text-primary-650 dark:text-primary-400 border-primary-200/50 dark:border-slate-700'
+                    : 'bg-primary-50 hover:bg-primary-100 dark:bg-slate-900 dark:hover:bg-slate-800/80 text-primary-600 dark:text-primary-400 border-primary-200/50 dark:border-slate-700'
                 )}
               >
                 <Mic className="w-5 h-5" />
@@ -173,7 +174,7 @@ export default function VoiceAssistantModal({
                 onChange={(e) => setInputText(e.target.value)}
                 disabled={isRecording}
                 placeholder={isRecording ? 'Listening...' : 'Type or speak your request...'}
-                className="flex-1 text-xs py-2.5 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:border-primary-550 dark:focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-500/25 disabled:opacity-50 text-slate-800 dark:text-slate-100"
+                className="flex-1 text-base sm:text-sm py-2.5 px-3.5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:border-primary-500 dark:focus:border-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-500/25 disabled:opacity-50 text-slate-800 dark:text-slate-100"
               />
 
               {/* Send Button */}
