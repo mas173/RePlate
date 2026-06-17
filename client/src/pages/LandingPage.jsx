@@ -24,7 +24,8 @@ import {
 } from 'lucide-react';
 import mainLogo from '@/assets/images/mainLogo.png';
 import nameLogo from '@/assets/images/name.png';
-import heroImg from '@/assets/images/hero_image.png';
+import heroImageDesktop from '@/assets/images/hero_image.png';
+import heroImageMobile from '@/assets/images/hero_img.png';
 import movementDonors from '@/assets/images/movement_donors.png';
 import movementNgos from '@/assets/images/movement_ngos.png';
 import movementCommunity from '@/assets/images/movement_community.png';
@@ -81,7 +82,7 @@ function Navbar() {
   return (
     <nav
       className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled
-          ? `
+        ? `
         bg-white/10
         dark:bg-slate-900/20
         backdrop-blur-2xl
@@ -90,12 +91,12 @@ function Navbar() {
         dark:border-white/10
         shadow-[0_8px_32px_rgba(0,0,0,0.12)]
       `
-          : 'bg-transparent'
+        : 'bg-transparent'
         }`}
     >
       <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-3 shrink-0">
+        <Link to="/" className="flex items-center gap-3 shrink-0 mr-3">
           <img src={mainLogo} alt="RePlate Logo" className="w-10 h-10 object-contain" />
           <span className="font-display font-bold text-2xl text-brand-forest dark:text-brand-sage flex items-center">
             RePlate
@@ -103,7 +104,7 @@ function Navbar() {
         </Link>
 
         {/* Desktop nav links */}
-        <div className="hidden lg:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-5">
           <a href="#how-it-works" className="text-sm font-semibold text-neutralText-sub dark:text-slate-300 hover:text-brand-green dark:hover:text-brand-sage transition-colors">
             How it works
           </a>
@@ -113,7 +114,7 @@ function Navbar() {
 
           {/* For Donors Dropdown */}
           <div className="relative">
-            <button 
+            <button
               onClick={() => toggleDropdown('donors')}
               className="flex items-center gap-1 text-sm font-semibold text-neutralText-sub dark:text-slate-300 hover:text-brand-green dark:hover:text-brand-sage transition-colors focus:outline-none"
             >
@@ -134,7 +135,7 @@ function Navbar() {
 
           {/* For NGOs Dropdown */}
           <div className="relative">
-            <button 
+            <button
               onClick={() => toggleDropdown('ngos')}
               className="flex items-center gap-1 text-sm font-semibold text-neutralText-sub dark:text-slate-300 hover:text-brand-green dark:hover:text-brand-sage transition-colors focus:outline-none"
             >
@@ -155,7 +156,7 @@ function Navbar() {
 
           {/* Resources Dropdown */}
           <div className="relative">
-            <button 
+            <button
               onClick={() => toggleDropdown('resources')}
               className="flex items-center gap-1 text-sm font-semibold text-neutralText-sub dark:text-slate-300 hover:text-brand-green dark:hover:text-brand-sage transition-colors focus:outline-none"
             >
@@ -265,11 +266,11 @@ function Hero() {
 
   return (
     <section className="relative min-h-[600px] lg:min-h-[720px] flex items-center bg-white dark:bg-slate-950 overflow-hidden">
-      {/* Full Background Image */}
-      <div className="absolute inset-0 z-0">
-        <img 
-          src={heroImg} 
-          alt="Hero background" 
+      {/* Desktop Background Image (Previous Styling) */}
+      <div className="absolute inset-0 z-0 hidden lg:block">
+        <img
+          src={heroImageDesktop}
+          alt="Hero background"
           className="w-full h-full object-cover object-center lg:object-right select-none pointer-events-none"
         />
         {/* Gradients to ensure text readability on all viewports / dark mode */}
@@ -277,9 +278,20 @@ function Hero() {
         <div className="absolute inset-0 bg-transparent dark:bg-gradient-to-r dark:from-slate-950 dark:via-slate-950/90 dark:to-transparent" />
       </div>
 
+      {/* Mobile Background Image (Mobile Styling) */}
+      <div className="absolute inset-0 z-0 lg:hidden">
+        <img
+          src={heroImageMobile}
+          alt="Hero background"
+          className="w-full h-full object-cover object-center select-none pointer-events-none"
+        />
+        {/* Backdrop overlay for mobile readability */}
+        <div className="absolute inset-0 bg-white/75 dark:bg-slate-950/80 z-1" />
+      </div>
+
       <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-28 pb-24 relative z-10 w-full">
         <div className="grid lg:grid-cols-12 gap-8 items-center">
-          
+
           {/* Left: Copy */}
           <div className="lg:col-span-6 animate-fade-in-up">
             <h1 className="text-[52px] sm:text-[68px] font-bold leading-[1.05] tracking-tight text-neutralText-main dark:text-white font-display mb-6">
@@ -291,31 +303,31 @@ function Hero() {
               RePlate connects surplus food from businesses with communities that need it. Because no good food should go to waste when someone is hungry.
             </p>
 
-            <div className="flex flex-wrap gap-4 mb-10">
-              <Link to={isSignedIn ? (role === 'ngo' ? '/available' : '/donate') : '/sign-up'} 
-                className="inline-flex items-center gap-2 bg-brand-forest hover:bg-brand-forest/90 text-white font-bold rounded-xl px-7 py-4 text-base shadow-lg transition-all transform hover:-translate-y-0.5">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-4 mb-10">
+              <Link to={isSignedIn ? (role === 'ngo' ? '/available' : '/donate') : '/sign-up'}
+                className="inline-flex items-center gap-2 bg-brand-forest hover:bg-brand-forest/90 text-white font-bold rounded-xl px-7 py-4 text-base shadow-lg transition-all transform hover:-translate-y-0.5 w-full sm:w-auto text-center justify-center">
                 <HandHeart />
                 Donate Food
               </Link>
-              <Link to={isSignedIn ? '/dashboard' : '/sign-up'} 
-                className="inline-flex items-center gap-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-neutralText-main dark:text-white border border-brand-border dark:border-slate-700 font-bold rounded-xl px-7 py-4 text-base shadow-sm transition-all transform hover:-translate-y-0.5">
+              <Link to={isSignedIn ? '/dashboard' : '/sign-up'}
+                className="inline-flex items-center gap-2 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-neutralText-main dark:text-white border border-brand-border dark:border-slate-700 font-bold rounded-xl px-7 py-4 text-base shadow-sm transition-all transform hover:-translate-y-0.5 w-full sm:w-auto text-center justify-center">
                 <Users className="w-5 h-5 text-brand-green" />
                 Partner as NGO
               </Link>
               <a href="https://github.com/mas173/RePlate/releases/download/v1.0.0/replate-android.apk"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-[#3DDC84] hover:bg-[#32B86C] text-slate-900 font-bold rounded-xl px-7 py-4 text-base shadow-lg transition-all transform hover:-translate-y-0.5">
-                <svg className="w-5 h-5 fill-current text-slate-900" viewBox="0 0 24 24">
-                  <path d="M17.523 15.3414C17.027 15.3414 16.621 14.9374 16.621 14.4414C16.621 13.9454 17.027 13.5414 17.523 13.5414C18.019 13.5414 18.423 13.9454 18.423 14.4414C18.423 14.9374 18.019 15.3414 17.523 15.3414ZM6.477 15.3414C5.981 15.3414 5.577 14.9374 5.577 14.4414C5.577 13.9454 5.981 13.5414 6.477 13.5414C6.973 13.5414 7.377 13.9454 7.377 14.4414C7.377 14.9374 6.973 15.3414 6.477 15.3414ZM17.935 9.87336L19.789 6.64736C19.924 6.41336 19.843 6.11136 19.609 5.97636C19.375 5.84136 19.073 5.92236 18.938 6.15636L17.061 9.42136C15.61 8.76336 13.89 8.38836 12 8.38836C10.11 8.38836 8.39 8.76336 6.939 9.42136L5.062 6.15636C4.927 5.92236 4.625 5.84136 4.391 5.97636C4.157 6.11136 4.076 6.41336 4.211 6.64736L6.065 9.87336C3.011 11.5304 0.941 14.6544 0.771 18.3414H23.229C23.059 14.6544 20.989 11.5304 17.935 9.87336Z"/>
+                className="inline-flex items-center gap-2 bg-brand-forest hover:bg-brand-forest/90 text-white font-bold rounded-xl px-7 py-4 text-base shadow-lg transition-all transform hover:-translate-y-0.5 w-full sm:w-auto text-center justify-center">
+                <svg className="w-6 h-6 fill-current text-white" viewBox="0 0 24 24">
+                  <path d="M17.523 15.3414C17.027 15.3414 16.621 14.9374 16.621 14.4414C16.621 13.9454 17.027 13.5414 17.523 13.5414C18.019 13.5414 18.423 13.9454 18.423 14.4414C18.423 14.9374 18.019 15.3414 17.523 15.3414ZM6.477 15.3414C5.981 15.3414 5.577 14.9374 5.577 14.4414C5.577 13.9454 5.981 13.5414 6.477 13.5414C6.973 13.5414 7.377 13.9454 7.377 14.4414C7.377 14.9374 6.973 15.3414 6.477 15.3414ZM17.935 9.87336L19.789 6.64736C19.924 6.41336 19.843 6.11136 19.609 5.97636C19.375 5.84136 19.073 5.92236 18.938 6.15636L17.061 9.42136C15.61 8.76336 13.89 8.38836 12 8.38836C10.11 8.38836 8.39 8.76336 6.939 9.42136L5.062 6.15636C4.927 5.92236 4.625 5.84136 4.391 5.97636C4.157 6.11136 4.076 6.41336 4.211 6.64736L6.065 9.87336C3.011 11.5304 0.941 14.6544 0.771 18.3414H23.229C23.059 14.6544 20.989 11.5304 17.935 9.87336Z" />
                 </svg>
                 Download App
               </a>
             </div>
 
             {/* Social proof / Trusted by */}
-            <div className="flex items-center gap-4">
-              <div className="flex -space-x-3">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 mt-6">
+              <div className="flex -space-x-3 shrink-0">
                 {[
                   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=100&h=100&q=80',
                   'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&h=100&q=80',
@@ -418,9 +430,9 @@ function Problem() {
   ];
 
   return (
-    <section id="problem" className="py-24 bg-white dark:bg-slate-950">
+    <section id="problem" className="py-16 md:py-24 bg-white dark:bg-slate-950">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        
+
         {/* Header */}
         <div className="max-w-3xl mb-16">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-green mb-3 block">
@@ -469,13 +481,13 @@ function Solution() {
   ];
 
   return (
-    <section id="how-it-works" className="py-24 bg-brand-bg dark:bg-slate-900/40">
+    <section id="how-it-works" className="py-16 md:py-24 bg-brand-bg dark:bg-slate-900/40">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        
+
         {/* Solution Container Box */}
         <div className="bg-brand-mint dark:bg-slate-900 rounded-[40px] p-8 md:p-14 border border-brand-sage/60 dark:border-slate-800 shadow-xl">
           <div className="grid lg:grid-cols-12 gap-12 items-center">
-            
+
             {/* Left Col */}
             <div className="lg:col-span-5 flex flex-col justify-between min-h-[380px]">
               <div>
@@ -583,21 +595,19 @@ function Solution() {
               {solutions.map((s, idx) => {
                 const isActive = activeIdx === idx;
                 return (
-                  <div 
-                    key={idx} 
+                  <div
+                    key={idx}
                     onMouseEnter={() => setActiveIdx(idx)}
                     onClick={() => setActiveIdx(idx)}
-                    className={`p-6 rounded-3xl cursor-pointer border transition-all duration-300 transform hover:-translate-y-0.5 ${
-                      isActive 
-                        ? 'bg-white dark:bg-slate-950 border-brand-green shadow-lg scale-[1.02]' 
-                        : 'bg-white/60 dark:bg-slate-950/60 border-brand-border/60 dark:border-slate-800 hover:bg-white hover:border-brand-sage dark:hover:bg-slate-950'
-                    }`}
+                    className={`p-6 rounded-3xl cursor-pointer border transition-all duration-300 transform hover:-translate-y-0.5 ${isActive
+                      ? 'bg-white dark:bg-slate-950 border-brand-green shadow-lg scale-[1.02]'
+                      : 'bg-white/60 dark:bg-slate-950/60 border-brand-border/60 dark:border-slate-800 hover:bg-white hover:border-brand-sage dark:hover:bg-slate-950'
+                      }`}
                   >
-                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center mb-4 transition-colors ${
-                      isActive 
-                        ? 'bg-brand-green text-white' 
-                        : 'bg-brand-mint dark:bg-brand-forest/20 text-brand-green'
-                    }`}>
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center mb-4 transition-colors ${isActive
+                      ? 'bg-brand-green text-white'
+                      : 'bg-brand-mint dark:bg-brand-forest/20 text-brand-green'
+                      }`}>
                       {s.icon}
                     </div>
                     <h3 className="text-base font-bold text-neutralText-main dark:text-white mb-2">{s.title}</h3>
@@ -618,9 +628,9 @@ function Solution() {
 // ─── A Global Movement Section ──────────────────────────────────
 function GlobalMovement() {
   return (
-    <section id="about" className="py-24 bg-white dark:bg-slate-950">
+    <section id="about" className="py-16 md:py-24 bg-white dark:bg-slate-950">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        
+
         {/* Header */}
         <div className="max-w-3xl mb-16">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-green mb-3 block">
@@ -633,7 +643,7 @@ function GlobalMovement() {
 
         {/* 5-element grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-stretch">
-          
+
           {/* Card 1: Restaurant packing */}
           <div className="rounded-[32px] overflow-hidden bg-brand-bg dark:bg-slate-900 border border-brand-border dark:border-slate-800 flex flex-col group hover:shadow-xl transition-all">
             <div className="aspect-[4/3] overflow-hidden bg-slate-100 relative">
@@ -684,8 +694,8 @@ function GlobalMovement() {
               </p>
             </div>
             <div className="flex items-center gap-3.5 mt-8 border-t border-brand-sage dark:border-slate-800 pt-6">
-              <img className="w-11 h-11 rounded-full object-cover" 
-                src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&h=100&q=80" 
+              <img className="w-11 h-11 rounded-full object-cover"
+                src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&h=100&q=80"
                 alt="Priya Shah avatar" />
               <div>
                 <p className="text-sm font-bold text-neutralText-main dark:text-white">Priya Shah</p>
@@ -745,9 +755,9 @@ function NewsSection() {
   ];
 
   return (
-    <section id="news" className="py-24 bg-brand-bg dark:bg-slate-900/20">
+    <section id="news" className="py-16 md:py-24 bg-brand-bg dark:bg-slate-900/20">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        
+
         {/* Header */}
         <div className="max-w-3xl mb-16">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-green mb-3 block">
@@ -837,7 +847,7 @@ function MobileAppSection() {
                 className="inline-flex items-center gap-3 bg-[#3DDC84] hover:bg-[#32B86C] text-slate-900 font-bold rounded-2xl px-8 py-4 text-base shadow-xl transition-all transform hover:-translate-y-0.5"
               >
                 <svg className="w-6 h-6 fill-current text-slate-900" viewBox="0 0 24 24">
-                  <path d="M17.523 15.3414C17.027 15.3414 16.621 14.9374 16.621 14.4414C16.621 13.9454 17.027 13.5414 17.523 13.5414C18.019 13.5414 18.423 13.9454 18.423 14.4414C18.423 14.9374 18.019 15.3414 17.523 15.3414ZM6.477 15.3414C5.981 15.3414 5.577 14.9374 5.577 14.4414C5.577 13.9454 5.981 13.5414 6.477 13.5414C6.973 13.5414 7.377 13.9454 7.377 14.4414C7.377 14.9374 6.973 15.3414 6.477 15.3414ZM17.935 9.87336L19.789 6.64736C19.924 6.41336 19.843 6.11136 19.609 5.97636C19.375 5.84136 19.073 5.92236 18.938 6.15636L17.061 9.42136C15.61 8.76336 13.89 8.38836 12 8.38836C10.11 8.38836 8.39 8.76336 6.939 9.42136L5.062 6.15636C4.927 5.92236 4.625 5.84136 4.391 5.97636C4.157 6.11136 4.076 6.41336 4.211 6.64736L6.065 9.87336C3.011 11.5304 0.941 14.6544 0.771 18.3414H23.229C23.059 14.6544 20.989 11.5304 17.935 9.87336Z"/>
+                  <path d="M17.523 15.3414C17.027 15.3414 16.621 14.9374 16.621 14.4414C16.621 13.9454 17.027 13.5414 17.523 13.5414C18.019 13.5414 18.423 13.9454 18.423 14.4414C18.423 14.9374 18.019 15.3414 17.523 15.3414ZM6.477 15.3414C5.981 15.3414 5.577 14.9374 5.577 14.4414C5.577 13.9454 5.981 13.5414 6.477 13.5414C6.973 13.5414 7.377 13.9454 7.377 14.4414C7.377 14.9374 6.973 15.3414 6.477 15.3414ZM17.935 9.87336L19.789 6.64736C19.924 6.41336 19.843 6.11136 19.609 5.97636C19.375 5.84136 19.073 5.92236 18.938 6.15636L17.061 9.42136C15.61 8.76336 13.89 8.38836 12 8.38836C10.11 8.38836 8.39 8.76336 6.939 9.42136L5.062 6.15636C4.927 5.92236 4.625 5.84136 4.391 5.97636C4.157 6.11136 4.076 6.41336 4.211 6.64736L6.065 9.87336C3.011 11.5304 0.941 14.6544 0.771 18.3414H23.229C23.059 14.6544 20.989 11.5304 17.935 9.87336Z" />
                 </svg>
                 Download for Android
               </a>
@@ -849,7 +859,7 @@ function MobileAppSection() {
             <div className="relative w-64 h-[420px] bg-slate-900 rounded-[40px] border-4 border-slate-700 shadow-2xl overflow-hidden flex flex-col justify-between p-4">
               {/* Speaker / Notch */}
               <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-4 bg-slate-700 rounded-full z-20" />
-              
+
               {/* Inside Phone Screen */}
               <div className="flex-1 bg-[#FAFBF7] rounded-[32px] overflow-hidden p-4 pt-6 flex flex-col justify-between select-none">
                 {/* Header */}
@@ -922,10 +932,10 @@ function Footer() {
   return (
     <footer className="bg-brand-forest dark:bg-slate-950 text-white pt-20 pb-10 border-t border-white/5 dark:border-slate-900">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
-        
+
         {/* Main Footer Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 pb-16 border-b border-white/10 dark:border-slate-800">
-          
+
           {/* Brand Info */}
           <div className="lg:col-span-4 flex flex-col items-start gap-4">
             <div className="flex items-center gap-3">
@@ -947,7 +957,7 @@ function Footer() {
 
           {/* Links Columns */}
           <div className="lg:col-span-5 grid grid-cols-3 gap-6">
-            
+
             {/* Platform Column */}
             <div>
               <h4 className="text-xs font-bold uppercase tracking-wider text-brand-sage dark:text-slate-400 mb-4">Platform</h4>
@@ -955,10 +965,10 @@ function Footer() {
                 {['How it works', 'Our impact', 'For Donors', 'For NGOs', 'Download App'].map((item) => (
                   <li key={item}>
                     {item === 'Download App' ? (
-                      <a href="https://github.com/mas173/RePlate/releases/download/v1.0.0/replate-android.apk" 
-                         target="_blank" 
-                         rel="noopener noreferrer" 
-                         className="text-sm text-brand-sage font-semibold hover:text-white transition-colors flex items-center gap-1">
+                      <a href="https://github.com/mas173/RePlate/releases/download/v1.0.0/replate-android.apk"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-brand-sage font-semibold hover:text-white transition-colors flex items-center gap-1">
                         Download App <ExternalLink className="w-3 h-3" />
                       </a>
                     ) : (
@@ -999,17 +1009,17 @@ function Footer() {
           <div className="lg:col-span-3 flex flex-col items-start gap-4">
             <h4 className="text-xs font-bold uppercase tracking-wider text-brand-sage dark:text-slate-400">Stay updated</h4>
             <p className="text-sm text-brand-sage/80 dark:text-slate-400">Subscribe to our newsletter</p>
-            
+
             <form onSubmit={handleSubscribe} className="flex w-full items-center gap-2">
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
+              <input
+                type="email"
+                placeholder="Enter your email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-white/10 border border-white/20 dark:border-slate-800 rounded-xl px-4 py-2.5 text-sm w-full placeholder-white/50 text-white focus:outline-none focus:ring-2 focus:ring-brand-green"
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="bg-brand-green hover:bg-brand-green/90 text-white font-bold rounded-xl px-4 py-2.5 text-sm transition-all shadow-md"
               >
                 {subscribed ? 'Subbed!' : 'Subscribe'}

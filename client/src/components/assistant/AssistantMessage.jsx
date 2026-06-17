@@ -19,7 +19,7 @@ export default function AssistantMessage({ message, onPlayAudio, onFillForm, onN
             <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
             AI Extracted Details
           </div>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+          <div className="grid grid-cols-1 min-[380px]:grid-cols-2 gap-x-3 gap-y-2 text-xs">
             {data.foodName && (
               <div>
                 <span className="text-slate-400">Food:</span>
@@ -232,12 +232,12 @@ export default function AssistantMessage({ message, onPlayAudio, onFillForm, onN
       )}
 
       {/* Message Bubble container */}
-      <div className={cn('flex flex-col max-w-[82%]', isUser ? 'items-end' : 'items-start')}>
+      <div className={cn('flex flex-col max-w-[88%] sm:max-w-[82%]', isUser ? 'items-end' : 'items-start')}>
         <div
           className={cn(
             'p-3.5 rounded-2xl text-sm shadow-lg relative group transition-all duration-200',
             isUser
-              ? 'bg-primary-550 dark:bg-primary-600 text-white rounded-tr-none'
+              ? 'bg-primary-600 dark:bg-primary-700 text-white rounded-tr-none'
               : 'bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700/60 text-slate-800 dark:text-slate-200 rounded-tl-none'
           )}
         >
@@ -248,7 +248,7 @@ export default function AssistantMessage({ message, onPlayAudio, onFillForm, onN
 
           {/* Quick-action buttons in assistant card */}
           {!isUser && (
-            <div className="flex items-center justify-between gap-4 mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-700/60">
+            <div className="flex flex-wrap items-center justify-between gap-2 mt-2.5 pt-2 border-t border-slate-100 dark:border-slate-700/60">
               <span className="text-[10px] text-slate-400 font-medium">
                 {message.timestamp ? new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
               </span>
@@ -266,7 +266,7 @@ export default function AssistantMessage({ message, onPlayAudio, onFillForm, onN
                 {message.navigationPath && (
                   <button
                     onClick={() => onNavigate(message.navigationPath)}
-                    className="py-1 px-2.5 rounded-md bg-primary-50 dark:bg-primary-950/40 text-primary-650 dark:text-primary-400 hover:bg-primary-100 transition-colors text-[10px] font-bold flex items-center gap-1 border border-primary-200/50 dark:border-primary-900/30"
+                    className="py-1 px-2.5 rounded-md bg-primary-50 dark:bg-primary-950/40 text-primary-600 dark:text-primary-400 hover:bg-primary-100 transition-colors text-[10px] font-bold flex items-center gap-1 border border-primary-200/50 dark:border-primary-900/30"
                   >
                     <Navigation className="w-3 h-3" />
                     Navigate

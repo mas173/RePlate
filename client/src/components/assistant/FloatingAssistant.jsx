@@ -29,12 +29,12 @@ export default function FloatingAssistant() {
 
   return (
     <>
-      <div className="fixed bottom-6 right-6 z-55 bg-slate-800 rounded-full flex flex-col items-end gap-2">
+      <div className="fixed bottom-6 right-6 z-[9999] bg-slate-800 rounded-full flex flex-col items-end gap-2">
         {/* Floating Sparkle/Mic Button */}
         <button
           onClick={toggleOpen}
           aria-label="Toggle RePlate AI Voice Assistant"
-          className="w-14 h-14 rounded-full bg-gradient-to-r from-primary-650 to-teal-500 hover:from-primary-700 hover:to-teal-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl focus:outline-none transition-all duration-300 relative group pointer-events-auto"
+          className="w-14 h-14 rounded-full bg-gradient-to-r from-primary-600 to-teal-500 hover:from-primary-700 hover:to-teal-600 text-white flex items-center justify-center shadow-lg hover:shadow-xl focus:outline-none transition-all duration-300 relative group pointer-events-auto"
           style={{
             animation: isOpen ? 'none' : 'assistant-pulse 2s infinite',
           }}
