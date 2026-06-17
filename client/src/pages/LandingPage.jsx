@@ -302,6 +302,15 @@ function Hero() {
                 <Users className="w-5 h-5 text-brand-green" />
                 Partner as NGO
               </Link>
+              <a href="https://github.com/mas173/RePlate/releases/download/v1.0.0/replate-android.apk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-[#3DDC84] hover:bg-[#32B86C] text-slate-900 font-bold rounded-xl px-7 py-4 text-base shadow-lg transition-all transform hover:-translate-y-0.5">
+                <svg className="w-5 h-5 fill-current text-slate-900" viewBox="0 0 24 24">
+                  <path d="M17.523 15.3414C17.027 15.3414 16.621 14.9374 16.621 14.4414C16.621 13.9454 17.027 13.5414 17.523 13.5414C18.019 13.5414 18.423 13.9454 18.423 14.4414C18.423 14.9374 18.019 15.3414 17.523 15.3414ZM6.477 15.3414C5.981 15.3414 5.577 14.9374 5.577 14.4414C5.577 13.9454 5.981 13.5414 6.477 13.5414C6.973 13.5414 7.377 13.9454 7.377 14.4414C7.377 14.9374 6.973 15.3414 6.477 15.3414ZM17.935 9.87336L19.789 6.64736C19.924 6.41336 19.843 6.11136 19.609 5.97636C19.375 5.84136 19.073 5.92236 18.938 6.15636L17.061 9.42136C15.61 8.76336 13.89 8.38836 12 8.38836C10.11 8.38836 8.39 8.76336 6.939 9.42136L5.062 6.15636C4.927 5.92236 4.625 5.84136 4.391 5.97636C4.157 6.11136 4.076 6.41336 4.211 6.64736L6.065 9.87336C3.011 11.5304 0.941 14.6544 0.771 18.3414H23.229C23.059 14.6544 20.989 11.5304 17.935 9.87336Z"/>
+                </svg>
+                Download App
+              </a>
             </div>
 
             {/* Social proof / Trusted by */}
@@ -802,6 +811,101 @@ function SupportedBy() {
   );
 }
 
+// ─── Mobile App Promotion Section ────────────────────────────────
+function MobileAppSection() {
+  return (
+    <section className="py-24 bg-brand-mint dark:bg-slate-900/60 border-t border-b border-brand-sage/40 dark:border-slate-800 relative overflow-hidden">
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 w-96 h-96 bg-brand-green/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="grid lg:grid-cols-12 gap-12 items-center">
+          {/* Left Column: Promotion and Download */}
+          <div className="lg:col-span-7 space-y-6">
+            <span className="text-xs font-bold uppercase tracking-widest text-brand-green mb-3 block">
+              REPLATE ON THE GO
+            </span>
+            <h2 className="text-4xl sm:text-5xl font-bold font-display text-neutralText-main dark:text-white tracking-tight leading-tight">
+              Get the RePlate Mobile App
+            </h2>
+            <p className="text-lg text-neutralText-sub dark:text-slate-300 leading-relaxed max-w-xl">
+              Donors and NGOs can now coordinate food rescue faster than ever. Get push notifications for local listings, pick up food with real-time mapping, and manage your impact directly from your pocket.
+            </p>
+            <div className="pt-4 flex flex-wrap gap-4">
+              <a
+                href="https://github.com/mas173/RePlate/releases/download/v1.0.0/replate-android.apk"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-3 bg-[#3DDC84] hover:bg-[#32B86C] text-slate-900 font-bold rounded-2xl px-8 py-4 text-base shadow-xl transition-all transform hover:-translate-y-0.5"
+              >
+                <svg className="w-6 h-6 fill-current text-slate-900" viewBox="0 0 24 24">
+                  <path d="M17.523 15.3414C17.027 15.3414 16.621 14.9374 16.621 14.4414C16.621 13.9454 17.027 13.5414 17.523 13.5414C18.019 13.5414 18.423 13.9454 18.423 14.4414C18.423 14.9374 18.019 15.3414 17.523 15.3414ZM6.477 15.3414C5.981 15.3414 5.577 14.9374 5.577 14.4414C5.577 13.9454 5.981 13.5414 6.477 13.5414C6.973 13.5414 7.377 13.9454 7.377 14.4414C7.377 14.9374 6.973 15.3414 6.477 15.3414ZM17.935 9.87336L19.789 6.64736C19.924 6.41336 19.843 6.11136 19.609 5.97636C19.375 5.84136 19.073 5.92236 18.938 6.15636L17.061 9.42136C15.61 8.76336 13.89 8.38836 12 8.38836C10.11 8.38836 8.39 8.76336 6.939 9.42136L5.062 6.15636C4.927 5.92236 4.625 5.84136 4.391 5.97636C4.157 6.11136 4.076 6.41336 4.211 6.64736L6.065 9.87336C3.011 11.5304 0.941 14.6544 0.771 18.3414H23.229C23.059 14.6544 20.989 11.5304 17.935 9.87336Z"/>
+                </svg>
+                Download for Android
+              </a>
+            </div>
+          </div>
+
+          {/* Right Column: Visual Mockup */}
+          <div className="lg:col-span-5 flex justify-center">
+            <div className="relative w-64 h-[420px] bg-slate-900 rounded-[40px] border-4 border-slate-700 shadow-2xl overflow-hidden flex flex-col justify-between p-4">
+              {/* Speaker / Notch */}
+              <div className="absolute top-2 left-1/2 -translate-x-1/2 w-20 h-4 bg-slate-700 rounded-full z-20" />
+              
+              {/* Inside Phone Screen */}
+              <div className="flex-1 bg-[#FAFBF7] rounded-[32px] overflow-hidden p-4 pt-6 flex flex-col justify-between select-none">
+                {/* Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <div className="w-5 h-5 rounded-full bg-brand-forest flex items-center justify-center">
+                      <span className="text-[10px] text-white font-bold">R</span>
+                    </div>
+                    <span className="text-xs font-bold text-neutralText-main">RePlate</span>
+                  </div>
+                  <span className="text-[9px] bg-brand-mint text-brand-forest font-bold px-2 py-0.5 rounded-full">Android</span>
+                </div>
+
+                {/* Dashboard Card Preview */}
+                <div className="bg-white rounded-xl p-3 border border-brand-sage/40 shadow-sm space-y-2 mt-4">
+                  <p className="text-[10px] text-neutralText-muted uppercase tracking-wider">Your Impact</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-brand-mint/50 p-2 rounded-lg text-center">
+                      <p className="text-sm font-black text-brand-forest">420</p>
+                      <p className="text-[8px] text-neutralText-sub">Meals Saved</p>
+                    </div>
+                    <div className="bg-brand-mint/50 p-2 rounded-lg text-center">
+                      <p className="text-sm font-black text-brand-forest">180kg</p>
+                      <p className="text-[8px] text-neutralText-sub">CO₂ Reduced</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notification Banner */}
+                <div className="bg-brand-forest text-white rounded-xl p-3 shadow-md space-y-1 mt-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[8px] font-bold text-brand-sage">NEW ALERT</span>
+                    <span className="text-[7px] text-brand-sage/80">Just now</span>
+                  </div>
+                  <p className="text-[9px] font-bold">15 Meals Available Nearby</p>
+                  <p className="text-[8px] text-brand-sage/90">Harvest Cafe listed Veggie Salads.</p>
+                </div>
+
+                <div className="flex-1" />
+
+                {/* Footer bar */}
+                <div className="border-t border-slate-100 pt-2 flex justify-between items-center px-2">
+                  <div className="w-2.5 h-2.5 rounded-full bg-brand-green" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 // ─── Footer ────────────────────────────────────────────────────
 function Footer() {
   const [email, setEmail] = useState('');
@@ -848,9 +952,18 @@ function Footer() {
             <div>
               <h4 className="text-xs font-bold uppercase tracking-wider text-brand-sage dark:text-slate-400 mb-4">Platform</h4>
               <ul className="space-y-2.5">
-                {['How it works', 'Our impact', 'For Donors', 'For NGOs', 'Resources'].map((item) => (
+                {['How it works', 'Our impact', 'For Donors', 'For NGOs', 'Download App'].map((item) => (
                   <li key={item}>
-                    <a href="#" className="text-sm text-white/70 hover:text-white transition-colors">{item}</a>
+                    {item === 'Download App' ? (
+                      <a href="https://github.com/mas173/RePlate/releases/download/v1.0.0/replate-android.apk" 
+                         target="_blank" 
+                         rel="noopener noreferrer" 
+                         className="text-sm text-brand-sage font-semibold hover:text-white transition-colors flex items-center gap-1">
+                        Download App <ExternalLink className="w-3 h-3" />
+                      </a>
+                    ) : (
+                      <a href="#" className="text-sm text-white/70 hover:text-white transition-colors">{item}</a>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -959,6 +1072,7 @@ export default function LandingPage() {
       <GlobalMovement />
       <NewsSection />
       <SupportedBy />
+      <MobileAppSection />
       <Footer />
     </div>
   );
